@@ -14,3 +14,8 @@ Judge 4: 8.5
 Judge 5: 9
 Your Olympic score is 8.0
 """
+judgeScore = 0
+for i in range (5):
+    judgeScore = judgeScore + float(input(f"Judge {i+1}: "))
+judgeScore = judgeScore/5
+print(f"Your Olympic score is {judgeScore}")
