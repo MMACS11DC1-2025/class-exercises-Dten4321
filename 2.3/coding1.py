@@ -11,10 +11,3 @@ How old are you?
 > 25
 In 2056, you will be 56 years old!
 """
-import datetime
-
-print("How old are you?")
-age = int(input("> "))
-currentYear = datetime.datetime.now().year
-newAge = age + (2056 - currentYear)
-print(f"In In 2056, you will be {newAge} years old!")
