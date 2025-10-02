@@ -33,7 +33,6 @@ for line in data:
 		yourData = datas
 		break
 	yourIndex += 1
-print(yourData)
 
 #Calculating the base name similarities with other classmates
 index = 0
@@ -52,11 +51,6 @@ for i in range(len(similarity)):
 	if i != yourIndex:
 		if similarity[i] > maxSimilarity:
 			maxSimilarity = similarity[i]
- 
-#Display most similar people
-for i in range(len(similarity)):
-	if similarity[i] == maxSimilarity:
-		print(f"{similarityName[i]} has most similarities with {similarityName[yourIndex]} similarities.")
 
 #find people who like parameter 1 also like parameter 2
 questions = data[0].split(",")
@@ -86,19 +80,29 @@ for line in data:
 	if yourData[question1 + 1] == datas[question1 + 1]:
 		similarResults.append(datas[question2 + 1])
 
-print(similarResults)
-
-
 mostSimilarities = 0
 resultSimilarity = {}
 for i in similarResults:
 	resultSimilarity.update({i: 0})
+
 lastResult = ""
 index = 0
 for item in (similarResults):
-	print(resultSimilarity)
 	resultSimilarity[item] += 1
-print(resultSimilarity)
 
+most = 0
+mostItem = ""
+for i in list(resultSimilarity.keys()):
+	if resultSimilarity[i] > most:
+		most = resultSimilarity[i]
+		mostItem = i
+	else:
+		most = resultSimilarity[i]
 
-#print(f"People who answered like {similarityName[yourIndex]} also liked {similarResult}")
+print("\n============================================\n")
+#Display most similar people
+for i in range(len(similarity)):
+	if similarity[i] == maxSimilarity:
+		print(f"{similarityName[i]} has most similarities with {similarityName[yourIndex]} similarities.")
+
+print(f"\nPeople who are like {similarityName[yourIndex]} also liked {mostItem}")
