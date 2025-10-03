@@ -49,7 +49,7 @@ def findName():
 	return None, 0
 
 while yourData == None:
-	name1 = input("\nPlease enter a valid name inside the avaliable dataset: ").lower().strip()
+	name1 = input("\nPlease enter a valid name: ").lower().strip()
 	yourData, yourIndex = findName()
 
 
@@ -149,9 +149,9 @@ print("\n============================================\n")
 for i in range(len(similarity)):
 	if similarity[i] == maxSimilarity:
 		if maxSimilarity > 1 :
-			print(f"{similarityName[i]} has most similarities with {similarityName[yourIndex]} with {maxSimilarity} similarities.")
+			print(f"{similarityName[yourIndex]} has most similarities with {similarityName[i]} with {maxSimilarity} similarities.")
 		else:
-			print(f"{similarityName[i]} has most similarities with {similarityName[yourIndex]} with {maxSimilarity} similarity.")
+			print(f"{similarityName[yourIndex]} has most similarities with {similarityName[i]} with {maxSimilarity} similarity.")
 	if i == len(similarity) - 1 and maxSimilarity == 0:
 		print(f"No one is similar to {similarityName[yourIndex]}")
 
@@ -161,3 +161,6 @@ else:
 	print(f"\nPeople who answered \"{yourData[question1 + 1]}\" from the question \"{questions[question1 - 1]}\" also liked \"{mostItem}\" from the question \"{questions[question2 - 1]}\"")
 
 print("\n============================================\n")
+
+# ============================= SECTION 4 ====================================
+# ============================= TEST CASES ===================================
