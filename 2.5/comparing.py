@@ -10,7 +10,7 @@ Test as you go! Describe in your comments what steps you took to test your code.
 
 #Enter a name as a base which you can compare to other people in the dataset
 #Enter a first question and enter a second question.
-#The program will give a recommendation based on who liked the same things on the first question for a topic in the second question
+#The program will give a recommendation based on who liked the same things on the first question for an answer in the second question
 #Program will also show those who answered the most same answers with you
 
 import re
