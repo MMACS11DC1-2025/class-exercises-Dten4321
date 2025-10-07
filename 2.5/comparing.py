@@ -6,6 +6,12 @@ You may use user input to add interactivity to the program.
 You must design your algorithm in English first, then translate it to Python code.
 Test as you go! Describe in your comments what steps you took to test your code.
 """
+#INSTRUCTIONS
+
+#Enter a name as a base which you can compare to other people in the dataset
+#Enter a first question and enter a second question.
+#The program will give a recommendation based on who liked the same things on the first question for a topic in the second question
+#Program will also show those who answered the most same answers with you
 
 import re
 
@@ -14,14 +20,6 @@ file = open("2.4/responses.csv")
 
 #coverts file into list for easier access
 data = file.read().strip().split("\n")
-
-#INSTRUCTIONS
-
-#Enter a name as a base which you can compare to other people in the dataset
-#Enter a first question and enter a second question.
-#The program will give a recommendation based on who liked the same things on the first question for a topic in the second question
-#Program will also show those who show most similarities with you
-
 
 #SETTING UP SIMILARITIES
 similarity = []
@@ -54,16 +52,14 @@ while yourData == None:
 
 
 #CALCULATING THE BASE NAME SIMILARITIES WITH OTHER CLASSMATES
-index = 0
-for line in data:
-	datas = line.split(",")
+for line in range(len(data)):
+	datas = data[line].split(",")
 	i = 0
 	for perameters in datas:
 		if yourData[i] == datas[i]:
-			similarity[index] += 1
-			similarityName[index] = datas[1]
+			similarity[line] += 1
+			similarityName[line] = datas[1]
 		i += 1
-	index += 1
 
 maxSimilarity = 0
 for i in range(len(similarity)):
@@ -125,7 +121,6 @@ for i in similarResults:
 	resultSimilarity.update({i: 0})
 
 lastResult = ""
-index = 0
 for item in (similarResults):
 	resultSimilarity[item] += 1
 
@@ -164,3 +159,38 @@ print("\n============================================\n")
 
 # ============================= SECTION 4 ====================================
 # ============================= TEST CASES ===================================
+
+#	CASE 1:
+#		INPUT:
+#		AsHar
+#		2
+#		3
+
+#		OUTPUT:
+
+#		============================================
+
+#		Ashar Siddiqui has most similarities with Erisha Rahman with 3 similarities.
+
+#		People who answered "Bird" from the question "What is your favourite pet among these options?" also liked "Fine Arts" from the question "What's your favourite subject?"
+
+#		============================================
+
+
+#	CASE 1:
+#		INPUT:
+#		derick
+#		3
+#		6
+
+#		OUTPUT:
+
+#		============================================
+
+#		Derick Su has most similarities with Ethan Wong with 3 similarities.
+#		Derick Su has most similarities with Greysen Li with 3 similarities.
+#		Derick Su has most similarities with Brendan Yap with 3 similarities.
+
+#		There were no people who answered Social Studies
+
+#		============================================
