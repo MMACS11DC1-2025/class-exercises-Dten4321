@@ -24,11 +24,11 @@ data = file.read().strip().split("\n")
 
 #SETTING UP SIMILARITIES
 similarity = []
-similarityName = []
+names = []
 
 for line in data:
 	similarity.append(0)
-	similarityName.append(0)
+	names.append(0)
 
 yourData = None
 yourIndex = 0
@@ -53,13 +53,15 @@ while yourData == None:
 
 
 #CALCULATING THE BASE NAME SIMILARITIES WITH OTHER CLASSMATES
+#if the target has a the same answer in a parameter, add one to the corrosponding index of the list "similarity" that stores it's similarities
+#adds name of target to "name" regardless of similariteis, helps with finding names. It's a list of just names.
 for line in range(len(data)):
 	datas = data[line].split(",")
 	i = 0
 	for perameters in datas:
 		if yourData[i] == datas[i]:
 			similarity[line] += 1
-			similarityName[line] = datas[1]
+			names[line] = datas[1]
 		i += 1
 
 maxSimilarity = 0
@@ -145,12 +147,12 @@ print("\n============================================\n")
 for i in range(len(similarity)):
 	if similarity[i] == maxSimilarity:
 		if maxSimilarity > 1 :
-			print(f"{similarityName[yourIndex]} has most similarities with {similarityName[i]} with {maxSimilarity} similarities.")
+			print(f"{names[yourIndex]} has most similarities with {names[i]} with {maxSimilarity} similarities.")
 		else:
-			print(f"{similarityName[yourIndex]} has most similarities with {similarityName[i]} with {maxSimilarity} similarity.")
+			print(f"{names[yourIndex]} has most similarities with {names[i]} with {maxSimilarity} similarity.")
 			#if the person most similar to the name you inputed only has one similarity
 	if i == len(similarity) - 1 and maxSimilarity == 0:
-		print(f"No one is similar to {similarityName[yourIndex]}")
+		print(f"No one is similar to {names[yourIndex]}")
 		#if there are no similarities between the name you inputed and everyone
 
 
