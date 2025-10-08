@@ -81,7 +81,7 @@ for i in range(2):
 
 #GETTING QUESTION FUNCTION
 def getQuestion(questionNum, questionPerameter):
-	while questionNum < 1 or questionNum > len(questionPerameter):
+	while (questionNum < 1 or questionNum > len(questionPerameter)) and (questionNum != question1 and question1 != 0) or (questionNum == question1):
 		questionNum = (re.sub('[^0-9]','', input("\nInput question number: ")))
 		if questionNum == "":
 			questionNum = int(0)
