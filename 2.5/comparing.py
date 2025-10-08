@@ -11,7 +11,8 @@ Test as you go! Describe in your comments what steps you took to test your code.
 #Enter a name as a base which you can compare to other people in the dataset
 #Enter a first question and enter a second question.
 #The program will give a recommendation based on who liked the same things on the first question for an answer in the second question
-#Program will also show those who answered the most same answers with you
+#Program will output those who answered the most same answers with you (similarities)
+#Program will output the recommendation
 
 import re
 
@@ -147,8 +148,11 @@ for i in range(len(similarity)):
 			print(f"{similarityName[yourIndex]} has most similarities with {similarityName[i]} with {maxSimilarity} similarities.")
 		else:
 			print(f"{similarityName[yourIndex]} has most similarities with {similarityName[i]} with {maxSimilarity} similarity.")
+			#if the person most similar to the name you inputed only has one similarity
 	if i == len(similarity) - 1 and maxSimilarity == 0:
 		print(f"No one is similar to {similarityName[yourIndex]}")
+		#if there are no similarities between the name you inputed and everyone
+
 
 if mostItem == "":
 	print(f"\nThere were no people who answered {yourData[question1 + 1]}")
