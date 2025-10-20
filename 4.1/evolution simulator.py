@@ -21,16 +21,19 @@ t.penup()
 t.hideturtle()
 turtle.delay(0)
 turtle.tracer(0)
-
+lifeSide = 0
+maxTime = 250
+timer = maxTime
 class Ball:
-    def __init__(self, speed, time, direction, pos):
+    def __init__(self, speed, timer, direction, pos):
         self.speed = speed
-        self.time = time
+        self.timer = timer
         self.direction = direction
         self.pos = pos
-        self.size = speed
+        self.size = 20 - speed
+        self.time = 0
     def getStuff(self):
-        return [self.speed, self.time, self.direction, self.pos, self.size]
+        return [self.speed, self.timer, self.direction, self.pos, self.size]
     
     def draw(self):
         t.penup()
@@ -41,21 +44,51 @@ class Ball:
         t.pendown()
         
     def move(self):
-        self.pos[0] += self.speed * self.direction
-
+        self.pos[1] += self.speed * self.direction
+        
+    def timeDo(self):
+        if self.time >= self.timer:
+            self.direction = -(self.direction)
+            self.time = 0
+        else: 
+            self.time += 1
+    
+    def checkLife(self):
+        if lifeSide == 1:
+            if self.pos[1] > 0:
+                return False
+        elif lifeSide == 2:
+            if self.pos[1] < 0:
+                return False
+        else:
+            return True
 
 balls = []
 
 
 
 for i in range(20):
-    balls.append(Ball(random.randrange(100),1,random.choice([-1, 1]), [int(random.randrange(100)), int(random.randrange(100))]))
+    balls.append(Ball(random.randrange(1, 5),random.randrange(300),random.choice([-1, 1]), [int(random.randrange(-350, 350)), int(random.randrange(-100, 100))]))
     
 while True:
+    print(timer)
+    if timer > 0:
+        timer -= 1
+    else:
+        if lifeSide == 1:
+            lifeSide = 2
+            timer = maxTime
+        elif lifeSide == 2 or lifeSide == 0:
+            lifeSide = 1
+            timer = maxTime
     t.clear()
     for ball in balls:
         ball.draw()
         ball.move()
+        ball.timeDo()
+        if not ball.checkLife():
+            balls.remove(ball)
+            continue
         
     turtle.update()
     
