@@ -6,8 +6,9 @@ Write recursive functions for each of the following problems:
 # Exercise 0: Factorial
 # Remember that n! is defined as n * (n-1)! and 0! is 1
 def factorial(n):
-    # TODO implement this
-    return 1
+    if n == 1:
+        return 1
+    return n * factorial(n-1)
 
 print(factorial(1)) # Expected output: 1
 print(factorial(2)) # Expected output: 2
@@ -20,8 +21,9 @@ print(factorial(5)) # Expected output: 120
 # Remember that x^y is defined as x * x^(y-1) and x^0 is 1.
 
 def power(x, y):
-    # TODO implement this
-    return 1
+    if y == 0:
+        return 1
+    return x * power(x, y-1)
 
 # Test cases
 print(power(2, 3))  # Expected output: 8
@@ -29,12 +31,13 @@ print(power(5, 0))  # Expected output: 1
 print(power(3, 2))  # Expected output: 9
 
 # Exercise 2: Sum of Integers
-# Write a function named sum_list_recursive(numbers, index) that
+# Write a function named sum_list_recursive_helper(numbers, index) that
 # takes a list of integers and an index and returns their sum.
 # Remember that the sum of a list is the first item plus the sum of the rest of the list.
 
 def sum_list_recursive_helper(numbers, index):
-    # TODO: implement this
+    if index < len(numbers):
+        return numbers[index] + sum_list_recursive_helper(numbers, index+1)
     return 0
 
 def sum_list(numbers):
@@ -56,11 +59,17 @@ print(sum_list([5, 10, 15]))    # Expected output: 30
 
 vowels = "aeiou"
 def count_vowels_recursive_helper(word, index):
-    # TODO implement this
-    return 0
+    vowel_count = 0
+    if index < len(word):
+        if word[index] in vowels:
+            return 1 + count_vowels_recursive_helper(word, index+1)
+        else:
+            return count_vowels_recursive_helper(word, index+1)
+    return vowel_count
 
 def count_vowels(word):
-    # TODO implement this
+    if len(word) > 0:
+        return count_vowels_recursive_helper(word, 0)
     return 0
 
 # Test cases
@@ -74,7 +83,15 @@ print(count_vowels("aeiou"))     # Expected output: 5
 # the rest of the string.
 # NOTE: You might need a recursive helper like in exercises 2 and 3.
 
+def reverse_string_recursive_helper(word, index):
+    newWord = word[index]
+    if index > 0:
+        return newWord + reverse_string_recursive_helper(word, index-1)
+    return newWord
+
 def reverse_string(word):
+    if len(word) > 0:
+        return reverse_string_recursive_helper(word, len(word) - 1)
     return ""
 
 # Test cases
