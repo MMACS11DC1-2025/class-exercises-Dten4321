@@ -45,12 +45,12 @@ You'll create a fractal generator that can draw at least one recursive pattern (
 - [ ] Includes meaningful comments that explain the logic and steps taken in the code. (2 pts)
 
 ### **Documentation & Process**
-- [ ] README.md file with project documentation explaining the approach used and how to use the program (2 pts)
-- [ ] Code must be well commented to enhance readability (2 pts)
+- [o] README.md file with project documentation explaining the approach used and how to use the program (2 pts)
+- [o] Code must be well commented to enhance readability (2 pts)
 - [ ] Test cases with expected vs actual results (2 pts)
 - [ ] Screenshots of visual outputs for each test case (2 pts)
 - [ ] Discussion of reasonable recursion depth (for your program, what depth is too low, what is too high, and why?) (2 pts)
-- [ ] Documentation of debugging and testing process in README.md (2 pts)
+- [o] Documentation of debugging and testing process in README.md (2 pts)
 - [ ] Source code is committed to repository on Github with **at least 3 meaningful commits on different days** (2 pts)
 
 ### **Peer Review**
