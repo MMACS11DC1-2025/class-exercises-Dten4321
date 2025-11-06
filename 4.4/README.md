@@ -87,6 +87,42 @@ Determines the blue value in RGB of the fractal.</ul>
 start
 taiga
 ```
+![taiga](assets/taiga.png)
+## Input: 
+```
+start
+spiral
+```
+![alt text](assets/spiral.png)
+
+## Input: 
+```
+
+```
+![enter](assets/nothing.png)
+
+## Input: 
+```
+lorem ipsusm
+```
+![blank](assets/blank.png)<br>
+![invalid](assets/loremipusminvalid.png)
+
+## Input: 
+```
+start
+taiga
+start
+67
+```
+![67 taiga](assets/67taiga.png)<br>
+(nothing is supposed to change with invalid start)
+## Input: 
+```
+random
+```
+![random "4 sided" fractal](assets/random.png)
+
 
 # Struggles and Development Process
 The original plan for **Taiga** was to make a pentagonal Koch Snowflake. However, the original algorithm was not successful. Yet, the algorithm produced something interesting, so I continued to work on it for a bit to see what I could make out of it. After some improvements, I had made an algorithm that made the fractals we see today. I was quite intrigued by this novel fractal, and therefore decided to keep it. After implementing the basic process for a fractal to work, I wanted to implement a simple spawning system somewhat inspired by Ethan's program. This would later come into conflict with the command system I wanted to implement. Since the check for creating a fractal based on the sides was first, it would have an error if I tried to input a command since it was not able to become an integer. At first I attempted to use the *try, except* statements. This was not able to work. I was not quite sure why that was the case, so I just removed it. The way I resolved issue was by detecting the string inputs first, and detecting the integer inputs last. To check for errors, I added a *try, except* statement which actually worked this time!
