@@ -68,13 +68,13 @@ Determines the rotation of the fractal.</ul>
 <ul> <i><b>Rotation Speed</b></i><br>
 Determines the change in rotation of the fractal. Negative values are clockwise and positive values are counterclockwise.</ul>
 
-<ul> <i><b>RGB Red</b></i><br>
+<ul> <i><b>Red</b></i><br>
 Determines the red value in RGB of the fractal.</ul>
 
-<ul> <i><b>RGB Green</b></i><br>
+<ul> <i><b>Green</b></i><br>
 Determines the green value in RGB of the fractal.</ul>
 
-<ul> <i><b>RGB Blue</b></i><br>
+<ul> <i><b>Blue</b></i><br>
 Determines the blue value in RGB of the fractal.</ul>
 
 ### EDIT
@@ -123,6 +123,27 @@ random
 ```
 ![random "4 sided" fractal](assets/random.png)
 
+## Input: 
+```
+side length
+700
+create
+```
+![side length 700](assets/sidelength700.png)
 
-# Disscussion, Struggles, and Development Process
+
+# Disscussion
+## Reasonable Limits
+**Taiga** does not have a maxium for the parameters aside from the RGB colour values. However, this does not mean the user can make a really large fractal. The practical limits of each setting: 
+- **Side Length**: Should be small enough to fix inside the screen, anything under 2000 should behave normally. It is not recommended to go over 10000.
+- **Sides**: Anything over 10 will lag significantly. It is not recommended to go over 15. #&$(#(&^$&(#^(^#(%(%(&#^%)))))))<<<
+- **Depth**: Anything over 5 will be very laggy. It is not recommended to go over 7.
+
+## Recursion Approch
+The method of recursion used by **Taiga** is based of of the objects. Each fractal on screen is an object of the <u>Ball</u> class. The parameters of each object determines the way the fractal will be drawn. The function which actually draws the fractal has three main parts: the part which sets up the turtle to draw, only ran the first time it is called; the main loop, which recurses for fractal depth; and the return statement, which returns the amount of times the recursion has ran and is added to the recursion counter.
+
+## Development Process
 The original plan for **Taiga** was to make a pentagonal Koch Snowflake. However, the original algorithm was not successful. Yet, the algorithm produced something interesting, so I continued to work on it for a bit to see what I could make out of it. After some improvements, I had made an algorithm that made the fractals we see today. I was quite intrigued by this novel fractal, and therefore decided to keep it. After implementing the basic process for a fractal to work, I wanted to implement a simple spawning system somewhat inspired by Ethan's program. This would later come into conflict with the command system I wanted to implement. Since the check for creating a fractal based on the sides was first, it would have an error if I tried to input a command since it was not able to become an integer. At first I attempted to use the *try, except* statements. This was not able to work. I was not quite sure why that was the case, so I just removed it. The way I resolved issue was by detecting the string inputs first, and detecting the integer inputs last. To check for errors, I added a *try, except* statement which actually worked this time!
+
+## Peer Review
+The colourful fractals were suggested by Ethan Wong.

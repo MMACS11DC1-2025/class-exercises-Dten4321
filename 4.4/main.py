@@ -22,13 +22,13 @@ spawnParameters = {
     "Depth" : 4,
     "Position X" : 0,
     "Position Y" : 0,
-    "Speed X" : 1,
+    "Speed X" : 0,
     "Speed Y" : 0,
     "Rotation" : 90,
     "Rotation Speed" : 0,
-    "RGB Red" : 0,
-    "RGB Green" : 0,
-    "RGB Blue" : 0
+    "Red" : 0,
+    "Green" : 0,
+    "Blue" : 0
 }
 
 # Global Variables
@@ -140,6 +140,12 @@ def inputHandle(inputInput):
 
         elif inputInput.title().strip() in list(spawnParameters.keys()):
             spawnParameters[inputInput.title()] = int(input(f"Enter the {inputInput.title()}: "))
+            if spawnParameters["Red"] > 255 or spawnParameters["Red"] < 0:
+                spawnParameters["Red"] = 255
+            if spawnParameters["Green"] > 255 or spawnParameters["Green"] < 0:
+                spawnParameters["Green"] = 255
+            if spawnParameters["Blue"] > 255 or spawnParameters["Blue"] < 0:
+                spawnParameters["Blue"] = 255
             
         elif inputInput.lower().strip() == "settings": # Shows all settings
             print("===========================")
@@ -169,8 +175,8 @@ def inputHandle(inputInput):
 
         elif inputInput == "" or inputInput.lower().strip() == "create": # creates a fractal based of of the settings
             # If side length, sides, or depth is 0, it will not make a new fractal
-            if not(spawnParameters["Side Length"] == 0 or spawnParameters["Sides"] == 0 or spawnParameters["Depth"] == 0):
-                shapes.append(Shape(spawnParameters["Side Length"], spawnParameters["Sides"], spawnParameters["Depth"], [spawnParameters["Position X"], spawnParameters["Position Y"]], [spawnParameters["Speed X"], spawnParameters["Speed Y"]], spawnParameters["Rotation"], spawnParameters["Rotation Speed"], [spawnParameters["RGB Red"]/255, spawnParameters["RGB Green"]/255, spawnParameters["RGB Blue"]/255]))
+            if (spawnParameters["Side Length"] > 0 or spawnParameters["Sides"] > 0 or spawnParameters["Depth"] > 0):
+                shapes.append(Shape(spawnParameters["Side Length"], spawnParameters["Sides"], spawnParameters["Depth"], [spawnParameters["Position X"], spawnParameters["Position Y"]], [spawnParameters["Speed X"], spawnParameters["Speed Y"]], spawnParameters["Rotation"], spawnParameters["Rotation Speed"], [abs(spawnParameters["Red"]/255), abs(spawnParameters["Green"]/255), abs(spawnParameters["Blue"]/255)] ))
 
         elif int(inputInput) > 0: # creates a fractal with the "sides" of it based on the integer inputted
             shapes.append(Shape(random.randrange(100, 300), int(inputInput), random.randrange(3, 5), [0, 0], [random.randrange(-10, 10), random.randrange(-10, 10)], random.randrange(0, 360), random.randrange(-2, 2), [0,0,0]))
