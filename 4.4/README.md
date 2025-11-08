@@ -136,7 +136,7 @@ create
 ## Reasonable Limits
 **Taiga** does not have a maxium for the parameters aside from the RGB colour values. However, this does not mean the user can make a really large fractal. The practical limits of each setting: 
 - **Side Length**: Should be small enough to fix inside the screen, anything under 2000 should behave normally. It is not recommended to go over 10000.
-- **Sides**: Anything over 10 will lag significantly. It is not recommended to go over 15. #&$(#(&^$&(#^(^#(%(%(&#^%)))))))<<<
+- **Sides**: Anything over 10 will lag significantly. It is not recommended to go over 15.
 - **Depth**: Anything over 5 will be very laggy. It is not recommended to go over 7.
 
 ## Recursion Approch
