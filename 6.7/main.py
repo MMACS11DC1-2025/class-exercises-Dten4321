@@ -6,8 +6,8 @@ import time
 
 tolerance = 130
 
-image_check_load = Image.open("./6.7/WWIWorldMap.png").load()
-image_output = Image.open("./6.7/WWIWorldMap.png")
+image_check_load = Image.open("./6.7/randomMap.png").load()
+image_output = Image.open("./6.7/randomMap.png")
 
 width = image_output.width
 height = image_output.height
@@ -25,16 +25,19 @@ colours = {
 }
 
 clumps = []
+clumpValue = []
 
 startTime = time.time()
 
+index = 0
 for x in range(width):
     for y in range(height):
-        r = image_check_load[x,y][0]
-        g = image_check_load[x,y][1]
-        b = image_check_load[x,y][2]
+        r, g, b, a = image_check_load[x,y]
+        
+        colour = ""
     
-        colours[binarizer.colour(r,g,b, tolerance)] += 1
+        colour = binarizer.colour(r,g,b, tolerance) 
+        colours[colour] += 1
         if binarizer.colour(r,g,b, tolerance) == "red":
             image_output.putpixel((x,y), (255, 0, 0))
         elif binarizer.colour(r,g,b, tolerance) == "green":
@@ -53,7 +56,17 @@ for x in range(width):
             image_output.putpixel((x,y), (255, 255, 255))
         else:
             image_output.putpixel((x,y), (255, 0, 255))
-        
+    try:
+        if colour == binarizer.pixelColour(x-1,y, image_check_load, tolerance):
+            clumpValue[index] = clumpValue[index-height]
+        elif colour == binarizer.pixelColour(x,y-1, image_check_load, tolerance):
+            pass
+        elif colour == binarizer.pixelColour(x-1,y-1, image_check_load, tolerance):
+            pass
+    except:
+        pass 
+    index +=1
+    
 total = width * height
 
 endTime = time.time()
