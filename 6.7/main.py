@@ -26,6 +26,7 @@ colours = {
 
 clumps = []
 clumpValue = []
+maxClumpValue = 0
 
 startTime = time.time()
 
@@ -56,16 +57,26 @@ for x in range(width):
             image_output.putpixel((x,y), (255, 255, 255))
         else:
             image_output.putpixel((x,y), (255, 0, 255))
-    try:
-        if colour == binarizer.pixelColour(x-1,y, image_check_load, tolerance):
-            clumpValue[index] = clumpValue[index-height]
-        elif colour == binarizer.pixelColour(x,y-1, image_check_load, tolerance):
-            pass
-        elif colour == binarizer.pixelColour(x-1,y-1, image_check_load, tolerance):
-            pass
-    except:
-        pass 
-    index +=1
+        if index > height:
+            if colour == binarizer.pixelColour(x-1,y, image_check_load, tolerance):
+                clumpValue.append(clumpValue[index-height])
+            elif colour == binarizer.pixelColour(x,y-1, image_check_load, tolerance):
+                clumpValue.append(clumpValue[index-1])
+            else:
+                maxClumpValue += 1
+                clumpValue.append(maxClumpValue)
+        elif index < height and index > 0:
+            if colour == binarizer.pixelColour(x,y-1, image_check_load, tolerance):
+                clumpValue.append(clumpValue[index-1])
+            else:
+                maxClumpValue += 1
+                clumpValue.append(maxClumpValue)
+        else:
+            maxClumpValue += 1
+            clumpValue.append(maxClumpValue)
+        index +=1
+
+print(maxClumpValue)
     
 total = width * height
 
@@ -87,9 +98,28 @@ print("White at {:.2f}%".format(findpercentage("white")))
 print("Pink at {:.2f}%".format(findpercentage("pink")))
 print("Unidentified at {:.2f}%".format(findpercentage("unidentified")))
 
-
-
 image_output.show()
+
+index = 0
+seeGroup = int(input("enter group: "))
+for x in range(width):
+    for y in range(height):
+        if clumpValue[index] == seeGroup:
+            image_output.putpixel((x,y), (255, 255, 255))
+        else:
+            image_output.putpixel((x,y), (0, 0, 0))
+        index += 1
+image_output.show()
+
+#index = 0
+#for x in range(width):
+#    for y in range(height):
+#        if clumpValue[index] == seeGroup:
+#            image_output.putpixel((x,y), (255, 255, 255))
+#        else:
+#            image_output.putpixel((x,y), (0, 0, 0))
+#        index += 1
+#image_output.show()
 
 while True:
     pass
