@@ -7,8 +7,8 @@ import random
 
 tolerance = 130
 
-image_check_load = Image.open("./6.7/assessCrack.png").load()
-image_output = Image.open("./6.7/assessCrack.png")
+image_check_load = Image.open("./6.7/small.png").load()
+image_output = Image.open("./6.7/small.png")
 
 width = image_output.width
 height = image_output.height
@@ -59,13 +59,20 @@ for x in range(width):
         #    image_output.putpixel((x,y), (255, 255, 255))
         #else:
         #    image_output.putpixel((x,y), (255, 0, 255))
+        #print("rah")
         if index > 0 and (height % index) > 0 and index > height:
             if colour == binarizer.pixelColour(x-1,y, image_check_load, tolerance):
                 clumpValue.append(clumpValue[index-height])
                 if colour == binarizer.pixelColour(x,y-1, image_check_load, tolerance):
-                    eliminatedValue = clumpValue()
+                    print("go!")
+                    print(len(clumpValue)-1)
+                    eliminatedValue = clumpValue[len(clumpValue)-2]
+                    print(f"eliminated! {eliminatedValue}")
                     for i in range(len(clumpValue)):
-                        
+                        if clumpValue[i] == eliminatedValue:
+                            print("eliminated!")
+                            print(clumpValue)
+                            clumpValue[i] = clumpValue[index-height]
             elif colour == binarizer.pixelColour(x,y-1, image_check_load, tolerance):
                 clumpValue.append(clumpValue[index-1])
             else:
