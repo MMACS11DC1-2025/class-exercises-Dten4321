@@ -7,8 +7,8 @@ import random
 
 tolerance = 130
 
-image_check_load = Image.open("./6.7/small.png").load()
-image_output = Image.open("./6.7/small.png")
+image_check_load = Image.open("./6.7/randomMap.png").load()
+image_output = Image.open("./6.7/randomMap.png")
 
 width = image_output.width
 height = image_output.height
@@ -28,11 +28,15 @@ colours = {
 clumps = []
 clumpValue = []
 clumpColour = []
+clumpMatrix = {}
 maxClumpValue = 0
 
 startTime = time.time()
 
 index = 0
+pixelCounter = 0
+print(width*height)
+input("ready? ")
 for x in range(width):
     for y in range(height):
         r, g, b, a = image_check_load[x,y]
@@ -41,44 +45,24 @@ for x in range(width):
     
         colour = binarizer.colour(r,g,b, tolerance) 
         colours[colour] += 1
-        #if binarizer.colour(r,g,b, tolerance) == "red":
-        #    image_output.putpixel((x,y), (255, 0, 0))
-        #elif binarizer.colour(r,g,b, tolerance) == "green":
-        #    image_output.putpixel((x,y), (0, 255, 0))
-        #elif binarizer.colour(r,g,b, tolerance) == "blue":
-        #    image_output.putpixel((x,y), (0, 0, 255))
-        #elif binarizer.colour(r,g,b, tolerance) == "yellow":
-        #    image_output.putpixel((x,y), (255, 255, 0))
-        #elif binarizer.colour(r,g,b, tolerance) == "orange":
-        #    image_output.putpixel((x,y), (255, 150, 0))
-        #elif binarizer.colour(r,g,b, tolerance) == "black":
-        #    image_output.putpixel((x,y), (0, 0, 0))
-        #elif binarizer.colour(r,g,b, tolerance) == "pink":
-        #    image_output.putpixel((x,y), (255, 0, 255))
-        #elif binarizer.colour(r,g,b, tolerance) == "white":
-        #    image_output.putpixel((x,y), (255, 255, 255))
-        #else:
-        #    image_output.putpixel((x,y), (255, 0, 255))
-        #print("rah")
+        programTime = time.time()
         if index > 0 and (height % index) > 0 and index > height:
             if colour == binarizer.pixelColour(x-1,y, image_check_load, tolerance):
                 clumpValue.append(clumpValue[index-height])
+                clumpMatrix[clumpValue[index-height]].append(index)
                 if colour == binarizer.pixelColour(x,y-1, image_check_load, tolerance):
-                    print("go!")
-                    print(len(clumpValue)-1)
-                    eliminatedValue = clumpValue[len(clumpValue)-2]
-                    print(f"eliminated! {eliminatedValue}")
-                    for i in range(len(clumpValue)):
-                        if clumpValue[i] == eliminatedValue:
-                            print("eliminated!")
-                            print(clumpValue)
-                            clumpValue[i] = clumpValue[index-height]
+                    print("{:.2f}% and {}".format(index/(width*height)*100, pixelCounter))
+                    #eliminatedValue = clumpValue[len(clumpValue)-2]
+                    #for i in range(len(clumpMatrix[eliminatedValue])):
+                    #    clumpValue[i] = clumpValue[index-height]
+                    #    pixelCounter += 1
             elif colour == binarizer.pixelColour(x,y-1, image_check_load, tolerance):
                 clumpValue.append(clumpValue[index-1])
             else:
                 maxClumpValue += 1
                 clumpColour.append((random.randrange(0, 255), random.randrange(0, 255), random.randrange(0, 255)))
                 clumpValue.append(maxClumpValue)
+                clumpMatrix[maxClumpValue] = [index]
         elif index < height and index > 0:
             if colour == binarizer.pixelColour(x,y-1, image_check_load, tolerance):
                 clumpValue.append(clumpValue[index-1])
@@ -86,12 +70,41 @@ for x in range(width):
                 clumpColour.append((random.randrange(0, 255), random.randrange(0, 255), random.randrange(0, 255)))
                 maxClumpValue += 1
                 clumpValue.append(maxClumpValue)
+                clumpMatrix[maxClumpValue] = [index]
         else:
             clumpColour.append((int(random.randrange(0, 255)), int(random.randrange(0, 255)), int(random.randrange(0, 255))))
             maxClumpValue += 1
             clumpValue.append(maxClumpValue)
+            clumpMatrix[maxClumpValue] = [index]
+        finTime = time.time()
+        #image_output.putpixel((x,y), (clumpColour[clumpValue[index]-1][0], clumpColour[clumpValue[index]-1][1], clumpColour[clumpValue[index]-1][2]))
+        index +=1
+
+index = 0
+for x in range(width):
+    for y in range(height):
+        r, g, b, a = image_check_load[x,y]
+        colour = binarizer.colour(r,g,b, tolerance) 
+        if index > 0 and (height % index) > 0 and index > height:
+            if colour == binarizer.pixelColour(x-1,y, image_check_load, tolerance):
+                if colour == binarizer.pixelColour(x,y-1, image_check_load, tolerance):
+                    correctVaule = index-height
+                    print("{:.2f}% and {:,} pixels".format(index/(width*height)*100, pixelCounter))
+                    eliminatedValue = clumpValue[len(clumpValue)-2]
+                    print(len(clumpMatrix[eliminatedValue]))
+                    for i in range(len(clumpMatrix[eliminatedValue])):
+                        clumpValue[i] = clumpValue[correctVaule]
+                        pixelCounter += 1
+                    clumpMatrix[correctVaule]
+        index +=1
+# TODO finish this!!
+
+index = 0
+for x in range(width):
+    for y in range(height):
         image_output.putpixel((x,y), (clumpColour[clumpValue[index]-1][0], clumpColour[clumpValue[index]-1][1], clumpColour[clumpValue[index]-1][2]))
         index +=1
+
 print(len(clumpColour))
 
 print(maxClumpValue)
