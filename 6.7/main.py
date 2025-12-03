@@ -95,7 +95,8 @@ for x in range(width):
                     for i in range(len(clumpMatrix[eliminatedValue])):
                         clumpValue[i] = clumpValue[correctVaule]
                         pixelCounter += 1
-                    clumpMatrix[correctVaule]
+                    clumpMatrix[correctVaule] += clumpMatrix[eliminatedValue]
+                    clumpMatrix[eliminatedValue] = 0
         index +=1
 # TODO finish this!!
 
