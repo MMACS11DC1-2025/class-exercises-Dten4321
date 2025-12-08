@@ -1,12 +1,12 @@
 from PIL import Image
-import binarizer
+import colourProcessor
 import time
 import random
 
 tolerance = 130
 
-image_check_load = Image.open("./6.7/randomMaptest.png").load()
-image_output = Image.open("./6.7/randomMaptest.png")
+image_check_load = Image.open("./6.7/nguyenMap.png").load()
+image_output = Image.open("./6.7/nguyenMap.png")
 
 width = image_output.width
 height = image_output.height
@@ -29,10 +29,12 @@ clumpValue = [] # which clump is each pixel
 clumpColour = [] # colour of clump
 clumpDisplayColour = [] # display colour of clump
 clumpMatrix = {} # dict, each key is a clump, each key has list of pixels in a group
+clumpSizeSorted = [] #sorted list with clumps
 maxClumpValue = 0
 
 startTime = time.time()
 
+testValue = height+height+1
 
 pixelCounter = 0
 size = width*height
@@ -44,13 +46,16 @@ for x in range(width):
 index = 0
 for x in range(width):
     for y in range(height):
-        #if index % 100000 == 0:
-        #    print("{:.2f}% done, index= {:,}".format((index/size)*100, index))
-        r, g, b, a = imgList[index]
-        colour = binarizer.colour(r,g,b, tolerance)
+        if index % 100000 == 0:
+            print("{:.2f}% done".format((index/(size*2))*100))
+        try:
+            r, g, b, a = imgList[index]
+        except:
+            r, g, b = imgList[index]
+        colour = colourProcessor.colour(r,g,b, tolerance)
         colours[colour] += 1
         
-        if index > 0 and (height % index) > 0 and index > height:
+        if (index % height) != 0 and index > height:
             if colour == clumpColour[clumpValue[index-height]]:
                 clumpValue.append(clumpValue[index-height])
                 clumpMatrix[clumpValue[index]].append(index)
@@ -63,7 +68,16 @@ for x in range(width):
                 clumpValue.append(maxClumpValue)
                 clumpMatrix[maxClumpValue] = [index]
                 maxClumpValue += 1
-        
+        elif index > height and (index % height) == 0:
+            if colour == clumpColour[clumpValue[index-height]]:
+                clumpValue.append(clumpValue[index-height])
+                clumpMatrix[clumpValue[index]].append(index)
+            else:
+                clumpColour.append(colour)
+                clumpDisplayColour.append((random.randrange(0, 255), random.randrange(0, 255), random.randrange(0, 255)))
+                clumpValue.append(maxClumpValue)
+                clumpMatrix[maxClumpValue] = [index]
+                maxClumpValue += 1   
         elif index < height and index > 0:
             if colour == clumpColour[clumpValue[index-1]]:
                 clumpValue.append(clumpValue[index-1])
@@ -81,27 +95,27 @@ for x in range(width):
             clumpMatrix[maxClumpValue] = [index]
             maxClumpValue += 1
         index +=1
-print(len(set(clumpValue)))
-
 index = 0
 for x in range(width):
     for y in range(height):
-        #if index % 100 == 0:
-        #    print("{:.2f}% done, index= {:,}, pixes= {:,}".format((index/size)*100, index, pixelCounter))
+        if index % 100000 == 0:
+            print("{:.2f}% done".format(((index+size)/(size*2))*100))
+        colour = clumpColour[clumpValue[index]]
         if index > 0 and (height % index) > 0 and index > height:
             
             #if pixel on left and on top is the same colour
             if (colour == clumpColour[clumpValue[index-height]] and
                         colour == clumpColour[clumpValue[index-1]] and 
+                        index % height != 0 and
                         clumpValue[index-height] != clumpValue[index-1]):
                 correctValue = clumpValue[index-height]
                 eliminatedValue = clumpValue[index-1]
-                print(f"ID= {index}, Clump={clumpValue[index]} Eliminated: {eliminatedValue}, Replaced with: {correctValue}, length {len(clumpMatrix[eliminatedValue])}")
                 for i in range((len(clumpMatrix[eliminatedValue]))): # loop through the dict list of values to be eliminated
                     clumpValue[clumpMatrix[eliminatedValue][i]] = correctValue
                     pixelCounter += 1
                 clumpMatrix[correctValue] += clumpMatrix[eliminatedValue]
                 clumpMatrix[eliminatedValue] = []
+            
         index +=1
 
 index = 0
@@ -113,37 +127,59 @@ for x in range(width):
 endTime = time.time()
 
 print("program took {:.2f} seconds".format(endTime - startTime))
-print(len(set(clumpValue)))
-print(clumpDisplayColour[0])
-print(clumpValue[0])
 
 image_output.show()
 
-sizeOfClump = []
 for i in range(len(clumpValue)):
-    sizeOfClump.append(0)
+    clumpSizeSorted.append([i,0])
 
-for i in (clumpValue):
-    sizeOfClump[i] += 1
+print("sfhjksaf")
+for i in clumpValue:
+    clumpSizeSorted[i][1] += 1
+
+index = 0
+print("sfhjksaf")
+while i <= len(clumpSizeSorted):
+    #if i % 10000 == 0: 
+    #    print("{:.2f}% done".format((i/len(clumpSizeSorted)*100)))
+    print(i)
+    if clumpSizeSorted[index][1] == 0:
+        clumpSizeSorted.pop(index)
+        index = index-1
+    index += 1
+        
+
+for i in range(len(clumpSizeSorted)):
+    if i % 100 == 0: 
+        print("{:.2f}% done".format((i/len(clumpSizeSorted)*100)))
+    largestScore = clumpSizeSorted[i][1]
+    largestIndex = i
     
+    for j in range(i+1, len(clumpSizeSorted)):
+        if clumpSizeSorted[j][1] > largestScore:
+            largestScore = clumpSizeSorted[j][1]
+            largestIndex = j
+    clumpSizeSorted[largestIndex][1], clumpSizeSorted[i][1] = clumpSizeSorted[i][1], clumpSizeSorted[largestIndex][1]
+    
+clumpSizeSorted = clumpSizeSorted[::-1]
+
+print(clumpSizeSorted)
+
 max = 0
 
 for i in (clumpValue):
     if i > max:
         max = i
 
-
-print(max)
-index = 0
-seeGroup = int(input("enter group: "))
-for x in range(width):
-    for y in range(height):
-        if clumpValue[index] == max:
-            image_output.putpixel((x,y), (255, 255, 255))
-        else:
-            image_output.putpixel((x,y), (0, 0, 0))
-        index += 1
-image_output.show()
-
 while True:
-    pass
+    print(max)
+    index = 0
+    seeGroup = int(input("enter group: "))
+    for x in range(width):
+        for y in range(height):
+            if clumpValue[index] == seeGroup:
+                image_output.putpixel((x,y), (255, 255, 255))
+            else:
+                image_output.putpixel((x,y), (0, 0, 0))
+            index += 1
+    image_output.show()
