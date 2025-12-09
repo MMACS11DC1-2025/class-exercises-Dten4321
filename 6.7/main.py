@@ -119,7 +119,7 @@ for x in range(width):
                     clumpValue[clumpMatrix[eliminatedValue][i]] = correctValue
                     pixelCounter += 1
                 clumpMatrix[correctValue] += clumpMatrix[eliminatedValue]
-                clumpMatrix[eliminatedValue] = []
+                clumpMatrix.pop(eliminatedValue)
             
         index +=1
 
@@ -135,16 +135,12 @@ print("program took {:.2f} seconds".format(endTime - startTime))
 
 image_output.show()
 
-print(len(clumps))
-for i in range(len(clumps)):
-    clumpSizeSorted.append([i,0])
+avaliableClumps = list(clumpMatrix.keys())
+print(avaliableClumps)
 
-print(len(clumpValue))
-print(size)
-print("starting adding")
-for i in range(len(clumpValue)):
-    clumpSizeSorted[clumpValue[i]][1] += 1
-    print(f"added 1 to index {clumpValue[i]}")
+print(len(avaliableClumps))
+for i in range(len(avaliableClumps)):
+    clumpSizeSorted.append([avaliableClumps[i], len(clumpMatrix[avaliableClumps[i]])])
 
 print(len(clumpSizeSorted))
 
@@ -160,14 +156,12 @@ while index < len(clumpSizeSorted):
         index = index-1
     index += 1
         
-print(len(clumpSizeSorted))
+print(clumpSizeSorted)
 
 endTime = time.time()
 print("program took {:.2f} seconds".format(endTime - startTime))
 
 for i in range(len(clumpSizeSorted)):
-    if i % 100 == 0: 
-        print("{:.2f}% done".format(((i/len(clumpSizeSorted))*100)))
     largestScore = clumpSizeSorted[i][1]
     largestIndex = i
     
@@ -175,17 +169,11 @@ for i in range(len(clumpSizeSorted)):
         if clumpSizeSorted[j][1] > largestScore:
             largestScore = clumpSizeSorted[j][1]
             largestIndex = j
-    clumpSizeSorted[largestIndex][1], clumpSizeSorted[i][1] = clumpSizeSorted[i][1], clumpSizeSorted[largestIndex][1]
+    clumpSizeSorted[largestIndex], clumpSizeSorted[i] = clumpSizeSorted[i], clumpSizeSorted[largestIndex]
     
 clumpSizeSorted = clumpSizeSorted[::-1]
 
 print(clumpSizeSorted)
-
-max = 0
-
-for i in (clumpValue):
-    if i > max:
-        max = i
 
 while True:
     print(max)
