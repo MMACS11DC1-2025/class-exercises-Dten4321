@@ -63,6 +63,7 @@ for x in range(width):
                 clumpValue.append(clumpValue[index-1])
                 clumpMatrix[clumpValue[index]].append(index)
             else:
+                clumps.append(maxClumpValue)
                 clumpColour.append(colour)
                 clumpDisplayColour.append((random.randrange(0, 255), random.randrange(0, 255), random.randrange(0, 255)))
                 clumpValue.append(maxClumpValue)
@@ -73,6 +74,7 @@ for x in range(width):
                 clumpValue.append(clumpValue[index-height])
                 clumpMatrix[clumpValue[index]].append(index)
             else:
+                clumps.append(maxClumpValue)
                 clumpColour.append(colour)
                 clumpDisplayColour.append((random.randrange(0, 255), random.randrange(0, 255), random.randrange(0, 255)))
                 clumpValue.append(maxClumpValue)
@@ -83,18 +85,21 @@ for x in range(width):
                 clumpValue.append(clumpValue[index-1])
                 clumpMatrix[clumpValue[index]].append(index)
             else:
+                clumps.append(maxClumpValue)
                 clumpColour.append(colour)
                 clumpDisplayColour.append((random.randrange(0, 255), random.randrange(0, 255), random.randrange(0, 255)))
                 clumpValue.append(maxClumpValue)
                 clumpMatrix[maxClumpValue] = [index]
                 maxClumpValue += 1
         else:
+            clumps.append(maxClumpValue)
             clumpColour.append(colour)
             clumpDisplayColour.append((random.randrange(0, 255), random.randrange(0, 255), random.randrange(0, 255)))
             clumpValue.append(maxClumpValue)
             clumpMatrix[maxClumpValue] = [index]
             maxClumpValue += 1
         index +=1
+
 index = 0
 for x in range(width):
     for y in range(height):
@@ -130,28 +135,39 @@ print("program took {:.2f} seconds".format(endTime - startTime))
 
 image_output.show()
 
-for i in range(len(clumpValue)):
+print(len(clumps))
+for i in range(len(clumps)):
     clumpSizeSorted.append([i,0])
 
-print("sfhjksaf")
-for i in clumpValue:
-    clumpSizeSorted[i][1] += 1
+print(len(clumpValue))
+print(size)
+print("starting adding")
+for i in range(len(clumpValue)):
+    clumpSizeSorted[clumpValue[i]][1] += 1
+    print(f"added 1 to index {clumpValue[i]}")
+
+print(len(clumpSizeSorted))
+
+startTime = time.time()
 
 index = 0
 print("sfhjksaf")
-while i <= len(clumpSizeSorted):
-    #if i % 10000 == 0: 
-    #    print("{:.2f}% done".format((i/len(clumpSizeSorted)*100)))
-    print(i)
+while index < len(clumpSizeSorted):
     if clumpSizeSorted[index][1] == 0:
+        if index % 10 == 0: 
+            print("pixel: {}, {}% done".format(clumpSizeSorted[index][0], (clumpSizeSorted[index][0]/len(clumpSizeSorted))*100))
         clumpSizeSorted.pop(index)
         index = index-1
     index += 1
         
+print(len(clumpSizeSorted))
+
+endTime = time.time()
+print("program took {:.2f} seconds".format(endTime - startTime))
 
 for i in range(len(clumpSizeSorted)):
     if i % 100 == 0: 
-        print("{:.2f}% done".format((i/len(clumpSizeSorted)*100)))
+        print("{:.2f}% done".format(((i/len(clumpSizeSorted))*100)))
     largestScore = clumpSizeSorted[i][1]
     largestIndex = i
     
