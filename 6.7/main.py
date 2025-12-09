@@ -5,8 +5,10 @@ import random
 
 tolerance = 130
 
-image_check_load = Image.open("./6.7/nguyenMap.png").load()
-image_output = Image.open("./6.7/nguyenMap.png")
+image = input("What image to you wish to inspect? ")
+
+image_check_load = Image.open(f"./6.7/{image}").load()
+image_output = Image.open(f"./6.7/{image}")
 
 width = image_output.width
 height = image_output.height
@@ -136,32 +138,13 @@ print("program took {:.2f} seconds".format(endTime - startTime))
 image_output.show()
 
 avaliableClumps = list(clumpMatrix.keys())
-print(avaliableClumps)
 
-print(len(avaliableClumps))
+#create a sorted list of clumps
 for i in range(len(avaliableClumps)):
     clumpSizeSorted.append([avaliableClumps[i], len(clumpMatrix[avaliableClumps[i]])])
 
-print(len(clumpSizeSorted))
 
-startTime = time.time()
-
-index = 0
-print("sfhjksaf")
-while index < len(clumpSizeSorted):
-    if clumpSizeSorted[index][1] == 0:
-        if index % 10 == 0: 
-            print("pixel: {}, {}% done".format(clumpSizeSorted[index][0], (clumpSizeSorted[index][0]/len(clumpSizeSorted))*100))
-        clumpSizeSorted.pop(index)
-        index = index-1
-    index += 1
-        
-print(clumpSizeSorted)
-
-endTime = time.time()
-print("program took {:.2f} seconds".format(endTime - startTime))
-
-for i in range(len(clumpSizeSorted)):
+for i in range(len(clumpSizeSorted)): #Sorting algorithm
     largestScore = clumpSizeSorted[i][1]
     largestIndex = i
     
@@ -170,13 +153,10 @@ for i in range(len(clumpSizeSorted)):
             largestScore = clumpSizeSorted[j][1]
             largestIndex = j
     clumpSizeSorted[largestIndex], clumpSizeSorted[i] = clumpSizeSorted[i], clumpSizeSorted[largestIndex]
-    
-clumpSizeSorted = clumpSizeSorted[::-1]
 
-print(clumpSizeSorted)
+print(f"The avaliable clumps (largest to smallest): {clumpSizeSorted}")
 
 while True:
-    print(max)
     index = 0
     seeGroup = int(input("enter group: "))
     for x in range(width):
