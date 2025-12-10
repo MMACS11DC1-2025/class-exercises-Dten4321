@@ -34,11 +34,38 @@ clumpMatrix = {} # dict, each key is a clump, each key has list of pixels in a g
 clumpSizeSorted = [] #sorted list with clumps
 maxClumpValue = 0
 
+def showImg(): #Shows grouped image
+    index = 0
+    for x in range(width):
+        for y in range(height):
+            image_output.putpixel((x,y), (clumpDisplayColour[clumpValue[index]-1][0], clumpDisplayColour[clumpValue[index]-1][1], clumpDisplayColour[clumpValue[index]-1][2]))
+            index +=1
+    image_output.show()
+
+def showIndex(indexedList):
+    listIndexes = []
+    for i in indexedList:
+        listIndexes.append(i[0])
+    return listIndexes
+
+#Using Binary search to find target group
+def findIndex(indexedList, target):
+    findMax = len(indexedList)
+    findMin = 0
+    while findMax > findMin:
+        middle = int((findMax-findMin)/2)
+        print(findMin+middle)
+        if indexedList[findMin+middle][0] == target:
+            return f"Group size is {indexedList[middle][1]} being the number {middle+1} largest group"
+        elif indexedList[findMin+middle][0] > target:
+            findMax = findMin+middle
+        elif indexedList[findMin+middle][0] < target:
+            findMin = findMin+middle
+    return "Unavailable"
+            
+
 startTime = time.time()
 
-testValue = height+height+1
-
-pixelCounter = 0
 size = width*height
 #print(size)
 
@@ -119,27 +146,16 @@ for x in range(width):
                 eliminatedValue = clumpValue[index-1]
                 for i in range((len(clumpMatrix[eliminatedValue]))): # loop through the dict list of values to be eliminated
                     clumpValue[clumpMatrix[eliminatedValue][i]] = correctValue
-                    pixelCounter += 1
                 clumpMatrix[correctValue] += clumpMatrix[eliminatedValue]
                 clumpMatrix.pop(eliminatedValue)
             
         index +=1
 
-index = 0
-for x in range(width):
-    for y in range(height):
-        image_output.putpixel((x,y), (clumpDisplayColour[clumpValue[index]-1][0], clumpDisplayColour[clumpValue[index]-1][1], clumpDisplayColour[clumpValue[index]-1][2]))
-        index +=1
 
-endTime = time.time()
-
-print("program took {:.2f} seconds".format(endTime - startTime))
-
-image_output.show()
 
 avaliableClumps = list(clumpMatrix.keys())
 
-#create a sorted list of clumps
+#add value to a future sorted list of clumps
 for i in range(len(avaliableClumps)):
     clumpSizeSorted.append([avaliableClumps[i], len(clumpMatrix[avaliableClumps[i]])])
 
@@ -154,16 +170,46 @@ for i in range(len(clumpSizeSorted)): #Sorting algorithm
             largestIndex = j
     clumpSizeSorted[largestIndex], clumpSizeSorted[i] = clumpSizeSorted[i], clumpSizeSorted[largestIndex]
 
-print(f"The avaliable clumps (largest to smallest): {clumpSizeSorted}")
+endTime = time.time()
+
+print("program took {:.3f} seconds".format(endTime - startTime))
+
+print("\n================================")
+print("The possible commands are:")
+print("GROUP: display a clump")
+print("SEE: returns all groups")
+print("FIND: Find a clump")
+print("SHOW: Shows image with different colours for each clump")
+print("SHOWOG: Show's original image")
+print("================================\n")
 
 while True:
     index = 0
-    seeGroup = int(input("enter group: "))
-    for x in range(width):
-        for y in range(height):
-            if clumpValue[index] == seeGroup:
-                image_output.putpixel((x,y), (255, 255, 255))
-            else:
-                image_output.putpixel((x,y), (0, 0, 0))
-            index += 1
-    image_output.show()
+    command = input("Enter Command: ")
+    if command.strip().lower() == "group":
+            seeGroup = input("Enter Group: ")
+            try:
+                if int(seeGroup) in list(clumpMatrix.keys()):
+                    for x in range(width):
+                        for y in range(height):
+                            if clumpValue[index] == int(seeGroup):
+                                image_output.putpixel((x,y), (255, 255, 255))
+                            else:
+                                image_output.putpixel((x,y), (0, 0, 0))
+                            index += 1
+                    image_output.show()
+                else:
+                    print("Not a valid group!")
+            except:
+                print("Not a valid group!")
+    elif command.strip().lower() == "see":
+        print(f"The avaliable clumps (largest to smallest): {showIndex(clumpSizeSorted)}")
+    elif command.strip().lower() == "show":
+        showImg()
+    elif command.strip().lower() == "showog":
+        Image.open(f"./6.7/{image}").show()
+    elif command.strip().lower() == "find":
+        #try:
+        print(findIndex(clumpSizeSorted, int(input("Search for Group: "))))
+        #except:
+        #    print("Group does not exist")
