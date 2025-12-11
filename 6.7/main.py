@@ -2,11 +2,15 @@ from PIL import Image
 import colourProcessor
 import time
 import random
-
-tolerance = 130
+import os
 
 image = input("What image to you wish to inspect? ")
 
+if not os.path.exists(F"./6.7/{image}"):
+    print("This image does not exist!")
+    exit()
+
+tolerance = 130
 image_check_load = Image.open(f"./6.7/{image}").load()
 image_output = Image.open(f"./6.7/{image}")
 
