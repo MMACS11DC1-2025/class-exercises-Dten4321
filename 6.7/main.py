@@ -49,19 +49,31 @@ def showIndex(indexedList):
     return listIndexes
 
 #Using Binary search to find target group
-def findIndex(indexedList, target):
-    findMax = len(indexedList)
+def findIndex(indexedList,sortedIndexedList, target):
+    findMax = len(indexedList)-1
     findMin = 0
-    while findMax > findMin:
-        middle = int((findMax-findMin)/2)
-        print(findMin+middle)
-        if indexedList[findMin+middle][0] == target:
-            return f"Group size is {indexedList[middle][1]} being the number {middle+1} largest group"
-        elif indexedList[findMin+middle][0] > target:
-            findMax = findMin+middle
-        elif indexedList[findMin+middle][0] < target:
-            findMin = findMin+middle
+    while findMax >= findMin:
+        middle = int((findMax+findMin)/2)
+        if indexedList[middle][0] == target:
+            target = indexedList[middle][1]
+            break
+        elif indexedList[middle][0] < target:
+            findMin = middle+1
+        elif indexedList[middle][0] > target:
+            findMax = middle-1
+    findMax = len(sortedIndexedList)-1
+    findMin = 0
+    while findMax >= findMin:
+        middle = int((findMax+findMin)/2)
+        if sortedIndexedList[middle][1] == target:
+            print(sortedIndexedList)
+            return f"The group contains {sortedIndexedList[middle][1]} pixels, being the number {middle+1} largest group"
+        elif sortedIndexedList[middle][1] > target:
+            findMin = middle+1
+        elif sortedIndexedList[middle][1] < target:
+            findMax = middle-1
     return "Unavailable"
+    
             
 
 startTime = time.time()
@@ -159,6 +171,7 @@ avaliableClumps = list(clumpMatrix.keys())
 for i in range(len(avaliableClumps)):
     clumpSizeSorted.append([avaliableClumps[i], len(clumpMatrix[avaliableClumps[i]])])
 
+numSortedClumps = clumpSizeSorted[:]
 
 for i in range(len(clumpSizeSorted)): #Sorting algorithm
     largestScore = clumpSizeSorted[i][1]
@@ -181,6 +194,7 @@ print("SEE: returns all groups")
 print("FIND: Find a clump")
 print("SHOW: Shows image with different colours for each clump")
 print("SHOWOG: Show's original image")
+print("TOP: Shows top 5 largest groups if possible")
 print("================================\n")
 
 while True:
@@ -209,7 +223,14 @@ while True:
     elif command.strip().lower() == "showog":
         Image.open(f"./6.7/{image}").show()
     elif command.strip().lower() == "find":
-        #try:
-        print(findIndex(clumpSizeSorted, int(input("Search for Group: "))))
-        #except:
-        #    print("Group does not exist")
+        try:
+            print(findIndex(numSortedClumps, clumpSizeSorted,int(input("Search for Group: "))))
+        except:
+            print("Group index must be an integer")
+    elif command.strip().lower() == "top":
+        if len(clumpSizeSorted) >= 5:
+            print(f"The top 5 groups are: {showIndex(clumpSizeSorted)[:5]}")
+        else:
+            print(f"The top groups are: {showIndex(clumpSizeSorted)}")
+    else:
+        print("Invalid Command!")
