@@ -1,33 +1,42 @@
 from PIL import Image
-import colourProcessor
 import time
 import random
 import os
 
-image = input("What image to you wish to inspect? ")
+# colour processor contains functions to detect colour
+import colourProcessor
 
+def getNumberofIMG():
+    validInput = False
+    while not validInput:
+        try:
+            numOfIMG = int(input("How many images to analyse?: "))
+            validInput = True
+        except:
+            validInput = False
+    return numOfIMG
+
+#class AnalysedImage:
+#    def __init__(self, ):
+#
+#for i in range(getNumberofIMG()):
+image = input("What is the image to you wish to inspect? ")
+
+# checks if image exists in folder
 if not os.path.exists(F"./6.7/{image}"):
     print("This image does not exist!")
     exit()
 
-tolerance = 130
+# load the original image and create an output image
 image_check_load = Image.open(f"./6.7/{image}").load()
 image_output = Image.open(f"./6.7/{image}")
 
+# gets the width and height of the image
 width = image_output.width
 height = image_output.height
 
-colours = {
-    "red" : 0,
-    "green" : 0,
-    "blue" : 0,
-    "yellow" : 0,
-    "orange" : 0,
-    "black" : 0,
-    "pink" : 0,
-    "white" : 0,
-    "unidentified" : 0
-}
+# sets tolerance of grouping of colours
+tolerance = 130
 
 imgList = [] #data for all pixels in the image
 clumps = [] # each list item will store a "clump" -- a contiguous mass
@@ -37,14 +46,17 @@ clumpDisplayColour = [] # display colour of clump
 clumpMatrix = {} # dict, each key is a clump, each key has list of pixels in a group
 clumpSizeSorted = [] #sorted list with clumps
 maxClumpValue = 0
+size = width*height # number of pixels in the image
 
-def showImg(): #Shows grouped image
+#Shows image with each group a different colour
+def showImg():
     index = 0
     for x in range(width):
         for y in range(height):
             image_output.putpixel((x,y), (clumpDisplayColour[clumpValue[index]-1][0], clumpDisplayColour[clumpValue[index]-1][1], clumpDisplayColour[clumpValue[index]-1][2]))
             index +=1
     image_output.show()
+
 
 def showIndex(indexedList):
     listIndexes = []
@@ -77,13 +89,8 @@ def findIndex(indexedList,sortedIndexedList, target):
         elif sortedIndexedList[middle][1] < target:
             findMax = middle-1
     return "Unavailable"
-    
-            
 
 startTime = time.time()
-
-size = width*height
-#print(size)
 
 for x in range(width):
     for y in range(height):
@@ -97,9 +104,7 @@ for x in range(width):
             r, g, b, a = imgList[index]
         except:
             r, g, b = imgList[index]
-        colour = colourProcessor.colour(r,g,b, tolerance)
-        colours[colour] += 1
-        
+        colour = colourProcessor.colour(r,g,b, tolerance)        
         if (index % height) != 0 and index > height:
             if colour == clumpColour[clumpValue[index-height]]:
                 clumpValue.append(clumpValue[index-height])
@@ -199,6 +204,7 @@ print("FIND: Find a clump")
 print("SHOW: Shows image with different colours for each clump")
 print("SHOWOG: Show's original image")
 print("TOP: Shows top 5 largest groups if possible")
+print("TOTAL: shows the total amount of each colour")
 print("================================\n")
 
 while True:

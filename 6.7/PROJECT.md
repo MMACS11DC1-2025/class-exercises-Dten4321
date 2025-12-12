@@ -20,7 +20,7 @@ Using the new skills in units 5 and 6, you will implement a computer vision algo
 
 ### Image Processing and Feature Extraction (Unit 5)
 #### Task 1: Pixels to Data Function
-- [ ] Write a function, is_target_feature, that accepts pixel data (e.g. colour channels as RGB tuple inputs) and returns a specific, useful output (e.g., returns True if the pixel matches your custom feature definition else False, or a weight) (10 pts)
+- [x] Write a function, is_target_feature, that accepts pixel data (e.g. colour channels as RGB tuple inputs) and returns a specific, useful output (e.g., returns True if the pixel matches your custom feature definition else False, or a weight) (10 pts)
 #### Task 2: Pixel Iteration and List Building
 - [x] Use nested loops to iterate over all pixels **in a set of at least 10 images** and calculate your "Feature Density Score" for each image (10 pts)
 - [ ] Append the filename and score to a master list, demonstrating list manipulation and the use of the append() method (5 pts)
@@ -31,9 +31,9 @@ Using the new skills in units 5 and 6, you will implement a computer vision algo
 ### Algorithms and Efficiency (Unit 6)
 #### Task 4: Selection Sort
 - [x] Implement the Selection Sort algorithm function yourself (not using built-in libraries for sorting) to sort the master list based on the calculated Feature Density Score (highest to lowest) (12 pts)
-- [ ] Output the top 5 results using list slicing (3 pts)
+- [x] Output the top 5 results using list slicing (3 pts)
 #### Task 5: Binary Search
-- [ ] Implement the Binary Search algorithm function yourself to search the sorted list for a specific target score (10 pts)
+- [x] Implement the Binary Search algorithm function yourself to search the sorted list for a specific target score (10 pts)
 
 ### Process
 - [ ] Algorithm design in English: outline the logic using English comments (pseudocode) before each major Python code block (3 pts)
