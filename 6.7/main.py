@@ -15,6 +15,40 @@ def getNumberofIMG():
         except:
             validInput = False
     return numOfIMG
+def sortedAllImageList():
+    listTopGroups = []
+    for i in list(images.keys()):
+        listTopGroups.append([f"group {images[i].getClumpSizes()[0][0]} from {i}", images[i].getClumpSizes()[0][1]])
+        
+    for i in range(len(listTopGroups)): #Sorting algorithm
+            largestScore = listTopGroups[i][1]
+            largestIndex = i
+
+            for j in range(i+1, len(listTopGroups)):
+                if listTopGroups[j][1] > largestScore:
+                    largestScore = listTopGroups[j][1]
+                    largestIndex = j
+            listTopGroups[largestIndex], listTopGroups[i] = listTopGroups[i], listTopGroups[largestIndex]
+    for i in range(len(listTopGroups)):
+        print(f"Number {i+1} largest group is {listTopGroups[i][0]} with {listTopGroups[i][1]} pixels")
+
+def sortedAllGroupImageList():
+    listTopGroups = []
+    for i in list(images.keys()):
+        for j in range(len(images[i].getClumpSizes())):
+            listTopGroups.append([f"group {images[i].getClumpSizes()[j][0]} from {i}", images[i].getClumpSizes()[j][1]])
+        
+    for i in range(len(listTopGroups)): #Sorting algorithm
+            largestScore = listTopGroups[i][1]
+            largestIndex = i
+
+            for j in range(i+1, len(listTopGroups)):
+                if listTopGroups[j][1] > largestScore:
+                    largestScore = listTopGroups[j][1]
+                    largestIndex = j
+            listTopGroups[largestIndex], listTopGroups[i] = listTopGroups[i], listTopGroups[largestIndex]
+    for i in range(5):
+        print(f"Number {i+1} largest group is {listTopGroups[i][0]} with {listTopGroups[i][1]} pixels")
 
 class AnalysedImage:
     def __init__(self, name, tolerance):
@@ -95,29 +129,29 @@ class AnalysedImage:
                     self.clumpMatrix[self.maxClumpValue] = [index]
                     self.maxClumpValue += 1
                 index +=1
+        
+        index = 0
+        for x in range(self.width):
+            for y in range(self.height):
+                if index % 100000 == 0:
+                    print("{:.2f}% done".format(((index+self.size)/(self.size*2))*100))
+                #print(f"maxsize: {self.size},clump colour: {len(self.clumpValue)}, clump: {len(self.clumpValue)}, index: {index}")
+                colour = self.clumpColour[self.clumpValue[index]]
+                if index > 0 and (self.height % index) > 0 and index > self.height:
+                
+                    #if pixel on left and on top is the same colour
+                    if (colour == self.clumpColour[self.clumpValue[index-self.height]] and
+                                colour == self.clumpColour[self.clumpValue[index-1]] and 
+                                index % self.height != 0 and
+                                self.clumpValue[index-self.height] != self.clumpValue[index-1]):
+                        correctValue = self.clumpValue[index-self.height]
+                        eliminatedValue = self.clumpValue[index-1]
+                        for i in range((len(self.clumpMatrix[eliminatedValue]))): # loop through the dict list of values to be eliminated
+                            self.clumpValue[self.clumpMatrix[eliminatedValue][i]] = correctValue
+                        self.clumpMatrix[correctValue] += self.clumpMatrix[eliminatedValue]
+                        self.clumpMatrix.pop(eliminatedValue)
 
-            index = 0
-            for x in range(self.width):
-                for y in range(self.height):
-                    if index % 100000 == 0:
-                        print("{:.2f}% done".format(((index+self.size)/(self.size*2))*100))
-                    print(f"clump colour: {len(self.clumpValue)}, index: {index}")
-                    colour = self.clumpColour[self.clumpValue[index]]
-                    if index > 0 and (self.height % index) > 0 and index > self.height:
-                    
-                        #if pixel on left and on top is the same colour
-                        if (colour == self.clumpColour[self.clumpValue[index-self.height]] and
-                                    colour == self.clumpColour[self.clumpValue[index-1]] and 
-                                    index % self.height != 0 and
-                                    self.clumpValue[index-self.height] != self.clumpValue[index-1]):
-                            correctValue = self.clumpValue[index-self.height]
-                            eliminatedValue = self.clumpValue[index-1]
-                            for i in range((len(self.clumpMatrix[eliminatedValue]))): # loop through the dict list of values to be eliminated
-                                self.clumpValue[self.clumpMatrix[eliminatedValue][i]] = correctValue
-                            self.clumpMatrix[correctValue] += self.clumpMatrix[eliminatedValue]
-                            self.clumpMatrix.pop(eliminatedValue)
-    
-                    index +=1
+                index +=1
 
         avaliableClumps = list(self.clumpMatrix.keys())
 
@@ -152,7 +186,7 @@ class AnalysedImage:
         self.listIndexes = []
         for i in indexedList:
             self.listIndexes.append(i[0])
-            return self.listIndexes
+        return self.listIndexes
 
     #Using Binary search to find target group
     def findIndex(self, indexedList,sortedIndexedList, target):
@@ -217,6 +251,10 @@ class AnalysedImage:
         else:
             print("Invalid Command!")
     
+    def getClumpSizes(self):
+        return self.clumpSizeSorted
+    
+    
 for i in range(getNumberofIMG()):
     image = input("What is the image to you wish to inspect? ")
     if not os.path.exists(F"./6.7/{image}"): # checks if image exists in folder
@@ -230,6 +268,8 @@ for i in range(getNumberofIMG()):
 print("\n================================")
 print("The possible commands are:")
 print("ALLIMG: shows list of all images which are being analysed")
+print("TOP: Shows a ranked list comparing the largest group of all images analysed")
+print("LARGE: Shows a ranked list of largest groups in all the images analysed")
 print("TOPCLUMPS: Shows list of largest clumps in all images")
 print("ONEIMG: Shows commands to deal with a single image\n")
 print("Single Image commands:")
@@ -249,3 +289,9 @@ while True:
         images[commandedImage].commandInput(input(f"Enter a command for {commandedImage}: "))
     elif command.strip().lower() == "allimg":
         print(list(images.keys()))
+    elif command.strip().lower() == "top":
+        sortedAllImageList()
+    elif command.strip().lower() == "large":
+        sortedAllGroupImageList()
+    else:
+        print("Not a valid command!")
