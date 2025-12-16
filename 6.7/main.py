@@ -6,6 +6,7 @@ import colourProcessor # colour processor contains functions to detect colour
 
 images = {}
 
+# gets number of images to analyse and compare in the beginning of the program
 def getNumberofIMG():
     validInput = False
     while not validInput:
@@ -15,12 +16,14 @@ def getNumberofIMG():
         except:
             validInput = False
     return numOfIMG
+
+# sorts and returns the output of the global TOP function
 def sortedAllImageList():
     listTopGroups = []
-    for i in list(images.keys()):
+    for i in list(images.keys()): # Gets top clump of every image
         listTopGroups.append([f"group {images[i].getClumpSizes()[0][0]} from {i}", images[i].getClumpSizes()[0][1]])
         
-    for i in range(len(listTopGroups)): #Sorting algorithm
+    for i in range(len(listTopGroups)): # Sorts the clumps by size, largest to smallest
             largestScore = listTopGroups[i][1]
             largestIndex = i
 
@@ -32,13 +35,14 @@ def sortedAllImageList():
     for i in range(len(listTopGroups)):
         print(f"Number {i+1} largest group is {listTopGroups[i][0]} with {listTopGroups[i][1]} pixels")
 
+# sorts and returns the output of the global LARGE function
 def sortedAllGroupImageList():
     listTopGroups = []
-    for i in list(images.keys()):
+    for i in list(images.keys()): # Gets every clump from every image
         for j in range(len(images[i].getClumpSizes())):
             listTopGroups.append([f"group {images[i].getClumpSizes()[j][0]} from {i}", images[i].getClumpSizes()[j][1]])
         
-    for i in range(len(listTopGroups)): #Sorting algorithm
+    for i in range(len(listTopGroups)): # Sorts the clumps by size, largest to smallest
             largestScore = listTopGroups[i][1]
             largestIndex = i
 
@@ -47,9 +51,11 @@ def sortedAllGroupImageList():
                     largestScore = listTopGroups[j][1]
                     largestIndex = j
             listTopGroups[largestIndex], listTopGroups[i] = listTopGroups[i], listTopGroups[largestIndex]
-    for i in range(5):
+            
+    for i in range(5): # Displays the top 5 clumps globally
         print(f"Number {i+1} largest group is {listTopGroups[i][0]} with {listTopGroups[i][1]} pixels")
 
+# Class to store aspects of an image
 class AnalysedImage:
     def __init__(self, name, tolerance):
         # load the original image and create an output image
@@ -65,63 +71,67 @@ class AnalysedImage:
         self.clumpColour = [] # colour of clump
         self.clumpDisplayColour = [] # display colour of clump
         self.clumpMatrix = {} # dict, each key is a clump, each key has list of pixels in a group
-        self.clumpSizeSorted = [] #sorted list with clumps
-        self.maxClumpValue = 0
+        self.clumpSizeSorted = [] #sorted list with clumps and their sizes
+        self.maxClumpValue = 0 # Numebr of clumps ever created
         self.size = self.width*self.height # number of pixels in the image
-        self.tolerance = tolerance
+        self.tolerance = tolerance # Tolerance of colour detection
         
+    # Analyse the image
     def scan(self):
-        startTime = time.time()
-        for x in range(self.width):
+        startTime = time.time() # Track how long the program takes
+        
+        for x in range(self.width): # Put all pixel data of an image into a list
             for y in range(self.height):
                 self.imgList.append(self.image_check_load[x,y])
+                
+        # First Scan, create the first groups
         index = 0
         for x in range(self.width):
             for y in range(self.height):
-                if index % 100000 == 0:
+                if index % 100000 == 0: # Prints percent done, up to 50% every 100k indexes
                     print("{:.2f}% done".format((index/(self.size*2))*100))
-                try:
+                try: # Only "store" the alpha value if there
                     r, g, b, a = self.imgList[index]
                 except:
                     r, g, b = self.imgList[index]
                 colour = colourProcessor.colour(r,g,b, self.tolerance)        
-                if (index % self.height) != 0 and index > self.height:
-                    if colour == self.clumpColour[self.clumpValue[index-self.height]]:
+                if (index % self.height) != 0 and index > self.height: # If the pixel is not at the top or the first column
+                    if colour == self.clumpColour[self.clumpValue[index-self.height]]: # If the pixel on the left is the same colour, add to that clump
                         self.clumpValue.append(self.clumpValue[index-self.height])
                         self.clumpMatrix[self.clumpValue[index]].append(index)
-                    elif colour == self.clumpColour[self.clumpValue[index-1]]:
+                    elif colour == self.clumpColour[self.clumpValue[index-1]]: # If the pixel above is the same colour, add to that clump
                         self.clumpValue.append(self.clumpValue[index-1])
                         self.clumpMatrix[self.clumpValue[index]].append(index)
-                    else:
+                    else: # If there is no pixels of the same colour in the loaded pixels, create a new clump
                         self.clumps.append(self.maxClumpValue)
                         self.clumpColour.append(colour)
                         self.clumpDisplayColour.append((random.randrange(0, 255), random.randrange(0, 255), random.randrange(0, 255)))
                         self.clumpValue.append(self.maxClumpValue)
                         self.clumpMatrix[self.maxClumpValue] = [index]
                         self.maxClumpValue += 1
-                elif index > self.height and (index % self.height) == 0:
-                    if colour == self.clumpColour[self.clumpValue[index-self.height]]:
+                elif index > self.height and (index % self.height) == 0: # If the pixel is at the top or not in the first column
+                    if colour == self.clumpColour[self.clumpValue[index-self.height]]: # If the pixel on the left is the same colour, add to that clump
                         self.clumpValue.append(self.clumpValue[index-self.height])
                         self.clumpMatrix[self.clumpValue[index]].append(index)
-                    else:
+                    else: # If there is no pixels of the same colour in the loaded pixels, create a new clump
                         self.clumps.append(self.maxClumpValue)
                         self.clumpColour.append(colour)
                         self.clumpDisplayColour.append((random.randrange(0, 255), random.randrange(0, 255), random.randrange(0, 255)))
                         self.clumpValue.append(self.maxClumpValue)
                         self.clumpMatrix[self.maxClumpValue] = [index]
                         self.maxClumpValue += 1   
-                elif index < self.height and index > 0:
-                    if colour == self.clumpColour[self.clumpValue[index-1]]:
+                elif index < self.height and index > 0: # If the pixel is in the first column
+                    if colour == self.clumpColour[self.clumpValue[index-1]]: # If the pixel above is the same colour, add to that clump
                         self.clumpValue.append(self.clumpValue[index-1])
                         self.clumpMatrix[self.clumpValue[index]].append(index)
-                    else:
+                    else: # If there is no pixels of the same colour in the loaded pixels, create a new clump
                         self.clumps.append(self.maxClumpValue)
                         self.clumpColour.append(colour)
                         self.clumpDisplayColour.append((random.randrange(0, 255), random.randrange(0, 255), random.randrange(0, 255)))
                         self.clumpValue.append(self.maxClumpValue)
                         self.clumpMatrix[self.maxClumpValue] = [index]
                         self.maxClumpValue += 1
-                else:
+                else: # if this is the first pixel, or something went wrong, create a new clump
                     self.clumps.append(self.maxClumpValue)
                     self.clumpColour.append(colour)
                     self.clumpDisplayColour.append((random.randrange(0, 255), random.randrange(0, 255), random.randrange(0, 255)))
@@ -130,12 +140,12 @@ class AnalysedImage:
                     self.maxClumpValue += 1
                 index +=1
         
+        # Second scan, to consolidate all the ajacent groups with the same colour
         index = 0
         for x in range(self.width):
             for y in range(self.height):
-                if index % 100000 == 0:
+                if index % 100000 == 0: # Prints percent done, from 50% to 100%, every 100k indexes
                     print("{:.2f}% done".format(((index+self.size)/(self.size*2))*100))
-                #print(f"maxsize: {self.size},clump colour: {len(self.clumpValue)}, clump: {len(self.clumpValue)}, index: {index}")
                 colour = self.clumpColour[self.clumpValue[index]]
                 if index > 0 and (self.height % index) > 0 and index > self.height:
                 
@@ -148,20 +158,20 @@ class AnalysedImage:
                         eliminatedValue = self.clumpValue[index-1]
                         for i in range((len(self.clumpMatrix[eliminatedValue]))): # loop through the dict list of values to be eliminated
                             self.clumpValue[self.clumpMatrix[eliminatedValue][i]] = correctValue
-                        self.clumpMatrix[correctValue] += self.clumpMatrix[eliminatedValue]
+                        self.clumpMatrix[correctValue] += self.clumpMatrix[eliminatedValue] # consolidate the redundant clumps
                         self.clumpMatrix.pop(eliminatedValue)
 
                 index +=1
 
-        avaliableClumps = list(self.clumpMatrix.keys())
+        avaliableClumps = list(self.clumpMatrix.keys()) # All clumps which were not removed
 
         #add value to a future sorted list of clumps
         for i in range(len(avaliableClumps)):
             self.clumpSizeSorted.append([avaliableClumps[i], len(self.clumpMatrix[avaliableClumps[i]])])
 
-        self.numSortedClumps = self.clumpSizeSorted[:]
+        self.indexSortedClumps = self.clumpSizeSorted[:] # Clumps sorted by index, not size
 
-        for i in range(len(self.clumpSizeSorted)): #Sorting algorithm
+        for i in range(len(self.clumpSizeSorted)): # Sorts Clumps by size
             largestScore = self.clumpSizeSorted[i][1]
             largestIndex = i
 
@@ -172,9 +182,9 @@ class AnalysedImage:
             self.clumpSizeSorted[largestIndex], self.clumpSizeSorted[i] = self.clumpSizeSorted[i], self.clumpSizeSorted[largestIndex]
         endTime = time.time()
 
-        print("program took {:.3f} seconds".format(endTime - startTime))
+        print("program took {:.3f} seconds".format(endTime - startTime)) # print time elapse to run program
 
-    def showImg(self):
+    def showImg(self): # displays original input image
         index = 0
         for x in range(self.width):
             for y in range(self.height):
@@ -182,7 +192,7 @@ class AnalysedImage:
                 index +=1
         self.image_output.show()
 
-    def showIndex(self, indexedList):
+    def showIndex(self, indexedList): # Returns a list of all indexs of the given group
         self.listIndexes = []
         for i in indexedList:
             self.listIndexes.append(i[0])
@@ -192,7 +202,7 @@ class AnalysedImage:
     def findIndex(self, indexedList,sortedIndexedList, target):
         findMax = len(indexedList)-1
         findMin = 0
-        while findMax >= findMin:
+        while findMax >= findMin: # First find the clump of correct index
             middle = int((findMax+findMin)/2)
             if indexedList[middle][0] == target:
                 target = indexedList[middle][1]
@@ -203,7 +213,7 @@ class AnalysedImage:
                 findMax = middle-1
         findMax = len(sortedIndexedList)-1
         findMin = 0
-        while findMax >= findMin:
+        while findMax >= findMin: # Then find the location of the group compared to the size of the other groups
             middle = int((findMax+findMin)/2)
             if sortedIndexedList[middle][1] == target:
                 print(sortedIndexedList)
@@ -214,10 +224,10 @@ class AnalysedImage:
                 findMax = middle-1
         return "Unavailable"
     
-    def commandInput(self, command):
-        if command.strip().lower() == "group": #Shows image with each group a different colour
+    def commandInput(self, command): # ONEIMG commands
+        if command.strip().lower() == "group": # Shows image with a clump highlighted in while with all other clumps blacked out
             index = 0
-            seeGroup = input("Enter Group: ")
+            seeGroup = input("Enter Group: ") # Get the clump by input
             try:
                 if int(seeGroup) in list(self.clumpMatrix.keys()):
                     for x in range(self.width):
@@ -229,32 +239,32 @@ class AnalysedImage:
                             index += 1
                     self.image_output.show()
                 else:
-                    print("Not a valid group!")
+                    print("Invalid clump index!")
             except:
-                print("Not a valid group!")
+                print("Invalid clump index!")
         elif command.strip().lower() == "see": # displays list of clumps in one image from largest to smallest
             print(f"The avaliable clumps (largest to smallest): {self.showIndex(self.clumpSizeSorted)}")
-        elif command.strip().lower() == "show":
+        elif command.strip().lower() == "show": # Shows image with all clumps with random different colours
             self.showImg()
-        elif command.strip().lower() == "showog":
+        elif command.strip().lower() == "showog": # Shows original image
             Image.open(f"./6.7/{image}").show()
-        elif command.strip().lower() == "find":
+        elif command.strip().lower() == "find": # Use binary search to find rank of a clump
             try:
-                print(self.findIndex(self.numSortedClumps, self.clumpSizeSorted,int(input("Search for Group: "))))
+                print(self.findIndex(self.indexSortedClumps, self.clumpSizeSorted,int(input("Search for Group: "))))
             except:
-                print("Group index must be an integer")
-        elif command.strip().lower() == "top":
+                print("Invalid clump index!")
+        elif command.strip().lower() == "top": # Shows top 5 clumps in an image
             if len(self.clumpSizeSorted) >= 5:
-                print(f"The top 5 groups are: {self.showIndex(self.clumpSizeSorted)[:5]}")
+                print(f"The top 5 clumps are: {self.showIndex(self.clumpSizeSorted)[:5]}")
             else:
-                print(f"The top groups are: {self.showIndex(self.clumpSizeSorted)}")
+                print(f"The top clumps are: {self.showIndex(self.clumpSizeSorted)}")
         else:
             print("Invalid Command!")
     
-    def getClumpSizes(self):
+    def getClumpSizes(self): # returns all clumps in this image which exist
         return self.clumpSizeSorted
     
-    
+# Processes all the images needed
 for i in range(getNumberofIMG()):
     image = input("What is the image to you wish to inspect? ")
     if not os.path.exists(F"./6.7/{image}"): # checks if image exists in folder
@@ -282,7 +292,7 @@ print("TOP: Shows top 5 largest groups if possible")
 print("TOTAL: shows the total amount of each colour")
 print("================================\n")
 
-while True:
+while True: # Command intake
     command = input("Enter Command: ")
     if command.strip().lower() == "oneimg":
         commandedImage = input("Enter an image to analyse: ")

@@ -48,9 +48,9 @@ Using the new skills in units 5 and 6, you will implement a computer vision algo
 
 ## **QUALITY CRITERIA**
 ### Code Quality and Efficiency
-- [ ] Code quality: Clean, readable structure (2 pts)
+- [x] Code quality: Clean, readable structure (2 pts)
 - [ ] Efficiency: Evidence of thinking about algorithmic complexity throughout the code (2 pts)
-- [ ] The program handles potential errors and edge cases effectively (2 pts)
+- [x] The program handles potential errors and edge cases effectively (2 pts)
 - [ ] Documentation polish: README is clear, concise, free of typos; also, code comments explain why decisions were made. (1 pt)
 
 ### Creativity and Originality
