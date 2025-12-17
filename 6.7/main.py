@@ -65,7 +65,7 @@ class AnalysedImage:
         # gets the width and height of the image
         self.width = self.image_output.width
         self.height = self.image_output.height
-        self.imgList = [] #data for all pixels in the image
+        self.imgList = [] # data for all pixels in the image
         self.clumps = [] # each list item will store a "clump" -- a contiguous mass
         self.clumpValue = [] # which clump is each pixel
         self.clumpColour = [] # colour of clump
