@@ -20,10 +20,10 @@ def getNumberofIMG():
 # sorts and returns the output of the global TOP function
 def sortedAllImageList():
     listTopGroups = []
-    for i in list(images.keys()): # Gets top clump of every image
-        listTopGroups.append([f"group {images[i].getClumpSizes()[0][0]} from {i}", images[i].getClumpSizes()[0][1]])
+    for i in list(images.keys()): # Gets top country of every image
+        listTopGroups.append([f"country {images[i].getClumpSizes()[0][0]} from {i}", images[i].getClumpSizes()[0][1]])
         
-    for i in range(len(listTopGroups)): # Sorts the clumps by size, largest to smallest
+    for i in range(len(listTopGroups)): # Sorts the countries by size, largest to smallest
             largestScore = listTopGroups[i][1]
             largestIndex = i
 
@@ -33,16 +33,16 @@ def sortedAllImageList():
                     largestIndex = j
             listTopGroups[largestIndex], listTopGroups[i] = listTopGroups[i], listTopGroups[largestIndex]
     for i in range(len(listTopGroups)):
-        print(f"Number {i+1} largest group is {listTopGroups[i][0]} with {listTopGroups[i][1]} pixels")
+        print(f"Number {i+1} largest country is {listTopGroups[i][0]} with {listTopGroups[i][1]} pixels")
 
 # sorts and returns the output of the global LARGE function
 def sortedAllGroupImageList():
     listTopGroups = []
-    for i in list(images.keys()): # Gets every clump from every image
+    for i in list(images.keys()): # Gets every country from every image
         for j in range(len(images[i].getClumpSizes())):
-            listTopGroups.append([f"group {images[i].getClumpSizes()[j][0]} from {i}", images[i].getClumpSizes()[j][1]])
+            listTopGroups.append([f"country {images[i].getClumpSizes()[j][0]} from {i}", images[i].getClumpSizes()[j][1]])
         
-    for i in range(len(listTopGroups)): # Sorts the clumps by size, largest to smallest
+    for i in range(len(listTopGroups)): # Sorts the countries by size, largest to smallest
             largestScore = listTopGroups[i][1]
             largestIndex = i
 
@@ -52,8 +52,8 @@ def sortedAllGroupImageList():
                     largestIndex = j
             listTopGroups[largestIndex], listTopGroups[i] = listTopGroups[i], listTopGroups[largestIndex]
             
-    for i in range(5): # Displays the top 5 clumps globally
-        print(f"Number {i+1} largest group is {listTopGroups[i][0]} with {listTopGroups[i][1]} pixels")
+    for i in range(5): # Displays the top 5 countries globally
+        print(f"Number {i+1} largest country is {listTopGroups[i][0]} with {listTopGroups[i][1]} pixels")
 
 # Class to store aspects of an image
 class AnalysedImage:
@@ -66,13 +66,13 @@ class AnalysedImage:
         self.width = self.image_output.width
         self.height = self.image_output.height
         self.imgList = [] # data for all pixels in the image
-        self.clumps = [] # each list item will store a "clump" -- a contiguous mass
-        self.clumpValue = [] # which clump is each pixel
-        self.clumpColour = [] # colour of clump
-        self.clumpDisplayColour = [] # display colour of clump
-        self.clumpMatrix = {} # dict, each key is a clump, each key has list of pixels in a group
-        self.clumpSizeSorted = [] #sorted list with clumps and their sizes
-        self.maxClumpValue = 0 # Numebr of clumps ever created
+        self.countries = [] # each list item will store a "country" -- a contiguous mass
+        self.clumpValue = [] # which country is each pixel
+        self.clumpColour = [] # colour of country
+        self.clumpDisplayColour = [] # display colour of country
+        self.clumpMatrix = {} # dict, each key is a country, each key has list of pixels in a country
+        self.clumpSizeSorted = [] #sorted list with countries and their sizes
+        self.maxClumpValue = 0 # Numebr of countries ever created
         self.size = self.width*self.height # number of pixels in the image
         self.tolerance = tolerance # Tolerance of colour detection
         
@@ -84,7 +84,7 @@ class AnalysedImage:
             for y in range(self.height):
                 self.imgList.append(self.image_check_load[x,y])
                 
-        # First Scan, create the first groups
+        # First Scan, create the first countries
         index = 0
         for x in range(self.width):
             for y in range(self.height):
@@ -96,43 +96,43 @@ class AnalysedImage:
                     r, g, b = self.imgList[index]
                 colour = colourProcessor.colour(r,g,b, self.tolerance)        
                 if (index % self.height) != 0 and index > self.height: # If the pixel is not at the top or the first column
-                    if colour == self.clumpColour[self.clumpValue[index-self.height]]: # If the pixel on the left is the same colour, add to that clump
+                    if colour == self.clumpColour[self.clumpValue[index-self.height]]: # If the pixel on the left is the same colour, add to that country
                         self.clumpValue.append(self.clumpValue[index-self.height])
                         self.clumpMatrix[self.clumpValue[index]].append(index)
-                    elif colour == self.clumpColour[self.clumpValue[index-1]]: # If the pixel above is the same colour, add to that clump
+                    elif colour == self.clumpColour[self.clumpValue[index-1]]: # If the pixel above is the same colour, add to that country
                         self.clumpValue.append(self.clumpValue[index-1])
                         self.clumpMatrix[self.clumpValue[index]].append(index)
-                    else: # If there is no pixels of the same colour in the loaded pixels, create a new clump
-                        self.clumps.append(self.maxClumpValue)
+                    else: # If there is no pixels of the same colour in the loaded pixels, create a new country
+                        self.countries.append(self.maxClumpValue)
                         self.clumpColour.append(colour)
                         self.clumpDisplayColour.append((random.randrange(0, 255), random.randrange(0, 255), random.randrange(0, 255)))
                         self.clumpValue.append(self.maxClumpValue)
                         self.clumpMatrix[self.maxClumpValue] = [index]
                         self.maxClumpValue += 1
                 elif index > self.height and (index % self.height) == 0: # If the pixel is at the top or not in the first column
-                    if colour == self.clumpColour[self.clumpValue[index-self.height]]: # If the pixel on the left is the same colour, add to that clump
+                    if colour == self.clumpColour[self.clumpValue[index-self.height]]: # If the pixel on the left is the same colour, add to that country
                         self.clumpValue.append(self.clumpValue[index-self.height])
                         self.clumpMatrix[self.clumpValue[index]].append(index)
-                    else: # If there is no pixels of the same colour in the loaded pixels, create a new clump
-                        self.clumps.append(self.maxClumpValue)
+                    else: # If there is no pixels of the same colour in the loaded pixels, create a new country
+                        self.countries.append(self.maxClumpValue)
                         self.clumpColour.append(colour)
                         self.clumpDisplayColour.append((random.randrange(0, 255), random.randrange(0, 255), random.randrange(0, 255)))
                         self.clumpValue.append(self.maxClumpValue)
                         self.clumpMatrix[self.maxClumpValue] = [index]
                         self.maxClumpValue += 1   
                 elif index < self.height and index > 0: # If the pixel is in the first column
-                    if colour == self.clumpColour[self.clumpValue[index-1]]: # If the pixel above is the same colour, add to that clump
+                    if colour == self.clumpColour[self.clumpValue[index-1]]: # If the pixel above is the same colour, add to that country
                         self.clumpValue.append(self.clumpValue[index-1])
                         self.clumpMatrix[self.clumpValue[index]].append(index)
-                    else: # If there is no pixels of the same colour in the loaded pixels, create a new clump
-                        self.clumps.append(self.maxClumpValue)
+                    else: # If there is no pixels of the same colour in the loaded pixels, create a new country
+                        self.countries.append(self.maxClumpValue)
                         self.clumpColour.append(colour)
                         self.clumpDisplayColour.append((random.randrange(0, 255), random.randrange(0, 255), random.randrange(0, 255)))
                         self.clumpValue.append(self.maxClumpValue)
                         self.clumpMatrix[self.maxClumpValue] = [index]
                         self.maxClumpValue += 1
-                else: # if this is the first pixel, or something went wrong, create a new clump
-                    self.clumps.append(self.maxClumpValue)
+                else: # if this is the first pixel, or something went wrong, create a new country
+                    self.countries.append(self.maxClumpValue)
                     self.clumpColour.append(colour)
                     self.clumpDisplayColour.append((random.randrange(0, 255), random.randrange(0, 255), random.randrange(0, 255)))
                     self.clumpValue.append(self.maxClumpValue)
@@ -140,7 +140,7 @@ class AnalysedImage:
                     self.maxClumpValue += 1
                 index +=1
         
-        # Second scan, to consolidate all the ajacent groups with the same colour
+        # Second scan, to consolidate all the ajacent countries with the same colour
         index = 0
         for x in range(self.width):
             for y in range(self.height):
@@ -158,20 +158,20 @@ class AnalysedImage:
                         eliminatedValue = self.clumpValue[index-1]
                         for i in range((len(self.clumpMatrix[eliminatedValue]))): # loop through the dict list of values to be eliminated
                             self.clumpValue[self.clumpMatrix[eliminatedValue][i]] = correctValue
-                        self.clumpMatrix[correctValue] += self.clumpMatrix[eliminatedValue] # consolidate the redundant clumps
+                        self.clumpMatrix[correctValue] += self.clumpMatrix[eliminatedValue] # consolidate the redundant countries
                         self.clumpMatrix.pop(eliminatedValue)
 
                 index +=1
 
-        avaliableClumps = list(self.clumpMatrix.keys()) # All clumps which were not removed
+        avaliableClumps = list(self.clumpMatrix.keys()) # All countries which were not removed
 
-        #add value to a future sorted list of clumps
+        #add value to a future sorted list of countries
         for i in range(len(avaliableClumps)):
             self.clumpSizeSorted.append([avaliableClumps[i], len(self.clumpMatrix[avaliableClumps[i]])])
 
-        self.indexSortedClumps = self.clumpSizeSorted[:] # Clumps sorted by index, not size
+        self.indexSortedClumps = self.clumpSizeSorted[:] # countries sorted by index, not size
 
-        for i in range(len(self.clumpSizeSorted)): # Sorts Clumps by size
+        for i in range(len(self.clumpSizeSorted)): # Sorts countries by size
             largestScore = self.clumpSizeSorted[i][1]
             largestIndex = i
 
@@ -192,17 +192,17 @@ class AnalysedImage:
                 index +=1
         self.image_output.show()
 
-    def showIndex(self, indexedList): # Returns a list of all indexs of the given group
+    def showIndex(self, indexedList): # Returns a list of all indexs of the given country
         self.listIndexes = []
         for i in indexedList:
             self.listIndexes.append(i[0])
         return self.listIndexes
 
-    #Using Binary search to find target group
+    #Using Binary search to find target country
     def findIndex(self, indexedList,sortedIndexedList, target):
         findMax = len(indexedList)-1
         findMin = 0
-        while findMax >= findMin: # First find the clump of correct index
+        while findMax >= findMin: # First find the country of correct index
             middle = int((findMax+findMin)/2)
             if indexedList[middle][0] == target:
                 target = indexedList[middle][1]
@@ -213,11 +213,10 @@ class AnalysedImage:
                 findMax = middle-1
         findMax = len(sortedIndexedList)-1
         findMin = 0
-        while findMax >= findMin: # Then find the location of the group compared to the size of the other groups
+        while findMax >= findMin: # Then find the location of the country compared to the size of the other countries
             middle = int((findMax+findMin)/2)
             if sortedIndexedList[middle][1] == target:
-                print(sortedIndexedList)
-                return f"The group contains {sortedIndexedList[middle][1]} pixels, being the number {middle+1} largest group"
+                return f"The country contains {sortedIndexedList[middle][1]} pixels, being the number {middle+1} largest country"
             elif sortedIndexedList[middle][1] > target:
                 findMin = middle+1
             elif sortedIndexedList[middle][1] < target:
@@ -225,9 +224,9 @@ class AnalysedImage:
         return "Unavailable"
     
     def commandInput(self, command): # ONEIMG commands
-        if command.strip().lower() == "group": # Shows image with a clump highlighted in while with all other clumps blacked out
+        if command.strip().lower() == "country": # Shows image with a country highlighted in while with all other countries blacked out
             index = 0
-            seeGroup = input("Enter Group: ") # Get the clump by input
+            seeGroup = input("Enter country: ") # Get the country by input
             try:
                 if int(seeGroup) in list(self.clumpMatrix.keys()):
                     for x in range(self.width):
@@ -239,29 +238,29 @@ class AnalysedImage:
                             index += 1
                     self.image_output.show()
                 else:
-                    print("Invalid clump index!")
+                    print("Invalid country index!")
             except:
-                print("Invalid clump index!")
-        elif command.strip().lower() == "see": # displays list of clumps in one image from largest to smallest
-            print(f"The avaliable clumps (largest to smallest): {self.showIndex(self.clumpSizeSorted)}")
-        elif command.strip().lower() == "show": # Shows image with all clumps with random different colours
+                print("Invalid country index!")
+        elif command.strip().lower() == "ALLCOUNTRY": # displays list of countries in one image from largest to smallest
+            print(f"The avaliable countries (largest to smallest): {self.showIndex(self.clumpSizeSorted)}")
+        elif command.strip().lower() == "show": # Shows image with all countries with random different colours
             self.showImg()
         elif command.strip().lower() == "showog": # Shows original image
             Image.open(f"./6.7/{image}").show()
-        elif command.strip().lower() == "find": # Use binary search to find rank of a clump
+        elif command.strip().lower() == "find": # Use binary search to find rank of a country
             try:
-                print(self.findIndex(self.indexSortedClumps, self.clumpSizeSorted,int(input("Search for Group: "))))
+                print(self.findIndex(self.indexSortedClumps, self.clumpSizeSorted,int(input("Search for country: "))))
             except:
-                print("Invalid clump index!")
-        elif command.strip().lower() == "top": # Shows top 5 clumps in an image
+                print("Invalid country index!")
+        elif command.strip().lower() == "top": # Shows top 5 countries in an image
             if len(self.clumpSizeSorted) >= 5:
-                print(f"The top 5 clumps are: {self.showIndex(self.clumpSizeSorted)[:5]}")
+                print(f"The top 5 countries are: {self.showIndex(self.clumpSizeSorted)[:5]}")
             else:
-                print(f"The top clumps are: {self.showIndex(self.clumpSizeSorted)}")
+                print(f"The top countries are: {self.showIndex(self.clumpSizeSorted)}")
         else:
             print("Invalid Command!")
     
-    def getClumpSizes(self): # returns all clumps in this image which exist
+    def getClumpSizes(self): # returns all countries in this image which exist
         return self.clumpSizeSorted
     
 # Processes all the images needed
@@ -278,26 +277,27 @@ for i in range(getNumberofIMG()):
 print("\n================================")
 print("The possible commands are:")
 print("ALLIMG: shows list of all images which are being analysed")
-print("LARGE: Shows list of largest clumps in all images")
-print("TOP: Shows a ranked list of largest groups in all the images analysed")
+print("LARGE: Shows list of largest countries in all images")
+print("TOP: Shows a ranked list of largest countries in all the images analysed")
 print("ONEIMG: Shows commands to deal with a single image\n")
 print("Single Image commands:")
-print("GROUP: display a clump")
-print("SEE: returns all groups")
-print("FIND: Find a clump")
-print("SHOW: Shows image with different colours for each clump")
+print("COUNTRY: display a country")
+print("ALLCOUNTRY: returns all countries")
+print("FIND: Find a country")
+print("SHOW: Shows image with different colours for each country")
 print("SHOWOG: Show's original image")
-print("TOP: Shows top 5 largest groups if possible")
+print("TOP: Shows top 5 largest countries if possible")
 print("TOTAL: shows the total amount of each colour")
 print("================================\n")
 
 while True: # Command intake
     command = input("Enter Command: ")
     if command.strip().lower() == "oneimg":
+        print(f"List of avaliable images: {list(images.keys())}")
         commandedImage = input("Enter an image to analyse: ")
         images[commandedImage].commandInput(input(f"Enter a command for {commandedImage}: "))
     elif command.strip().lower() == "allimg":
-        print(list(images.keys()))
+        print(f"List of avaliable images: {list(images.keys())}")
     elif command.strip().lower() == "large":
         sortedAllImageList()
     elif command.strip().lower() == "top":
