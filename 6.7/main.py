@@ -278,9 +278,8 @@ for i in range(getNumberofIMG()):
 print("\n================================")
 print("The possible commands are:")
 print("ALLIMG: shows list of all images which are being analysed")
-print("TOP: Shows a ranked list comparing the largest group of all images analysed")
-print("LARGE: Shows a ranked list of largest groups in all the images analysed")
-print("TOPCLUMPS: Shows list of largest clumps in all images")
+print("LARGE: Shows list of largest clumps in all images")
+print("TOP: Shows a ranked list of largest groups in all the images analysed")
 print("ONEIMG: Shows commands to deal with a single image\n")
 print("Single Image commands:")
 print("GROUP: display a clump")
@@ -299,9 +298,9 @@ while True: # Command intake
         images[commandedImage].commandInput(input(f"Enter a command for {commandedImage}: "))
     elif command.strip().lower() == "allimg":
         print(list(images.keys()))
-    elif command.strip().lower() == "top":
-        sortedAllImageList()
     elif command.strip().lower() == "large":
+        sortedAllImageList()
+    elif command.strip().lower() == "top":
         sortedAllGroupImageList()
     else:
         print("Not a valid command!")
