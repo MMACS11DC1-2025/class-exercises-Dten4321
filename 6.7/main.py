@@ -242,7 +242,7 @@ class AnalysedImage:
                     print("Invalid country index!")
             except:
                 print("Invalid country index!")
-        elif command.strip().lower() == "ALLCOUNTRY": # displays list of countries in one image from largest to smallest
+        elif command.strip().lower() == "allcountry": # displays list of countries in one image from largest to smallest
             print(f"The avaliable countries (largest to smallest): {self.showIndex(self.clumpSizeSorted)}")
         elif command.strip().lower() == "show": # Shows image with all countries with random different colours
             self.showImg()
@@ -278,9 +278,11 @@ while index < max:
         images[image].scan()
     index += 1
 
-if max > 0:
+# displays all possbible commands
+def helpCommand():
     print("\n================================")
     print("The possible commands are:")
+    print("HELP: Shows all possible commands")
     print("ALLIMG: shows list of all images which are being analysed")
     print("LARGE: Shows list of largest countries in all images")
     print("TOP: Shows a ranked list of largest countries in all the images analysed")
@@ -294,7 +296,9 @@ if max > 0:
     print("TOP: Shows top 5 largest countries if possible")
     print("================================\n")
     
-    while True: # Command intake
+if max > 0:
+    helpCommand()
+    while True: # Takes Commands
         command = input("Enter Command: ")
         if command.strip().lower() == "oneimg":
             print(f"List of avaliable images: {list(images.keys())}")
@@ -309,5 +313,7 @@ if max > 0:
             sortedAllImageList()
         elif command.strip().lower() == "top":
             sortedAllGroupImageList()
+        elif command.strip().lower() == "help":
+            helpCommand()
         else:
             print("Not a valid command!")
