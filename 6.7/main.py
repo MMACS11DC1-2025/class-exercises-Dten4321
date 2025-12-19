@@ -14,6 +14,7 @@ def getNumberofIMG():
             numOfIMG = int(input("How many images to analyse?: "))
             validInput = True
         except:
+            print("Not a valid Input!")
             validInput = False
     return numOfIMG
 
@@ -264,43 +265,49 @@ class AnalysedImage:
         return self.clumpSizeSorted
     
 # Processes all the images needed
-for i in range(getNumberofIMG()):
+max = getNumberofIMG()
+print(max)
+index = 0
+while index < max:
     image = input("What is the image to you wish to inspect? ")
-    if not os.path.exists(F"./6.7/{image}"): # checks if image exists in folder
+    if (not os.path.exists(F"./6.7/{image}")) or image == "": # checks if image exists in folder
         print("This image does not exist!")
-        i -=  1
+        index -=  1
     else:
         images[image] = AnalysedImage(image, 130)
         images[image].scan()
+    index += 1
 
-
-print("\n================================")
-print("The possible commands are:")
-print("ALLIMG: shows list of all images which are being analysed")
-print("LARGE: Shows list of largest countries in all images")
-print("TOP: Shows a ranked list of largest countries in all the images analysed")
-print("ONEIMG: Shows commands to deal with a single image\n")
-print("Single Image commands:")
-print("COUNTRY: display a country")
-print("ALLCOUNTRY: returns all countries")
-print("FIND: Find a country")
-print("SHOW: Shows image with different colours for each country")
-print("SHOWOG: Show's original image")
-print("TOP: Shows top 5 largest countries if possible")
-print("TOTAL: shows the total amount of each colour")
-print("================================\n")
-
-while True: # Command intake
-    command = input("Enter Command: ")
-    if command.strip().lower() == "oneimg":
-        print(f"List of avaliable images: {list(images.keys())}")
-        commandedImage = input("Enter an image to analyse: ")
-        images[commandedImage].commandInput(input(f"Enter a command for {commandedImage}: "))
-    elif command.strip().lower() == "allimg":
-        print(f"List of avaliable images: {list(images.keys())}")
-    elif command.strip().lower() == "large":
-        sortedAllImageList()
-    elif command.strip().lower() == "top":
-        sortedAllGroupImageList()
-    else:
-        print("Not a valid command!")
+if max > 0:
+    print("\n================================")
+    print("The possible commands are:")
+    print("ALLIMG: shows list of all images which are being analysed")
+    print("LARGE: Shows list of largest countries in all images")
+    print("TOP: Shows a ranked list of largest countries in all the images analysed")
+    print("ONEIMG: Shows commands to deal with a single image\n")
+    print("Single Image commands:")
+    print("COUNTRY: display a country")
+    print("ALLCOUNTRY: returns all countries")
+    print("FIND: Find a country")
+    print("SHOW: Shows image with different colours for each country")
+    print("SHOWOG: Show's original image")
+    print("TOP: Shows top 5 largest countries if possible")
+    print("================================\n")
+    
+    while True: # Command intake
+        command = input("Enter Command: ")
+        if command.strip().lower() == "oneimg":
+            print(f"List of avaliable images: {list(images.keys())}")
+            commandedImage = input("Enter an image to analyse: ")
+            try:
+                images[commandedImage].commandInput(input(f"Enter a command for {commandedImage}: "))
+            except:
+                print("Not a valid Image!")
+        elif command.strip().lower() == "allimg":
+            print(f"List of avaliable images: {list(images.keys())}")
+        elif command.strip().lower() == "large":
+            sortedAllImageList()
+        elif command.strip().lower() == "top":
+            sortedAllGroupImageList()
+        else:
+            print("Not a valid command!")

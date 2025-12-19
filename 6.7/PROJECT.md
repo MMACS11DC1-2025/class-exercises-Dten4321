@@ -23,7 +23,7 @@ Using the new skills in units 5 and 6, you will implement a computer vision algo
 - [x] Write a function, is_target_feature, that accepts pixel data (e.g. colour channels as RGB tuple inputs) and returns a specific, useful output (e.g., returns True if the pixel matches your custom feature definition else False, or a weight) (10 pts)
 #### Task 2: Pixel Iteration and List Building
 - [x] Use nested loops to iterate over all pixels **in a set of at least 10 images** and calculate your "Feature Density Score" for each image (10 pts)
-- [ ] Append the filename and score to a master list, demonstrating list manipulation and the use of the append() method (5 pts)
+- [x] Append the filename and score to a master list, demonstrating list manipulation and the use of the append() method (5 pts)
 #### Task 3: Code Profiling
 - [x] Measure the precise time taken for the program to complete the pixel processing loops using the time module (3 pts)
 - [x] Output this time in a human-readable report, using string formatting to ensure the output displays accurately to three decimal places (2 pts)
@@ -36,9 +36,9 @@ Using the new skills in units 5 and 6, you will implement a computer vision algo
 - [x] Implement the Binary Search algorithm function yourself to search the sorted list for a specific target score (10 pts)
 
 ### Process
-- [ ] Algorithm design in English: outline the logic using English comments (pseudocode) before each major Python code block (3 pts)
-- [ ] Code clarity: use descriptive variable names unless they are standard loop indices (e.g. x, y) (2 pts)
-- [ ] Use of functions: structure the program using functions to organize it and reduce code duplication (2 pts)
+- [x] Algorithm design in English: outline the logic using English comments (pseudocode) before each major Python code block (3 pts)
+- [x] Code clarity: use descriptive variable names unless they are standard loop indices (e.g. x, y) (2 pts)
+- [x] Use of functions: structure the program using functions to organize it and reduce code duplication (2 pts)
 - [ ] Testing and robustness: include a section in your README describing testing done to ensure each of the tasks works as intended (1 pt)
 - [ ] Performance analysis: include a section in your README describing your code profiling: give an example of the report and discuss what parts of the program take the longest
 - [ ] Challenges faced: include a section in your README describing at least one challenge faced and how you overcame it (2 pts)

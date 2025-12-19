@@ -4,6 +4,7 @@
 **Mapp** analyses the sizes of contigouous "countries" of colour (henceforth referred to as "countries") in the provided images. Using commands, the user can then gather data of the countries using commands.
 
 # Usage
+First the user will enter the amount of images they wish to analyse. After, they must enter images which must be located in the same folder as the program and the file extension must be in the entered name.
 
 # Commands
 **Commands** are what the user types in the *Enter Command:* field. Commands are used to obtain the data which is collected by the program. There are two types of **Commands**, **Global Commands** which are commands used to anaylse countries from all images and compare them, and **Single Image Commands** which only analyse countries within one image.
@@ -24,7 +25,43 @@ To access Single Image Commands, the user must enter the ONEIMG command and then
 Displays the a blacked out image with only the selected country coloured white.
 ### ALLCOUNTRY
 Returns list of all avaliable countries.
+### FIND
+Returns the size of the country and rank of it compared to other countries in the same image.
+### SHOW
+Displays an image of all countries in random colours, mainly used for debugging.
+### SHOWOG
+Displays the original image.
+### TOP
+Returns the top 5 largest countries. If there are less, it displays all countries from largest to smallest.
 
 # Test Cases
+## Input: 
+```
+dnfjksdl
+```
+### Output:
+```
+Not a valid Input!
+```
+
+## Input: 
+```
+3
+EastAsiaHanDynasty.png
+ww1.png
+randomMap.png
+tOP
+```
+### Output:
+```
+Number 1 largest country is country 398 from randomMap.png with 238912 pixels
+Number 2 largest country is country 284 from randomMap.png with 210206 pixels
+Number 3 largest country is country 399 from randomMap.png with 177353 pixels
+Number 4 largest country is country 0 from EastAsiaHanDynasty.png with 93380 pixels
+Number 5 largest country is country 2 from randomMap.png with 77457 pixels
+```
 
 # Development
+Compared to **Taiga**, **Mapp**'s development was much more slow, with a gradual implementation of processes, some not even expected from the start. The first big issue encountered during the development of **Mapp** was the issue of redundant countries. This would occur as The countries wouldn't know that other countries that touched it with the same colour should be consolidated into one larger country.This was particularly prominant in ledges facing right, which would cause this stripe like effect. To solve this issue, I originally tried to just implement the consolidation code while creating the countries, however, this was very buggy, often not working at all. Even when it did work, it would take nearly half an hour to process one image. Eventually, I made the consolidation process run in a seperate loop, which would make it easier to debug and optimaize. The biggest problem that **Mapp** faced during its development was it's terrible optimization. One of the ways which made it faster was reducing the print statements showing it's progress. I decided to limit it to 1 print every 100000 pixels as it would print around every 5 to 10 percent on a resonably sized image. I also imported all of the pixels of the image into a list, which somewhat increaced the speed, though the effectiveness of this optimization is debatable.
+
+# Real World Use
