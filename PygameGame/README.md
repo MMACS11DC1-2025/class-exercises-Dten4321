@@ -4,6 +4,8 @@
 ## Changelog
 
 ### 01/09/2026
+### V 0.1.0
+- Changed classes to use pygame.sprite Class for easier work (In progress)
 ### V 0.0.5
 - Added Menu
 ### 01/08/2026

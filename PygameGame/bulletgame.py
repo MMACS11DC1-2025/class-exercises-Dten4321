@@ -44,18 +44,20 @@ MUSIC.load('PygameGame/QiTheme.mp3')
 MUSIC.play()
 MUSIC.set_volume(0.5)
 
-
-
-######################################################
-# PLAYER CODE & setup
-######################################################
-playerSprite = jiangSprite
-playerX = 500
-playerY = 500
-playerSpeed = 5
-focusBaguaRotation = 0
-playerBullets = []
-bulletCooldown = 4
+# PLAYER CODE & setup=======================
+class Player(pygame.sprite.Sprite):
+    def __init__(self):
+        self.playerSprite = jiangSprite
+        self.x = 500
+        self.y = 500
+        self.playerSpeed = 5
+        self.focusBaguaRotation = 0
+        self.playerBullets = []
+        self.bulletCooldown = 4
+    
+    def move(self):
+        self.position[0] += self.velocity[0]
+        self.position[1] += self.velocity[1]
 
 # Setup =====================
 enemyBullets = []
@@ -64,7 +66,7 @@ enemyBullets = []
 # GRAPHIC FUNCTIONS IN MAIN GAMEzz
 ######################################################
 def displayIMGPlayer(img):
-    DISPLAYSURF.blit(img, (playerX - img.get_width()/2, playerY - img.get_height()/2))
+    DISPLAYSURF.blit(img, (player.x - img.get_width()/2, player.y - img.get_height()/2))
 
 def updateGraphics():
     #==========================
@@ -86,17 +88,17 @@ def updateGraphics():
     # Player
     #==========================
     #bullets
-    for bullet in playerBullets:
+    for bullet in player.playerBullets:
         bullet.move()
         bullet.render()
         bulletDestroyed = bullet.destroy()
         if bulletDestroyed[0]:
-            for bulletNewID in playerBullets[bulletDestroyed[1]:]:
+            for bulletNewID in player.playerBullets[bulletDestroyed[1]:]:
                 bulletNewID.index = bulletNewID.index-1
     if focus == True:
-        displayIMGPlayer(pygame.transform.rotate(focusBagua, focusBaguaRotation))
-        displayIMGPlayer(pygame.transform.rotate(focusSpear, 0-focusBaguaRotation))
-    displayIMGPlayer(playerSprite)
+        displayIMGPlayer(pygame.transform.rotate(focusBagua, player.focusBaguaRotation))
+        displayIMGPlayer(pygame.transform.rotate(focusSpear, 0-player.focusBaguaRotation))
+    displayIMGPlayer(player.playerSprite)
     if focus == True:
         displayIMGPlayer(playerHitbox)
 
@@ -105,7 +107,8 @@ def updateGraphics():
 ######################################################
 # CLASSES & EXTRA FUNCTIONS
 ######################################################
-class PlayerBullet:
+
+class PlayerBullet(pygame.sprite.Sprite):
     def __init__(self, typeBullet, playerPos, velocity, index):
         self.typeBullet = typeBullet
         self.position = playerPos
@@ -117,21 +120,17 @@ class PlayerBullet:
         self.position[1] += self.velocity[1]
     
     def render(self):
-        if self.typeBullet == "basic":
-            self.selfDraw(basicPlayerBullet)
-        else:
-            self.selfDraw(basicPlayerBullet)
+        self.selfDraw(basicPlayerBullet)
     def selfDraw(self, img):
         DISPLAYSURF.blit(img, (self.position[0] - img.get_width()/2, self.position[1] - img.get_height()/2))
-
     def destroy(self):
-        if self.position[1] < -10:
-            playerBullets.pop(self.index)
+        if self.position[1] > 1010:
+            player.playerBullets.pop(self.index)
             return (True, self.index)
         else:
             return (False, self.index)
 
-class EnemyBullet:
+class EnemyBullet(pygame.sprite.Sprite):
     def __init__(self, typeBullet, startPos, velocity, index):
         self.typeBullet = typeBullet
         self.position = startPos
@@ -169,7 +168,7 @@ class EnemyBullet:
         else:
             return (False, self.index)
     
-class Boss:
+class Boss(pygame.sprite.Sprite):
     def __init__(self, level):
         self.level = level
         self.position = [500, 120]
@@ -261,6 +260,7 @@ class Boss:
 #==========================
 # Setup
 #==========================
+player = Player()
 boss = Boss(2)
 ######################################################
 # EXTRA FUNCTIONS
@@ -322,28 +322,28 @@ while True:
             
             
             if keys[K_LEFT]:
-                    playerX -= playerSpeed
+                    player.x -= playerSpeed
             elif keys[K_RIGHT]:   
-                    playerX += playerSpeed
+                    player.x += playerSpeed
             if keys[K_UP]:
-                    playerY -= playerSpeed
+                    player.y -= playerSpeed
             elif keys[K_DOWN]:    
-                    playerY += playerSpeed
+                    player.y += playerSpeed
             if keys[K_LSHIFT] or keys[K_LCTRL]:
                 focus = True
                 playerSpeed = 3
-                if focusBaguaRotation <= 360:
-                    focusBaguaRotation += 1
+                if player.focusBaguaRotation <= 360:
+                    player.focusBaguaRotation += 1
                 else: 
-                    focusBaguaRotation = 0
+                    player.focusBaguaRotation = 0
             else:
                 focus = False
                 playerSpeed = 6
 
             if keys[K_z]:
-                if bulletCooldownTimer >= bulletCooldown:
-                    playerBullets.append(PlayerBullet("basic", [playerX+15, playerY], [0, -25], len(playerBullets)))
-                    playerBullets.append(PlayerBullet("basic", [playerX-15, playerY], [0, -25], len(playerBullets)))
+                if bulletCooldownTimer >= player.bulletCooldown:
+                    player.playerBullets.append(PlayerBullet("basic", [player.x+15, player.y], [0, -25], len(player.playerBullets)))
+                    player.playerBullets.append(PlayerBullet("basic", [player.x-15, player.y], [0, -25], len(player.playerBullets)))
                     bulletCooldownTimer = 0
 
 
