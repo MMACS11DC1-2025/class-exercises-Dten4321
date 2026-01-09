@@ -3,8 +3,10 @@
 
 ## Changelog
 
-
-### 01/07/2026
+### 01/09/2026
+### V 0.0.5
+- Added Menu
+### 01/08/2026
 ### V 0.0.4
 - Added Boss Movements and another attack type
 ### 01/07/2026
