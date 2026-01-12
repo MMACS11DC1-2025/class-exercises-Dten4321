@@ -1,4 +1,4 @@
-import pygame, sys, time, random
+import pygame, sys, time, random, math
 from pygame.locals import *
 
 pygame.init()
@@ -14,7 +14,7 @@ pygame.display.set_caption('Mizhou Episode 0.5')
 gameState = 0
 
 ######################################################
-# SPRITES AND GAME ASSETS
+# IMAGES AND GAME ASSETS
 ######################################################
 def ezload(img):
     return pygame.image.load(f'PygameGame/{img}')
@@ -40,24 +40,24 @@ qiSprite = ezload('qiBoss.png')
 
 #===========MUSIC============
 MUSIC = pygame.mixer.music
-MUSIC.load('PygameGame/QiTheme.mp3')
+MUSIC.load('PygameGame/LandOfTheLostFog.mp3')
 MUSIC.play()
 MUSIC.set_volume(0.5)
 
 # PLAYER CODE & setup=======================
+
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         self.playerSprite = jiangSprite
         self.x = 500
         self.y = 500
+        self.radius = 5
         self.playerSpeed = 5
         self.focusBaguaRotation = 0
         self.playerBullets = []
         self.bulletCooldown = 4
-    
-    def move(self):
-        self.position[0] += self.velocity[0]
-        self.position[1] += self.velocity[1]
+        self.rect = Rect(self.x, self.y, self.radius,self.radius) #math.sqrt(self.radius/2), math.sqrt(self.radius/2))
+        self.rect.center = [self.x, self.y]
 
 # Setup =====================
 enemyBullets = []
@@ -80,6 +80,7 @@ def updateGraphics():
         if bulletDestroyed[0]:
             for bulletNewID in enemyBullets[bulletDestroyed[1]:]:
                 bulletNewID.index = bulletNewID.index-1
+        #pygame.draw.rect(DISPLAYSURF, (255,255,255) , bullet.rect)
 
     # Boss ==========================
     boss.render()
@@ -103,7 +104,6 @@ def updateGraphics():
         displayIMGPlayer(playerHitbox)
 
 
-
 ######################################################
 # CLASSES & EXTRA FUNCTIONS
 ######################################################
@@ -114,6 +114,7 @@ class PlayerBullet(pygame.sprite.Sprite):
         self.position = playerPos
         self.velocity = velocity
         self.index = index
+        self.radius = 12
     
     def move(self):
         self.position[0] += self.velocity[0]
@@ -136,10 +137,18 @@ class EnemyBullet(pygame.sprite.Sprite):
         self.position = startPos
         self.velocity = velocity
         self.index = index
+        if self.typeBullet in ["basic","yellowbasic","yellowAccelerate"]:
+            self.radius = 30
+            self.radiusRect = self.radius#math.sqrt(self.radius/2)
+            self.rect = Rect(self.position[0], self.position[1], self.radiusRect, self.radiusRect)
+
     
     def move(self):
         self.position[0] += self.velocity[0]
         self.position[1] += self.velocity[1]
+        if self.typeBullet in ["basic","yellowbasic","yellowAccelerate"]:
+            self.rect.update(self.position, [self.radiusRect,self.radiusRect])
+        
         
         if self.position[1] < 100 and self.typeBullet == "yellowAccelerate":
             self.velocity[1] += 0.1
@@ -175,6 +184,7 @@ class Boss(pygame.sprite.Sprite):
         self.velocity = [0,0]
         self.health = 999
         self.maxV = [10,10]
+        self.rect = Rect(self.position[0],self.position[1], 70, 70)
         if self.level == 2:
             self.health = 200
                 
@@ -302,24 +312,19 @@ while True:
                 if keys[K_z]:
                     if menuSelect == 0:
                         gameState = 1
+                    if menuSelect == 3:
+                        pygame.event.post(pygame.event.Event(pygame.QUIT))
             
             menutext = ["Story", "Options", "Music Room", "Exit"]
             for textNum in range(len(menutext)):
                 textDisplay = text.render(menutext[textNum], False, menuGetColour(textNum))
                 DISPLAYSURF.blit(textDisplay, (700,300+textNum*100))
-                
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    pygame.quit()
-                    sys.exit()
             
             if inputCooldown < 10:
                 inputCooldown += 1
             
         case 1: #main gameply
             DISPLAYSURF.fill((0,0,0))
-
-            
             
             if keys[K_LEFT]:
                     player.x -= playerSpeed
@@ -339,22 +344,13 @@ while True:
             else:
                 focus = False
                 playerSpeed = 6
+            player.rect.update(player.x,player.y,7,7)
 
             if keys[K_z]:
                 if bulletCooldownTimer >= player.bulletCooldown:
                     player.playerBullets.append(PlayerBullet("basic", [player.x+15, player.y], [0, -25], len(player.playerBullets)))
                     player.playerBullets.append(PlayerBullet("basic", [player.x-15, player.y], [0, -25], len(player.playerBullets)))
                     bulletCooldownTimer = 0
-
-
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    pygame.quit()
-                    sys.exit()
-
-
-
-
 
             #==========================
             # Boss Loop
@@ -408,10 +404,19 @@ while True:
             #==========================
             # Per Loop Updates
             #==========================
+            if pygame.sprite.spritecollide(player,enemyBullets,False,pygame.sprite.collide_rect_ratio(1.4)):
+                gameState = 0
+
+            if pygame.sprite.collide_rect(player, boss):
+                gameState = 0
             if bulletCooldownTimer < 10:
                 bulletCooldownTimer += 1
             if bossbulletCooldownTimer < bosscdthreshold:
                 bossbulletCooldownTimer += 1
             updateGraphics()
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            pygame.quit()
+            sys.exit()
     pygame.display.update()
     fpsClock.tick(FPS)

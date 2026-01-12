@@ -3,6 +3,8 @@
 
 ## Changelog
 
+### 01/11/2026
+- Added Collision when touching boss or enemy
 ### 01/09/2026
 ### V 0.1.0
 - Changed classes to use pygame.sprite Class for easier work (In progress)
