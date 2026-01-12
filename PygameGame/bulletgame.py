@@ -56,8 +56,7 @@ class Player(pygame.sprite.Sprite):
         self.focusBaguaRotation = 0
         self.playerBullets = []
         self.bulletCooldown = 4
-        self.rect = Rect(self.x, self.y, self.radius,self.radius) #math.sqrt(self.radius/2), math.sqrt(self.radius/2))
-        self.rect.center = [self.x, self.y]
+        self.rect = Rect(self.x-self.radius/2, self.y-self.radius/2, self.radius,self.radius) #math.sqrt(self.radius/2), math.sqrt(self.radius/2))
 
 # Setup =====================
 enemyBullets = []
@@ -69,18 +68,7 @@ def displayIMGPlayer(img):
     DISPLAYSURF.blit(img, (player.x - img.get_width()/2, player.y - img.get_height()/2))
 
 def updateGraphics():
-    #==========================
-    # Enemies
-    #==========================
-    #bullets
-    for bullet in enemyBullets:
-        bullet.move()
-        bullet.render()
-        bulletDestroyed = bullet.destroy()
-        if bulletDestroyed[0]:
-            for bulletNewID in enemyBullets[bulletDestroyed[1]:]:
-                bulletNewID.index = bulletNewID.index-1
-        #pygame.draw.rect(DISPLAYSURF, (255,255,255) , bullet.rect)
+    
 
     # Boss ==========================
     boss.render()
@@ -100,6 +88,19 @@ def updateGraphics():
         displayIMGPlayer(pygame.transform.rotate(focusBagua, player.focusBaguaRotation))
         displayIMGPlayer(pygame.transform.rotate(focusSpear, 0-player.focusBaguaRotation))
     displayIMGPlayer(player.playerSprite)
+    #pygame.draw.rect(DISPLAYSURF, (255,0,255) , player.rect)
+    #==========================
+    # Enemies
+    #==========================
+    #bullets
+    for bullet in enemyBullets:
+        bullet.move()
+        bullet.render()
+        bulletDestroyed = bullet.destroy()
+        if bulletDestroyed[0]:
+            for bulletNewID in enemyBullets[bulletDestroyed[1]:]:
+                bulletNewID.index = bulletNewID.index-1
+        #pygame.draw.rect(DISPLAYSURF, (255,255,0) , bullet.rect)
     if focus == True:
         displayIMGPlayer(playerHitbox)
 
@@ -132,31 +133,25 @@ class PlayerBullet(pygame.sprite.Sprite):
             return (False, self.index)
 
 class EnemyBullet(pygame.sprite.Sprite):
-    def __init__(self, typeBullet, startPos, velocity, index):
+    def __init__(self, typeBullet, startPos, velocity, angle,index):
         self.typeBullet = typeBullet
         self.position = startPos
         self.velocity = velocity
         self.index = index
+        self.angle = angle
         if self.typeBullet in ["basic","yellowbasic","yellowAccelerate"]:
-            self.radius = 30
-            self.radiusRect = self.radius#math.sqrt(self.radius/2)
-            self.rect = Rect(self.position[0], self.position[1], self.radiusRect, self.radiusRect)
+            self.radius = 20
+            self.radiusRect = self.radius
+            self.rect = Rect(self.position[0]-self.radius/2, self.position[1]-self.radius/2, self.radiusRect, self.radiusRect)
 
     
     def move(self):
-        self.position[0] += self.velocity[0]
-        self.position[1] += self.velocity[1]
+        self.position[0] += math.cos(math.radians(self.angle))*self.velocity
+        self.position[1] += math.sin(math.radians(self.angle))*self.velocity
         if self.typeBullet in ["basic","yellowbasic","yellowAccelerate"]:
-            self.rect.update(self.position, [self.radiusRect,self.radiusRect])
-        
-        
-        if self.position[1] < 100 and self.typeBullet == "yellowAccelerate":
-            self.velocity[1] += 0.1
-        elif 140 <= self.position[1] < 150 and self.typeBullet == "yellowAccelerate" and self.velocity[0] == 0:
-            self.velocity[0] = random.randint(-4, 4)
-            self.velocity[1] -= random.randrange(4, 6)
-        elif self.position[1] < 200 and self.typeBullet == "yellowAccelerate":
-            self.velocity[1] += 0.1
+            self.rect.update([self.position[0]-self.radius/2, self.position[1]-self.radius/2], [self.radiusRect,self.radiusRect])
+        if self.typeBullet == "yellowAccelerate":
+            self.velocity += 0.02
     
     def render(self):
         if self.typeBullet == "basic":
@@ -252,20 +247,22 @@ class Boss(pygame.sprite.Sprite):
     def bossAttack(self, boss, special):
         if boss == 2:
             if special == 0:
-                self.addBullet("yellowbasic", self.position[:], [0,5])
-                self.addBullet("yellowbasic", self.position[:], [1.5,4.5])
-                self.addBullet("yellowbasic", self.position[:], [2.5,4])
-                self.addBullet("yellowbasic", self.position[:], [-2.5,4])
-                self.addBullet("yellowbasic", self.position[:], [-1.5,4.5])
-                self.addBullet("yellowbasic", self.position[:], [3,3])
-                self.addBullet("yellowbasic", self.position[:], [-3,3])
+                self.addBullet("yellowbasic", self.position[:], 8, 45)
+                self.addBullet("yellowbasic", self.position[:], 8, 60)
+                self.addBullet("yellowbasic", self.position[:], 8, 75)
+                self.addBullet("yellowbasic", self.position[:], 8, 90)
+                self.addBullet("yellowbasic", self.position[:], 8, 105)
+                self.addBullet("yellowbasic", self.position[:], 8, 120)
+                self.addBullet("yellowbasic", self.position[:], 8, 135)
             if special == 1:
-                for i in range(2):
-                    self.addBullet("yellowAccelerate", [700, -40], [0,0])
-                    self.addBullet("yellowAccelerate", [300, -40], [0,0])
+                self.addBullet("yellowAccelerate", [700, -40], 0, 60)
+                self.addBullet("yellowAccelerate", [300, -40], 0, 120)
+                self.addBullet("yellowbasic", [500, 200], 10, math.atan2(200-player.y,500-player.x)+90)
+                #self.addBullet("yellowAccelerate", [700, -40], 0, random.randint(60,120))
+                #self.addBullet("yellowAccelerate", [300, -40], 0, random.randint(60,120))
     
-    def addBullet(self, btype,pos,vel):
-        enemyBullets.append(EnemyBullet(btype, pos, vel, len(enemyBullets)))
+    def addBullet(self, btype,pos,vel,angle):
+        enemyBullets.append(EnemyBullet(btype, pos, vel, angle,len(enemyBullets)))
 
 #==========================
 # Setup
@@ -285,7 +282,7 @@ def menuGetColour(id):
 ######################################################
 # MAIN GAME LOOP
 ######################################################
-bulletCooldownTimer = 10
+bulletCooldownTimer = 12
 bossbulletCooldownTimer = 0
 bosscdthreshold = 10
 numBossattacks = 0
@@ -344,7 +341,7 @@ while True:
             else:
                 focus = False
                 playerSpeed = 6
-            player.rect.update(player.x,player.y,7,7)
+            player.rect.update(player.x-player.radius/2, player.y-player.radius/2,7,7)
 
             if keys[K_z]:
                 if bulletCooldownTimer >= player.bulletCooldown:
@@ -391,7 +388,7 @@ while True:
 
                 #Shooting===============
                 if numBossattacks % 40 < 5 and numBossattacks < 447:
-                    boss.bossAttack(2,0)
+                    boss.bossAttack(2,1)
                     bossbulletCooldownTimer = 0
 
                 elif numBossattacks and 447 < numBossattacks < 999:
@@ -404,7 +401,7 @@ while True:
             #==========================
             # Per Loop Updates
             #==========================
-            if pygame.sprite.spritecollide(player,enemyBullets,False,pygame.sprite.collide_rect_ratio(1.4)):
+            if pygame.sprite.spritecollide(player,enemyBullets,False,pygame.sprite.collide_rect_ratio(1)):
                 gameState = 0
 
             if pygame.sprite.collide_rect(player, boss):
