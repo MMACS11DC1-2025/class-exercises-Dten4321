@@ -176,63 +176,38 @@ class Boss(pygame.sprite.Sprite):
     def __init__(self, level):
         self.level = level
         self.position = [500, 120]
-        self.velocity = [0,0]
+        self.velocity = 0
         self.health = 999
         self.maxV = [10,10]
         self.rect = Rect(self.position[0],self.position[1], 70, 70)
         if self.level == 2:
             self.health = 200
-                
-    def move(self):
-        if self.velocity[0] > self.maxV[0]:
-            self.velocity[0] = self.maxV[0]
-        elif self.velocity[0] < -(self.maxV[0]):
-            self.velocity[0] = self.maxV[0]
-            
-        if self.velocity[1] > self.maxV[1]:
-            self.velocity[1] = self.maxV[1]
-        elif self.velocity[1] < -(self.maxV[1]):
-            self.velocity[1] = self.maxV[1]
-            
-        self.position[0] += self.velocity[0]
-        self.position[1] += self.velocity[1]
     
-    def gotoPos(self, target, pos, vel, ogPos, steps):
-        distanceX = target - ogPos
-        currentDistX = target - pos
-        if pos[0] < target[0]: 
-            if  target[0] - pos[0] <  (target[0] - ogPos[0])/2:
-                vel[0] += 1
-            else:
-                vel[0] -= 2
-        elif pos[0] > target[0]: 
-            vel[0] -= 1
-            if target[0] - pos[0] < (target[0] - ogPos[0])/2:
-                vel[0] -= 1
-            else:
-                vel[0] += 2
+    def gotoPos(self, target, pos, ogPos):
+        angleTowards = math.degrees(math.atan2(ogPos[1]-target[1],ogPos[0]-target[0]))
+        ogDist = (ogPos[0] - target[0], ogPos[1] - target[1]) #pythagoras to find hypotenuse
+        currDist = (pos[0] - target[0], pos[1] - target[1]) #pythagoras to find hypotenuse
+        if ogDist > 90:
+            if self.velocity < 10 and currDist > 45:
+                self.velocity+=1
+            elif currDist < 45:
+                self.velocity-=1
+        elif ogDist == 90:
+            if currDist > 45:
+                self.velocity+=1
+            elif currDist < 45:
+                self.velocity-=1
+        elif ogDist < 90:
+            if currDist > ogDist/2:
+                self.velocity+=1
+            elif currDist < ogDist/2:
+                self.velocity-=1
+        if pos[0] > target[0]-10 and pos[0] < target[0]+10 and pos[1] > target[1]-10 and pos[1] < target[1]+10:
+            return False
         else:
-            vel[0] = 0
-            
-        if pos[1] < target[1]:
-            if target[1] - pos[1] < (target[1] - ogPos[1])/2:
-                vel[1] += 1
-            else:
-                vel[1] -= 1
-        elif pos[1] > target[1]: 
-            if target[1] - pos[1] < (target[1] - ogPos[1])/2:
-                vel[1] -= 1
-            else:
-                vel[1] += 1
-        else:
-            vel[1] = 0      
-        print(f"{vel[0]=};{pos[0]=};{target[0]=};{ogPos[0]=}")
-        if vel[0] > 10:
-            vel[0] = 10
-        elif vel[0] < -10:
-            vel[0] = -10
-        
-        return vel
+            self.position[0] += math.cos(math.radians(angleTowards))*self.velocity
+            self.position[1] += math.sin(math.radians(angleTowards))*self.velocity
+            return True
         
     def render(self):
         if self.level == 2:
@@ -247,19 +222,15 @@ class Boss(pygame.sprite.Sprite):
     def bossAttack(self, boss, special):
         if boss == 2:
             if special == 0:
-                self.addBullet("yellowbasic", self.position[:], 8, 45)
-                self.addBullet("yellowbasic", self.position[:], 8, 60)
-                self.addBullet("yellowbasic", self.position[:], 8, 75)
-                self.addBullet("yellowbasic", self.position[:], 8, 90)
-                self.addBullet("yellowbasic", self.position[:], 8, 105)
-                self.addBullet("yellowbasic", self.position[:], 8, 120)
-                self.addBullet("yellowbasic", self.position[:], 8, 135)
+                for i in range(7):
+                    self.addBullet("yellowbasic", self.position[:], 8, math.degrees(math.atan2(player.y-200,player.x-500))-45+i*15)
+                
             if special == 1:
                 self.addBullet("yellowAccelerate", [700, -40], 0, 60)
                 self.addBullet("yellowAccelerate", [300, -40], 0, 120)
-                self.addBullet("yellowbasic", [500, 200], 10, math.atan2(200-player.y,500-player.x)+90)
-                #self.addBullet("yellowAccelerate", [700, -40], 0, random.randint(60,120))
-                #self.addBullet("yellowAccelerate", [300, -40], 0, random.randint(60,120))
+                self.addBullet("yellowAccelerate", [700, -15], 0, random.randint(60,120))
+                self.addBullet("yellowAccelerate", [300, -15], 0, random.randint(60,120))
+
     
     def addBullet(self, btype,pos,vel,angle):
         enemyBullets.append(EnemyBullet(btype, pos, vel, angle,len(enemyBullets)))
@@ -354,8 +325,10 @@ while True:
             #==========================
             if bossbulletCooldownTimer == bosscdthreshold:
                 #Moving=================
-                if 120 < numBossattacks < 130:
-                    boss.velocity[0] -= 1
+                if numBossattacks == 120:
+                    ogPos = boss.position[:]
+                elif 120 < numBossattacks < 130:
+                    boss.gotoPos([boss.position[0], 200], boss.position, ogPos)
                 elif 140 < numBossattacks < 150:
                     boss.velocity[0] += 1 
 
@@ -391,13 +364,15 @@ while True:
                     boss.bossAttack(2,0)
                     bossbulletCooldownTimer = 0
 
-                elif numBossattacks and 447 < numBossattacks < 999:
+                elif numBossattacks and 447 < numBossattacks < 800:
                     boss.bossAttack(2,1)
+                    bossbulletCooldownTimer = 0 
+                elif numBossattacks and 800 < numBossattacks < 1200:
+                    boss.bossAttack(2,0)
                     bossbulletCooldownTimer = 0 
 
 
                 numBossattacks +=1
-            boss.move()
             #==========================
             # Per Loop Updates
             #==========================
