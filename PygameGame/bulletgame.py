@@ -388,7 +388,7 @@ while True:
 
                 #Shooting===============
                 if numBossattacks % 40 < 5 and numBossattacks < 447:
-                    boss.bossAttack(2,1)
+                    boss.bossAttack(2,0)
                     bossbulletCooldownTimer = 0
 
                 elif numBossattacks and 447 < numBossattacks < 999:
