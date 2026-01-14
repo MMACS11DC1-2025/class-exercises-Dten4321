@@ -2,8 +2,11 @@
 
 
 ## Changelog
-
+### 01/14/2026
+### V 0.2.0
+- Implemented Boss movement
 ### 01/11/2026
+### V 0.1.1
 - Added Collision when touching boss or enemy and menu music
 ### 01/09/2026
 ### V 0.1.0

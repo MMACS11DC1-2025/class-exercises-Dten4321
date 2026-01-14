@@ -51,12 +51,12 @@ class Player(pygame.sprite.Sprite):
         self.playerSprite = jiangSprite
         self.x = 500
         self.y = 500
-        self.radius = 5
+        self.diameter = 5
         self.playerSpeed = 5
         self.focusBaguaRotation = 0
         self.playerBullets = []
         self.bulletCooldown = 4
-        self.rect = Rect(self.x-self.radius/2, self.y-self.radius/2, self.radius,self.radius) #math.sqrt(self.radius/2), math.sqrt(self.radius/2))
+        self.rect = Rect(self.x-self.diameter/2, self.y-self.diameter/2, self.diameter,self.diameter) #math.sqrt(self.diameter/2), math.sqrt(self.diameter/2))
 
 # Setup =====================
 enemyBullets = []
@@ -72,6 +72,7 @@ def updateGraphics():
 
     # Boss ==========================
     boss.render()
+    #pygame.draw.rect(DISPLAYSURF, (0,255,0) , boss.rect)
     
     #==========================
     # Player
@@ -115,7 +116,7 @@ class PlayerBullet(pygame.sprite.Sprite):
         self.position = playerPos
         self.velocity = velocity
         self.index = index
-        self.radius = 12
+        self.diameter = 12
     
     def move(self):
         self.position[0] += self.velocity[0]
@@ -140,16 +141,16 @@ class EnemyBullet(pygame.sprite.Sprite):
         self.index = index
         self.angle = angle
         if self.typeBullet in ["basic","yellowbasic","yellowAccelerate"]:
-            self.radius = 20
-            self.radiusRect = self.radius
-            self.rect = Rect(self.position[0]-self.radius/2, self.position[1]-self.radius/2, self.radiusRect, self.radiusRect)
+            self.diameter = 20
+            self.radiusRect = self.diameter
+            self.rect = Rect(self.position[0]-self.diameter/2, self.position[1]-self.diameter/2, self.radiusRect, self.radiusRect)
 
     
     def move(self):
         self.position[0] += math.cos(math.radians(self.angle))*self.velocity
         self.position[1] += math.sin(math.radians(self.angle))*self.velocity
-        if self.typeBullet in ["basic","yellowbasic","yellowAccelerate"]:
-            self.rect.update([self.position[0]-self.radius/2, self.position[1]-self.radius/2], [self.radiusRect,self.radiusRect])
+        if self.typeBullet in ["basic","yellowbasic","yellowAccelerate", "yellowturn"]:
+            self.rect.update([self.position[0]-self.diameter/2, self.position[1]-self.diameter/2], [self.radiusRect,self.radiusRect])
         if self.typeBullet == "yellowAccelerate":
             self.velocity += 0.02
     
@@ -179,35 +180,65 @@ class Boss(pygame.sprite.Sprite):
         self.velocity = 0
         self.health = 999
         self.maxV = [10,10]
+        self.diameter = 70
+        self.maxSpeed = 5
         self.rect = Rect(self.position[0],self.position[1], 70, 70)
+        self.rect.update([self.position[0]-self.diameter/2, self.position[1]-self.diameter/2], [self.diameter,self.diameter])
         if self.level == 2:
             self.health = 200
     
     def gotoPos(self, target, pos, ogPos):
-        angleTowards = math.degrees(math.atan2(ogPos[1]-target[1],ogPos[0]-target[0]))
-        ogDist = (ogPos[0] - target[0], ogPos[1] - target[1]) #pythagoras to find hypotenuse
-        currDist = (pos[0] - target[0], pos[1] - target[1]) #pythagoras to find hypotenuse
-        if ogDist > 90:
-            if self.velocity < 10 and currDist > 45:
-                self.velocity+=1
-            elif currDist < 45:
-                self.velocity-=1
-        elif ogDist == 90:
-            if currDist > 45:
-                self.velocity+=1
-            elif currDist < 45:
-                self.velocity-=1
-        elif ogDist < 90:
-            if currDist > ogDist/2:
-                self.velocity+=1
-            elif currDist < ogDist/2:
-                self.velocity-=1
-        if pos[0] > target[0]-10 and pos[0] < target[0]+10 and pos[1] > target[1]-10 and pos[1] < target[1]+10:
-            return False
-        else:
-            self.position[0] += math.cos(math.radians(angleTowards))*self.velocity
-            self.position[1] += math.sin(math.radians(angleTowards))*self.velocity
+        angleTowards = math.atan2(ogPos[1]-target[1],ogPos[0]-target[0])
+        ogDist = math.sqrt((ogPos[0] - target[0])**2 + (ogPos[1] - target[1])**2) #pythagoras to find hypotenuse
+        currDist = math.sqrt((pos[0] - target[0])**2 + (pos[1] - target[1])**2) #pythagoras to find hypotenuse
+        #print(f"ogdist = {ogDist}, currdist = {currDist}, vel = {self.velocity}")
+        if currDist >= 10:
+            self.velocity = 10
+            self.position[0] -= math.cos(angleTowards)*self.velocity
+            self.position[1] -= math.sin(angleTowards)*self.velocity
             return True
+        return False
+    
+    def makeogPos(self, NumBssAtks, currNumBssAtk, currOgPos):
+        if currNumBssAtk == NumBssAtks:
+            return boss.position
+        return currOgPos
+    
+    def fancyGotoPos(self, target, ogPos, NumBssAtks, startEndTime): 
+        angleTowards = math.atan2(ogPos[1]-target[1],ogPos[0]-target[0])
+        ogDist = math.sqrt((ogPos[0] - target[0])**2 + (ogPos[1] - target[1])**2) #pythagoras to find hypotenuse
+        currDist = math.sqrt((boss.position[0] - target[0])**2 + (boss.position[1] - target[1])**2) #pythagoras to find hypotenuse
+        speedChangetime = ((self.maxSpeed+1)*self.maxSpeed)/2
+        print(f"ogdist = {ogDist}, currdist = {currDist}, vel = {self.velocity}")
+        if NumBssAtks > startEndTime[0] and NumBssAtks < startEndTime[1]:
+            if currDist > 0:
+                if ogDist > speedChangetime:
+                    if abs(self.velocity) < self.maxSpeed and currDist > speedChangetime:
+                        self.velocity-=1
+                        print("going!")
+                    elif currDist < speedChangetime:
+                        self.velocity+=1
+                        print("decelerating!")
+                elif ogDist == speedChangetime:
+                    if currDist > speedChangetime:
+                        self.velocity-=1
+                    elif currDist < speedChangetime:
+                        self.velocity+=1
+                elif ogDist < speedChangetime*2:
+                    if currDist > ogDist/2:
+                        self.velocity-=1
+                    elif currDist < ogDist/2:
+                        self.velocity1+=1
+                self.position[0] += math.cos(angleTowards)*self.velocity
+                self.position[1] += math.sin(angleTowards)*self.velocity
+                self.rect.update([self.position[0]-self.diameter/2, self.position[1]-self.diameter/2], [self.diameter,self.diameter])
+                return ogPos
+            else:
+                self.velocity = 0
+        if NumBssAtks == startEndTime[0]:
+            return boss.position[:]
+        else:
+            return ogPos
         
     def render(self):
         if self.level == 2:
@@ -226,10 +257,9 @@ class Boss(pygame.sprite.Sprite):
                     self.addBullet("yellowbasic", self.position[:], 8, math.degrees(math.atan2(player.y-200,player.x-500))-45+i*15)
                 
             if special == 1:
-                self.addBullet("yellowAccelerate", [700, -40], 0, 60)
-                self.addBullet("yellowAccelerate", [300, -40], 0, 120)
-                self.addBullet("yellowAccelerate", [700, -15], 0, random.randint(60,120))
-                self.addBullet("yellowAccelerate", [300, -15], 0, random.randint(60,120))
+                self.addBullet("yellowAccelerate", [700, -15], 1, random.randint(60,120))
+                self.addBullet("yellowAccelerate", [500, -15], 1, random.randint(60,120))
+                self.addBullet("yellowAccelerate", [300, -15], 1, random.randint(60,120))
 
     
     def addBullet(self, btype,pos,vel,angle):
@@ -259,6 +289,7 @@ bosscdthreshold = 10
 numBossattacks = 0
 menuSelect = 0
 inputCooldown = 10
+ogPos = boss.position[:]
 while True:
     keys = pygame.key.get_pressed()
     match gameState:
@@ -312,7 +343,7 @@ while True:
             else:
                 focus = False
                 playerSpeed = 6
-            player.rect.update(player.x-player.radius/2, player.y-player.radius/2,7,7)
+            player.rect.update(player.x-player.diameter/2, player.y-player.diameter/2,7,7)
 
             if keys[K_z]:
                 if bulletCooldownTimer >= player.bulletCooldown:
@@ -324,41 +355,6 @@ while True:
             # Boss Loop
             #==========================
             if bossbulletCooldownTimer == bosscdthreshold:
-                #Moving=================
-                if numBossattacks == 120:
-                    ogPos = boss.position[:]
-                elif 120 < numBossattacks < 130:
-                    boss.gotoPos([boss.position[0], 200], boss.position, ogPos)
-                elif 140 < numBossattacks < 150:
-                    boss.velocity[0] += 1 
-
-                elif 170 < numBossattacks < 180:
-                    boss.velocity[0] += 1
-                elif 200 < numBossattacks < 210:
-                    boss.velocity[0] -= 1 
-
-                #left right left
-                elif 230 < numBossattacks < 240:
-                    boss.velocity[0] -= 1
-                elif 260 < numBossattacks < 270:
-                    boss.velocity[0] += 1 
-
-                elif 290 < numBossattacks < 300:
-                    boss.velocity[0] += 1
-                elif 320 < numBossattacks < 330:
-                    boss.velocity[0] -= 1 
-
-                elif 350 < numBossattacks < 360:
-                    boss.velocity[0] -= 1
-                elif 380 < numBossattacks < 390:
-                    boss.velocity[0] += 1 
-
-                #back to centre
-                elif 410 < numBossattacks < 420:
-                    boss.velocity[0] += 1
-                elif 437 < numBossattacks < 447:
-                    boss.velocity[0] -= 1 
-
                 #Shooting===============
                 if numBossattacks % 40 < 5 and numBossattacks < 447:
                     boss.bossAttack(2,0)
@@ -373,6 +369,11 @@ while True:
 
 
                 numBossattacks +=1
+            #Moving=================
+            ogPos = boss.fancyGotoPos([200, boss.position[1]], ogPos, numBossattacks, [80, 200])
+            ogPos = boss.fancyGotoPos([800, boss.position[1]], ogPos, numBossattacks, [200, 320])
+            ogPos = boss.fancyGotoPos([500, boss.position[1]], ogPos, numBossattacks, [320, 420])
+            #print(ogPos)
             #==========================
             # Per Loop Updates
             #==========================
