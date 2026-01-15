@@ -3,6 +3,8 @@
 
 ## Changelog
 ### 01/14/2026
+### V 0.2.1
+- Implemented Stage
 ### V 0.2.0
 - Implemented Boss movement
 ### 01/11/2026
