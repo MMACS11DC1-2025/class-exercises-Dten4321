@@ -6,7 +6,7 @@ pygame.init()
 FPS = 60 # frames per second setting
 fpsClock = pygame.time.Clock()
 
-text = pygame.font.SysFont('Comic Sans MS', 30)
+text = pygame.font.SysFont('Times New Roman', 30)
 
 DISPLAYSURF = pygame.display.set_mode((1000, 1000))
 pygame.display.set_caption('Mizhou Episode 0.5')
@@ -23,6 +23,7 @@ jiangSprite = ezload('player.png')
 playerHitbox = ezload('playerHitbox.png')
 focusBagua = ezload('baguaFocus.png')
 focusSpear = ezload('spearFocus.png')
+bambooSprite = ezload('Bamboo.png')
 pygame.Surface.set_alpha(focusBagua, 110)
 pygame.Surface.set_alpha(focusSpear, 110)
 
@@ -101,7 +102,7 @@ def updateGraphics():
         if bulletDestroyed[0]:
             for bulletNewID in enemyBullets[bulletDestroyed[1]:]:
                 bulletNewID.index = bulletNewID.index-1
-        #pygame.draw.rect(DISPLAYSURF, (255,255,0) , bullet.rect)
+        pygame.draw.rect(DISPLAYSURF, (255,255,0) , bullet.rect)
     if focus == True:
         displayIMGPlayer(playerHitbox)
 
@@ -140,34 +141,46 @@ class EnemyBullet(pygame.sprite.Sprite):
         self.velocity = velocity
         self.index = index
         self.angle = angle
+        
+        if self.typeBullet == "basic":
+            self.sprite = basicBullet
+        elif self.typeBullet in ["yellowbasic", "yellowAccelerate"]:
+            self.sprite = yellowbullet
+        elif self.typeBullet == "yellowbeam":
+            self.sprite = yellowbeam
+        elif self.typeBullet == "bamboo":
+            self.sprite = bambooSprite
+        else:
+            self.sprite = basicBullet
+        
+        if self.typeBullet == "bamboo":
+            self.diameter = 28
+            self.rect = Rect(self.position[0]-self.diameter/2, self.position[1]-self.diameter/2, self.diameter, self.diameter)
         if self.typeBullet in ["basic","yellowbasic","yellowAccelerate"]:
             self.diameter = 20
-            self.radiusRect = self.diameter
-            self.rect = Rect(self.position[0]-self.diameter/2, self.position[1]-self.diameter/2, self.radiusRect, self.radiusRect)
+            self.rect = Rect(self.position[0]-self.diameter/2, self.position[1]-self.diameter/2, self.diameter, self.diameter)
 
     
     def move(self):
         self.position[0] += math.cos(math.radians(self.angle))*self.velocity
         self.position[1] += math.sin(math.radians(self.angle))*self.velocity
-        if self.typeBullet in ["basic","yellowbasic","yellowAccelerate", "yellowturn"]:
-            self.rect.update([self.position[0]-self.diameter/2, self.position[1]-self.diameter/2], [self.radiusRect,self.radiusRect])
+        #if self.typeBullet in ["basic","yellowbasic","yellowAccelerate", "yellowturn"]:
+        self.rect.update([self.position[0]-self.diameter/2, self.position[1]-self.diameter/2], [self.diameter,self.diameter])
         if self.typeBullet == "yellowAccelerate":
             self.velocity += 0.02
+
     
     def render(self):
-        if self.typeBullet == "basic":
-            self.selfDraw(basicBullet)
-        elif self.typeBullet == "yellowbasic" or self.typeBullet == "yellowAccelerate":
-            self.selfDraw(yellowbullet)
-        elif self.typeBullet == "yellowbeam":
-            self.selfDraw(yellowbeam)
-        else:
-            self.selfDraw(basicBullet)
+        self.selfDraw(self.sprite)
+        
     def selfDraw(self, img):
-        DISPLAYSURF.blit(img, (self.position[0] - img.get_width()/2, self.position[1] - img.get_height()/2))
+        if self.typeBullet == "bamboo":
+            DISPLAYSURF.blit(img, (self.position[0] - img.get_width()/2, self.position[1] - img.get_height()))
+        else:
+            DISPLAYSURF.blit(img, (self.position[0] - img.get_width()/2, self.position[1] - img.get_height()/2))
 
     def destroy(self):
-        if self.position[1] > 1010:
+        if self.position[1] > 1010 + self.sprite.get_height():
             enemyBullets.pop(self.index)
             return (True, self.index)
         else:
@@ -239,7 +252,7 @@ class Boss(pygame.sprite.Sprite):
             return boss.position[:]
         else:
             return ogPos
-        
+    
     def render(self):
         if self.level == 2:
             self.selfDraw(qiSprite)
@@ -264,6 +277,30 @@ class Boss(pygame.sprite.Sprite):
     
     def addBullet(self, btype,pos,vel,angle):
         enemyBullets.append(EnemyBullet(btype, pos, vel, angle,len(enemyBullets)))
+###################################################
+#STAGE CODE
+###################################################
+def runStage(stageData, runStage):
+	for item in stageData:
+		if item[0]*100 == stageCount:
+			enemyBullets.append(EnemyBullet(item[1], item[2], item[3], item[4],len(enemyBullets)))
+#== STAGE 1 =======================================
+def getStageData(stage):
+    if stage == 1:
+    	return (
+            (1, "bamboo", [150, -40], 12, 90),
+            (1, "bamboo", [850, -40], 12, 90),
+            (2, "bamboo", [150, -40], 12, 90),
+            (2, "bamboo", [850, -40], 12, 90),
+            (3, "bamboo", [150, -40], 12, 90),
+            (3, "bamboo", [850, -40], 12, 90),
+            (4, "bamboo", [150, -40], 12, 90),
+            (4, "bamboo", [850, -40], 12, 90),
+            (5, "bamboo", [150, -40], 12, 90),
+            (5, "bamboo", [850, -40], 12, 90),
+            (6, "bamboo", [150, -40], 12, 90),
+            (6, "bamboo", [850, -40], 12, 90),
+    	    ) #Format for each item (time, bullet type,position,velocity,angle/direction)...
 
 #==========================
 # Setup
@@ -284,12 +321,20 @@ def menuGetColour(id):
 # MAIN GAME LOOP
 ######################################################
 bulletCooldownTimer = 12
+
+stage = 1
+stageCount = 0
+
+bossReady = False
 bossbulletCooldownTimer = 0
 bosscdthreshold = 10
 numBossattacks = 0
+ogPos = boss.position[:]
+
 menuSelect = 0
 inputCooldown = 10
-ogPos = boss.position[:]
+
+
 while True:
     keys = pygame.key.get_pressed()
     match gameState:
@@ -350,30 +395,33 @@ while True:
                     player.playerBullets.append(PlayerBullet("basic", [player.x+15, player.y], [0, -25], len(player.playerBullets)))
                     player.playerBullets.append(PlayerBullet("basic", [player.x-15, player.y], [0, -25], len(player.playerBullets)))
                     bulletCooldownTimer = 0
-
+            
+            
+            
             #==========================
             # Boss Loop
             #==========================
-            if bossbulletCooldownTimer == bosscdthreshold:
-                #Shooting===============
-                if numBossattacks % 40 < 5 and numBossattacks < 447:
-                    boss.bossAttack(2,0)
-                    bossbulletCooldownTimer = 0
+            if bossReady:
+                if bossbulletCooldownTimer == bosscdthreshold:
+                    #Shooting===============
+                    if numBossattacks % 40 < 5 and numBossattacks < 447:
+                        boss.bossAttack(2,0)
+                        bossbulletCooldownTimer = 0
 
-                elif numBossattacks and 447 < numBossattacks < 800:
-                    boss.bossAttack(2,1)
-                    bossbulletCooldownTimer = 0 
-                elif numBossattacks and 800 < numBossattacks < 1200:
-                    boss.bossAttack(2,0)
-                    bossbulletCooldownTimer = 0 
+                    elif numBossattacks and 447 < numBossattacks < 800:
+                        boss.bossAttack(2,1)
+                        bossbulletCooldownTimer = 0 
+                    elif numBossattacks and 800 < numBossattacks < 1200:
+                        boss.bossAttack(2,0)
+                        bossbulletCooldownTimer = 0 
 
 
-                numBossattacks +=1
-            #Moving=================
-            ogPos = boss.fancyGotoPos([200, boss.position[1]], ogPos, numBossattacks, [80, 200])
-            ogPos = boss.fancyGotoPos([800, boss.position[1]], ogPos, numBossattacks, [200, 320])
-            ogPos = boss.fancyGotoPos([500, boss.position[1]], ogPos, numBossattacks, [320, 420])
-            #print(ogPos)
+                    numBossattacks +=1
+                #Moving=================
+                ogPos = boss.fancyGotoPos([200, boss.position[1]], ogPos, numBossattacks, [80, 200])
+                ogPos = boss.fancyGotoPos([800, boss.position[1]], ogPos, numBossattacks, [200, 320])
+                ogPos = boss.fancyGotoPos([500, boss.position[1]], ogPos, numBossattacks, [320, 420])
+                #print(ogPos)
             #==========================
             # Per Loop Updates
             #==========================
@@ -386,6 +434,9 @@ while True:
                 bulletCooldownTimer += 1
             if bossbulletCooldownTimer < bosscdthreshold:
                 bossbulletCooldownTimer += 1
+            
+            runStage(getStageData(stage), stageCount)
+            stageCount +=1
             updateGraphics()
     for event in pygame.event.get():
         if event.type == QUIT:
