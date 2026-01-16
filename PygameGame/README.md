@@ -2,13 +2,17 @@
 
 
 ## Changelog
+### 01/16/2026
+### V 0.2.1
+- Added shooter yinyangs
+- added player bullet collision
 ### 01/15/2026
 ### V 0.2.1
-- Made YinYang orbs larger and red
+- Made Yinyang orbs larger and red
 - Added stage music
 ### 01/14/2026
 ### V 0.2.2
-- Added yingyang orbs
+- Added yinyang orbs
 ### V 0.2.1
 - Implemented Stage
 ### V 0.2.0

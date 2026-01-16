@@ -9,18 +9,22 @@ fpsClock = pygame.time.Clock()
 text = pygame.font.SysFont('Times New Roman', 30)
 
 level_1_data = (
-    [(0 + random.random(), "box", [random.randint(50,950), -40], 5, 90) for i in range(10)] +
-    [(1 + random.random(), "box", [random.randint(50,950), -40], 5, 90) for i in range(10)] +
-    [(2 + random.random(), "box", [random.randint(50,950), -40], 5, 90) for i in range(10)] +
-    [(3 + random.random(), "yinyangright", [1200, 100 + random.randint(-10,600)], 10 + random.randint(-2,2), 190) for i in range(10)] +
-    [(4 + random.random(), "yinyangright", [1200, 100 + random.randint(-10,600)], 10 + random.randint(-2,2), 190) for i in range(10)] +
-    [(5 + random.random(), "yinyangright", [1200, 100 + random.randint(-200,600)], 10 + random.randint(-2,2), 190) for i in range(20)] +
-    [(6.4 + random.random(), "yinyangleft", [-200, 100 + random.randint(-200,600)], 10 + random.randint(-2,2), 350) for i in range(20)] +
-    [(7 + random.random(), "yinyangleft", [-200, 100 + random.randint(-200,600)], 10 + random.randint(-2,2), 350) for i in range(20)] +
-    [(8 + random.random(), "yinyangleft", [-200, 100 + random.randint(-200,600)], 10 + random.randint(-2,2), 350) for i in range(20)] +
-    [(9 + random.random(), "yinyang", [random.randint(100,1500), -40], 7 + random.randint(-2,2), 110) for i in range(50)] +
-    [(random.randint(10,13) + random.random(), "box", [random.randint(50,950), -40], 5, 90) for i in range(40)] +
-    [(13 + random.random(), "yinyang", [random.randint(100,1500), -40], 10 + random.randint(-2,2), 110) for i in range(50)] +
+    [(0 + random.random(), "EMbox", [random.randint(50,950), -40], 5, 90) for i in range(10)] +
+    [(1 + random.random(), "EMbox", [random.randint(50,950), -40], 5, 90) for i in range(10)] +
+    [(2 + random.random(), "EMbox", [random.randint(50,950), -40], 5, 90) for i in range(10)] +
+    [(3 + random.random(), "yinyangright", [1200, 100 + random.randint(-10,600)], 10 + random.randint(-2,2), 190) for i in range(7)] +
+    [(4 + random.random(), "yinyangright", [1200, 100 + random.randint(-10,600)], 10 + random.randint(-2,2), 190) for i in range(7)] +
+    [(5 + random.random(), "yinyangright", [1200, 100 + random.randint(-200,600)], 10 + random.randint(-2,2), 190) for i in range(10)] +
+    [(6.4 + random.random(), "yinyangleft", [-200, 100 + random.randint(-200,600)], 10 + random.randint(-2,2), 350) for i in range(10)] +
+    [(7 + random.random(), "yinyangleft", [-200, 100 + random.randint(-200,600)], 10 + random.randint(-2,2), 350) for i in range(10)] +
+    [(8 + random.random(), "yinyangleft", [-200, 100 + random.randint(-200,600)], 10 + random.randint(-2,2), 350) for i in range(10)] +
+    [(9 + random.random(), "yinyang", [random.randint(100,1500), -40], 7 + random.randint(-2,2), 110) for i in range(35)] +
+    [(random.randint(10,13) + random.random(), "EMbox", [random.randint(50,950), -40], 5, 90) for i in range(30)] +
+    [(13 + random.random(), "yinyang", [random.randint(100,1500), -40], 10 + random.randint(-2,2), 110) for i in range(30)] +
+    [(random.randint(15,17) + random.random(), "EMbox", [random.randint(50,950), -40], 5, 90) for i in range(30)] +
+    [(random.randint(15,17), "yinyang", [1050, random.randint(50,950)], 6 + random.randint(-2,2), 170) for i in range(5)] +
+    [(random.randint(15,17), "yinyang", [-50, random.randint(50,950)], 6 + random.randint(-2,2), 10) for i in range(5)] +
+    [(0 + i/3, "EMyinyangevil", [1200, 50], 7, 160) for i in range(10)] +
     [(14, "boss", 2)]
 )    
 
@@ -29,9 +33,9 @@ pygame.display.set_caption('Mizhou Episode 0.5')
 
 gameState = 0
 
-######################################################
+############################################################################################################
 # IMAGES AND GAME ASSETS
-######################################################
+############################################################################################################
 def ezload(img):
     return pygame.image.load(f'PygameGame/{img}')
 #===========PLAYER============
@@ -52,8 +56,10 @@ bambooSprite = ezload('Bamboo.png')
 boxSprite = ezload('box.png')
 yinyangSprite = ezload('yinyang.png')
 evilyinyangSprite = ezload('evilyinyangbig.png')
+eMyinyang = ezload('enemyyinyang.png')
 
 pygame.Surface.set_alpha(evilyinyangSprite, 200)
+pygame.Surface.set_alpha(eMyinyang, 230)
 pygame.Surface.set_alpha(basicPlayerBullet, 185)
 
 #===========BOSSES============
@@ -65,8 +71,9 @@ MUSIC.load('PygameGame/LandOfTheLostFog.mp3')
 MUSIC.play()
 MUSIC.set_volume(0.5)
 
-# PLAYER CODE & setup=======================
-
+#===========================================================================================================
+# PLAYER CODE & setup
+#===========================================================================================================
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         self.playerSprite = jiangSprite
@@ -81,20 +88,43 @@ class Player(pygame.sprite.Sprite):
 
 # Setup =====================
 enemyBullets = []
-ememies = []
+enemies = []
 
-######################################################
-# GRAPHIC FUNCTIONS IN MAIN GAMEzz
-######################################################
+
+############################################################################################################
+############################################################################################################
+# GRAPHIC FUNCTIONS IN MAIN GAME
+############################################################################################################
+############################################################################################################
 def displayIMGPlayer(img):
     DISPLAYSURF.blit(img, (player.x - img.get_width()/2, player.y - img.get_height()/2))
 
 def updateGraphics():
-    
-
     # Boss ==========================
     boss.render()
     #pygame.draw.rect(DISPLAYSURF, (0,255,0) , boss.rect)
+    
+    #enemies collide
+    for enemy in enemies:
+        if enemy.hitcooldown < 5:
+            enemy.hitcooldown += 1
+        if enemy.typeBullet == "EMyinyangevil":
+            if enemy.cooldown == 30:
+                enemy.cooldown = 0
+                enemy.attack()
+            elif enemy.cooldown < 30:
+                enemy.cooldown += 1
+
+        if pygame.sprite.spritecollide(enemy,player.playerBullets,False,pygame.sprite.collide_rect_ratio(1)) and enemy.hitcooldown == 10:
+            enemy.hp -= 1
+            enemy.hitcooldown = 0
+            if enemy.hp <= 0:
+                enemyDestroyed = enemy.destroy()
+                removedBullet = True
+            #print(f"removedBullet = {removedBullet}, bulletDestroyed = {bulletDestroyed}")
+        elif enemy.position[1] > 1100:
+            enemyDestroyed = enemy.destroy()
+            removedBullet = True
     
     #==========================
     # Player
@@ -106,10 +136,10 @@ def updateGraphics():
         bullet.render()
         
         removedBullet = False
-        if pygame.sprite.spritecollide(bullet,ememies,False,pygame.sprite.collide_rect_ratio(1)):
+        if pygame.sprite.spritecollide(bullet,enemies,False,pygame.sprite.collide_rect_ratio(1)):
             bulletDestroyed = bullet.destroy()
             removedBullet = True
-            print(f"removedBullet = {removedBullet}, bulletDestroyed = {bulletDestroyed}")
+            #print(f"removedBullet = {removedBullet}, bulletDestroyed = {bulletDestroyed}")
         elif bullet.position[1] < -20:
             bulletDestroyed = bullet.destroy()
             removedBullet = True
@@ -129,18 +159,40 @@ def updateGraphics():
     for bullet in enemyBullets:
         bullet.move()
         bullet.render()
-        bulletDestroyed = bullet.destroy()
-        if bulletDestroyed[0]:
-            for bulletNewID in enemyBullets[bulletDestroyed[1]:]:
+        removedBullet = False
+        if bullet.position[1] > 1100:
+            bulletDestroyed = bullet.destroy()
+            removedBullet = True
+        #pygame.draw.rect(DISPLAYSURF, (255,255,0) , bullet.rect)
+        if removedBullet:
+            for bulletNewID in enemyBullets[bulletDestroyed:]:
                 bulletNewID.index = bulletNewID.index-1
         #pygame.draw.rect(DISPLAYSURF, (255,255,0) , bullet.rect)
+        
+    for enemy in enemies:
+        enemy.move()
+        enemy.render()
+        removedBullet = False
+        if pygame.sprite.spritecollide(enemy,player.playerBullets,False,pygame.sprite.collide_rect_ratio(1)):
+            enemyDestroyed = enemy.destroy()
+            removedBullet = True
+            #print(f"removedBullet = {removedBullet}, bulletDestroyed = {bulletDestroyed}")
+        elif enemy.position[1] > 1100:
+            enemyDestroyed = enemy.destroy()
+            removedBullet = True
+        #pygame.draw.rect(DISPLAYSURF, (255,255,0) , bullet.rect)
+        if removedBullet:
+            for newID in enemies[enemyDestroyed:]:
+                newID.index = newID.index-1
+            
     if focus == True:
         displayIMGPlayer(playerHitbox)
 
-
-######################################################
+############################################################################################################
+############################################################################################################
 # CLASSES & EXTRA FUNCTIONS
-######################################################
+############################################################################################################
+############################################################################################################
 
 class PlayerBullet(pygame.sprite.Sprite):
     def __init__(self, typeBullet, playerPos, velocity, angle, index):
@@ -167,6 +219,9 @@ class PlayerBullet(pygame.sprite.Sprite):
         player.playerBullets.pop(self.index)
         return self.index
 
+#===========================================================================================================
+# Ememy bullets
+#===========================================================================================================
 class EnemyBullet(pygame.sprite.Sprite):
     def __init__(self, typeBullet, startPos, velocity, angle, index):
         self.typeBullet = typeBullet
@@ -174,7 +229,13 @@ class EnemyBullet(pygame.sprite.Sprite):
         self.velocity = velocity
         self.index = index
         self.angle = angle
-        
+        if self.typeBullet[:2] == "EM":
+            self.hitcooldown = 0
+            if self.typeBullet[2:] == "box":
+                self.hp = 3
+            elif self.typeBullet[2:] == "yinyangevil":
+                self.hp = 10
+                self.cooldown = 0
         if self.typeBullet == "basic":
             self.sprite = basicBullet
         elif self.typeBullet in ["yellowbasic", "yellowAccelerate"]:
@@ -183,24 +244,25 @@ class EnemyBullet(pygame.sprite.Sprite):
             self.sprite = yellowbeam
         elif self.typeBullet == "bamboo":
             self.sprite = bambooSprite
-        elif self.typeBullet == "box":
+        elif self.typeBullet == "EMbox":
             self.sprite = boxSprite
-        elif self.typeBullet[:7] == "yinyang":
+        elif self.typeBullet[:7] == "yinyang" or self.typeBullet == "EMyinyangevil":
             self.sprite = evilyinyangSprite
             self.visableRotation = 0
+            if self.typeBullet == "EMyinyangevil":
+                self.sprite = eMyinyang
         else:
             self.sprite = basicBullet
         
         if self.typeBullet == "bamboo":
             self.diameter = 28
             self.rect = Rect(self.position[0]-self.diameter/2, self.position[1]-self.diameter/2, self.diameter, self.diameter)
-        elif self.typeBullet[:7] == "yinyang":
+        elif self.typeBullet[:7] == "yinyang" or self.typeBullet == "EMyinyangevil":
             self.diameter = 40
             self.rect = Rect(self.position[0]-self.diameter/2, self.position[1]-self.diameter/2, self.diameter, self.diameter)
-        elif self.typeBullet in ["basic","yellowbasic","yellowAccelerate", "box", "yinyangright", "yinyangleft", "yinyang"]:
+        elif self.typeBullet in ["basic","yellowbasic","yellowAccelerate", "EMbox"]:
             self.diameter = 25
             self.rect = Rect(self.position[0]-self.diameter/2, self.position[1]-self.diameter/2, self.diameter, self.diameter)
-
     
     def move(self):
         self.position[0] += math.cos(math.radians(self.angle))*self.velocity
@@ -209,16 +271,20 @@ class EnemyBullet(pygame.sprite.Sprite):
         self.rect.update([self.position[0]-self.diameter/2, self.position[1]-self.diameter/2], [self.diameter,self.diameter])
         if self.typeBullet == "yellowAccelerate":
             self.velocity += 0.02
-        if self.typeBullet == "yinyangright":
+        elif self.typeBullet == "yinyangright":
             self.angle -= 0.5
-        if self.typeBullet == "yinyangleft":
+        elif self.typeBullet == "yinyangleft":
             self.angle += 0.5
+        elif self.typeBullet == "EMyinyangevil":
+            self.angle += 0.2
         if self.typeBullet[:7] == "yinyang":
             self.visableRotation += 10
+        elif self.typeBullet == "EMyinyangevil":
+            self.visableRotation += 5
 
     
     def render(self):
-        if self.typeBullet[:7] == "yinyang":
+        if self.typeBullet[:7] == "yinyang" or self.typeBullet == "EMyinyangevil":
             self.selfDraw(pygame.transform.rotate(self.sprite, self.visableRotation))
         else:
             self.selfDraw(self.sprite)
@@ -231,12 +297,23 @@ class EnemyBullet(pygame.sprite.Sprite):
             DISPLAYSURF.blit(img, (self.position[0] - img.get_width()/2, self.position[1] - img.get_height()/2))
 
     def destroy(self):
-        if self.position[1] > 1010 + self.sprite.get_height():
-            enemyBullets.pop(self.index)
-            return (True, self.index)
+        if self.typeBullet[:2] == "EM":
+            enemies.pop(self.index)
         else:
-            return (False, self.index)
+            enemyBullets.pop(self.index)
+        return self.index
+
+    def attack(self):
+        if self.typeBullet == "EMyinyangevil":
+            self.addBullet("basic", self.position[:], 8, math.degrees(math.atan2(player.y-200,player.x-500)))
     
+    def addBullet(self, btype, pos, vel, angle):
+        enemyBullets.append(EnemyBullet(btype, pos, vel, angle,len(enemyBullets)))
+
+#===========================================================================================================
+# Boss
+#===========================================================================================================
+
 class Boss(pygame.sprite.Sprite):
     def __init__(self, level):
         self.level = level
@@ -274,16 +351,16 @@ class Boss(pygame.sprite.Sprite):
         ogDist = math.sqrt((ogPos[0] - target[0])**2 + (ogPos[1] - target[1])**2) #pythagoras to find hypotenuse
         currDist = math.sqrt((boss.position[0] - target[0])**2 + (boss.position[1] - target[1])**2) #pythagoras to find hypotenuse
         speedChangetime = ((self.maxSpeed+1)*self.maxSpeed)/2
-        print(f"ogdist = {ogDist}, currdist = {currDist}, vel = {self.velocity}")
+        #print(f"ogdist = {ogDist}, currdist = {currDist}, vel = {self.velocity}")
         if NumBssAtks > startEndTime[0] and NumBssAtks < startEndTime[1]:
             if currDist > 0:
                 if ogDist > speedChangetime:
                     if abs(self.velocity) < self.maxSpeed and currDist > speedChangetime:
                         self.velocity-=1
-                        print("going!")
+                        #print("going!")
                     elif currDist < speedChangetime:
                         self.velocity+=1
-                        print("decelerating!")
+                        #print("decelerating!")
                 elif ogDist == speedChangetime:
                     if currDist > speedChangetime:
                         self.velocity-=1
@@ -339,16 +416,19 @@ boss = Boss(0)
 def spawnBoss(level):
     return Boss(level)
 
-###################################################
+#########################################################################################################
 #STAGE CODE
-###################################################
+#########################################################################################################
 def runStage(stageData, stageCount):
     for item in stageData:
         if item[1] == "boss":
             if item[0]*100 == stageCount:
                 spawnBoss(item[2])
         elif int(item[0]*100) == stageCount:
-            enemyBullets.append(EnemyBullet(item[1], item[2], item[3], item[4],len(enemyBullets)))
+            if item[1][:2] == "EM":
+                enemies.append(EnemyBullet(item[1], item[2], item[3], item[4],len(enemies)))
+            else:
+                enemyBullets.append(EnemyBullet(item[1], item[2], item[3], item[4],len(enemyBullets)))
         
 #== STAGE 1 =======================================
 def getStageData(stage):
@@ -356,9 +436,9 @@ def getStageData(stage):
     	return level_1_data #Format for each item (time, bullet type,position,velocity,angle/direction)...
 
 
-######################################################
+############################################################################################################
 # EXTRA FUNCTIONS
-######################################################
+############################################################################################################
 
 def menuGetColour(id):
     if menuSelect == id:
@@ -376,10 +456,11 @@ def setState(state):
         MUSIC.play()
         MUSIC.set_volume(0.5)
     return state
-
-######################################################
+############################################################################################################
+############################################################################################################
 # MAIN GAME LOOP
-######################################################
+############################################################################################################
+############################################################################################################
 bulletCooldownTimer = 12
 
 stage = 1
@@ -398,7 +479,10 @@ inputCooldown = 10
 while True:
     keys = pygame.key.get_pressed()
     match gameState:
-        case 0: # Main menu
+        ############################################################################################################
+        # MAIN MENU
+        ############################################################################################################
+        case 0: 
             DISPLAYSURF.fill((0,0,0))
             if inputCooldown == 10:
                 if keys[K_UP]:
@@ -426,8 +510,11 @@ while True:
             
             if inputCooldown < 10:
                 inputCooldown += 1
-            
-        case 1: #main gameply
+        
+        ############################################################################################################
+        # MAIN GAMEPLAY
+        ############################################################################################################
+        case 1:
             DISPLAYSURF.fill((0,0,0))
             
             if keys[K_LEFT]:
@@ -485,7 +572,7 @@ while True:
             #==========================
             # Per Loop Updates
             #==========================
-            if pygame.sprite.spritecollide(player,enemyBullets,False,pygame.sprite.collide_rect_ratio(1)):
+            if pygame.sprite.spritecollide(player,enemyBullets,False,pygame.sprite.collide_rect_ratio(1)) or pygame.sprite.spritecollide(player,enemies,False,pygame.sprite.collide_rect_ratio(1)):
                 gameState = setState(0)
             if bossReady:
                 if pygame.sprite.collide_rect(player, boss):
