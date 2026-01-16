@@ -18,7 +18,7 @@ level_1_data = (
     [(6.4 + random.random(), "yinyangleft", [-200, 100 + random.randint(-200,600)], 10 + random.randint(-2,2), 350) for i in range(20)] +
     [(7 + random.random(), "yinyangleft", [-200, 100 + random.randint(-200,600)], 10 + random.randint(-2,2), 350) for i in range(20)] +
     [(8 + random.random(), "yinyangleft", [-200, 100 + random.randint(-200,600)], 10 + random.randint(-2,2), 350) for i in range(20)] +
-    [(9 + random.random(), "yinyang", [random.randint(100,1500), -40], 7 + random.randint(-2,2), 110) for i in range(100)] +
+    [(9 + random.random(), "yinyang", [random.randint(100,1500), -40], 7 + random.randint(-2,2), 110) for i in range(50)] +
     [(random.randint(10,13) + random.random(), "box", [random.randint(50,950), -40], 5, 90) for i in range(40)] +
     [(13 + random.random(), "yinyang", [random.randint(100,1500), -40], 10 + random.randint(-2,2), 110) for i in range(50)] +
     [(14, "boss", 2)]
@@ -51,8 +51,9 @@ yellowbeam = ezload('yellowBeam.png')
 bambooSprite = ezload('Bamboo.png')
 boxSprite = ezload('box.png')
 yinyangSprite = ezload('yinyang.png')
+evilyinyangSprite = ezload('evilyinyangbig.png')
 
-
+pygame.Surface.set_alpha(evilyinyangSprite, 200)
 pygame.Surface.set_alpha(basicPlayerBullet, 185)
 
 #===========BOSSES============
@@ -80,6 +81,7 @@ class Player(pygame.sprite.Sprite):
 
 # Setup =====================
 enemyBullets = []
+ememies = []
 
 ######################################################
 # GRAPHIC FUNCTIONS IN MAIN GAMEzz
@@ -100,10 +102,20 @@ def updateGraphics():
     #bullets
     for bullet in player.playerBullets:
         bullet.move()
+        #pygame.draw.rect(DISPLAYSURF, (255,0,255) , bullet.rect)
         bullet.render()
-        bulletDestroyed = bullet.destroy()
-        if bulletDestroyed[0]:
-            for bulletNewID in player.playerBullets[bulletDestroyed[1]:]:
+        
+        removedBullet = False
+        if pygame.sprite.spritecollide(bullet,ememies,False,pygame.sprite.collide_rect_ratio(1)):
+            bulletDestroyed = bullet.destroy()
+            removedBullet = True
+            print(f"removedBullet = {removedBullet}, bulletDestroyed = {bulletDestroyed}")
+        elif bullet.position[1] < -20:
+            bulletDestroyed = bullet.destroy()
+            removedBullet = True
+        
+        if removedBullet:
+            for bulletNewID in player.playerBullets[bulletDestroyed:]:
                 bulletNewID.index = bulletNewID.index-1
     if focus == True:
         displayIMGPlayer(pygame.transform.rotate(focusBagua, player.focusBaguaRotation))
@@ -113,7 +125,7 @@ def updateGraphics():
     #==========================
     # Enemies
     #==========================
-    #bullets
+    #Enemy bullets
     for bullet in enemyBullets:
         bullet.move()
         bullet.render()
@@ -131,30 +143,32 @@ def updateGraphics():
 ######################################################
 
 class PlayerBullet(pygame.sprite.Sprite):
-    def __init__(self, typeBullet, playerPos, velocity, index):
+    def __init__(self, typeBullet, playerPos, velocity, angle, index):
         self.typeBullet = typeBullet
         self.position = playerPos
         self.velocity = velocity
         self.index = index
-        self.diameter = 12
+        self.angle = angle
+        self.diameter = 30
+        self.rect = Rect(self.position[0]-self.diameter/2, self.position[1]-self.diameter/2, self.diameter, self.diameter)
+
     
     def move(self):
-        self.position[0] += self.velocity[0]
-        self.position[1] += self.velocity[1]
+        self.position[0] += math.cos(math.radians(self.angle))*self.velocity
+        self.position[1] += math.sin(math.radians(self.angle))*self.velocity
+        self.rect.update([self.position[0]-self.diameter/2, self.position[1]-self.diameter/2], [self.diameter,self.diameter])
+
     
     def render(self):
         self.selfDraw(basicPlayerBullet)
     def selfDraw(self, img):
         DISPLAYSURF.blit(img, (self.position[0] - img.get_width()/2, self.position[1] - img.get_height()/2))
     def destroy(self):
-        if self.position[1] > 1010:
-            player.playerBullets.pop(self.index)
-            return (True, self.index)
-        else:
-            return (False, self.index)
+        player.playerBullets.pop(self.index)
+        return self.index
 
 class EnemyBullet(pygame.sprite.Sprite):
-    def __init__(self, typeBullet, startPos, velocity, angle,index):
+    def __init__(self, typeBullet, startPos, velocity, angle, index):
         self.typeBullet = typeBullet
         self.position = startPos
         self.velocity = velocity
@@ -172,7 +186,7 @@ class EnemyBullet(pygame.sprite.Sprite):
         elif self.typeBullet == "box":
             self.sprite = boxSprite
         elif self.typeBullet[:7] == "yinyang":
-            self.sprite = yinyangSprite
+            self.sprite = evilyinyangSprite
             self.visableRotation = 0
         else:
             self.sprite = basicBullet
@@ -180,8 +194,11 @@ class EnemyBullet(pygame.sprite.Sprite):
         if self.typeBullet == "bamboo":
             self.diameter = 28
             self.rect = Rect(self.position[0]-self.diameter/2, self.position[1]-self.diameter/2, self.diameter, self.diameter)
-        if self.typeBullet in ["basic","yellowbasic","yellowAccelerate", "box", "yinyangright", "yinyangleft", "yinyang"]:
-            self.diameter = 20
+        elif self.typeBullet[:7] == "yinyang":
+            self.diameter = 40
+            self.rect = Rect(self.position[0]-self.diameter/2, self.position[1]-self.diameter/2, self.diameter, self.diameter)
+        elif self.typeBullet in ["basic","yellowbasic","yellowAccelerate", "box", "yinyangright", "yinyangleft", "yinyang"]:
+            self.diameter = 25
             self.rect = Rect(self.position[0]-self.diameter/2, self.position[1]-self.diameter/2, self.diameter, self.diameter)
 
     
@@ -349,6 +366,17 @@ def menuGetColour(id):
     else: 
        return (255,255,255)
 
+def setState(state):
+    if state == 0:
+        MUSIC.load('PygameGame/LandOfTheLostFog.mp3')
+        MUSIC.play()
+        MUSIC.set_volume(0.5)
+    elif state == 1:
+        MUSIC.load('PygameGame/Stage1Theme.mp3')
+        MUSIC.play()
+        MUSIC.set_volume(0.5)
+    return state
+
 ######################################################
 # MAIN GAME LOOP
 ######################################################
@@ -387,7 +415,7 @@ while True:
                     inputCooldown = 0
                 if keys[K_z]:
                     if menuSelect == 0:
-                        gameState = 1
+                        gameState = setState(1)
                     if menuSelect == 3:
                         pygame.event.post(pygame.event.Event(pygame.QUIT))
             
@@ -424,8 +452,8 @@ while True:
 
             if keys[K_z]:
                 if bulletCooldownTimer >= player.bulletCooldown:
-                    player.playerBullets.append(PlayerBullet("basic", [player.x+15, player.y], [0, -25], len(player.playerBullets)))
-                    player.playerBullets.append(PlayerBullet("basic", [player.x-15, player.y], [0, -25], len(player.playerBullets)))
+                    player.playerBullets.append(PlayerBullet("basic", [player.x+15, player.y], 25, 270,len(player.playerBullets)))
+                    player.playerBullets.append(PlayerBullet("basic", [player.x-15, player.y], 25, 270,len(player.playerBullets)))
                     bulletCooldownTimer = 0
             
             
@@ -458,10 +486,10 @@ while True:
             # Per Loop Updates
             #==========================
             if pygame.sprite.spritecollide(player,enemyBullets,False,pygame.sprite.collide_rect_ratio(1)):
-                gameState = 0
+                gameState = setState(0)
             if bossReady:
                 if pygame.sprite.collide_rect(player, boss):
-                    gameState = 0
+                    gameState = setState(0)
             if bulletCooldownTimer < 10:
                 bulletCooldownTimer += 1
             if bossbulletCooldownTimer < bosscdthreshold:
