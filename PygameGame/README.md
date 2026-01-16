@@ -2,6 +2,10 @@
 
 
 ## Changelog
+### 01/15/2026
+### V 0.2.1
+- Made YinYang orbs larger and red
+- Added stage music
 ### 01/14/2026
 ### V 0.2.2
 - Added yingyang orbs
