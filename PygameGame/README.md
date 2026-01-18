@@ -2,12 +2,17 @@
 
 
 ## Changelog
+### 01/18/2026
+### V 0.2.5
+- Added Dialogue
+- added more attacks and enlongated stage 1
+- added lives and "bombs"
 ### 01/16/2026
-### V 0.2.1
+### V 0.2.4
 - Added shooter yinyangs
 - added player bullet collision
 ### 01/15/2026
-### V 0.2.1
+### V 0.2.3
 - Made Yinyang orbs larger and red
 - Added stage music
 ### 01/14/2026
