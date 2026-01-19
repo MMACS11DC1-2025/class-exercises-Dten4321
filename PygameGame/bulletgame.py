@@ -11,7 +11,7 @@ pygame.init()
 
 FPS = 60 # frames per second setting
 fpsClock = pygame.time.Clock()
-DEBUG = True
+DEBUG = False
 
 text = pygame.font.SysFont('Times New Roman', 30)
 
@@ -720,7 +720,7 @@ class Boss(pygame.sprite.Sprite):
             return ogPos
     
     def render(self):
-        if self.level == 4:
+        if self.level == 1:
             self.selfDraw(qiSprite)
         elif self.level == 2:
             self.selfDraw(qiSprite)
@@ -739,13 +739,13 @@ class Boss(pygame.sprite.Sprite):
                 for i in range(3):
                     self.addBullet("basic", self.position[:], 8, math.degrees(math.atan2(player.y-self.position[1],player.x-self.position[0]))-30+i*30)
             elif special == 1:
-                for i in range(6):
+                for i in range(4):
                     self.addBullet("basic", [random.randint(10,990),-30], 5, math.degrees(math.atan2(player.y-self.position[1],player.x-self.position[0])))
             elif special == 2:
-                for i in range(6):
-                    self.addBullet("basic", [-30,100+i*80], 5, math.degrees(math.atan2(player.y-self.position[1],player.x-self.position[0])))
-                for i in range(6):
-                    self.addBullet("basic", [1030,150+i*80], 5, math.degrees(math.atan2(player.y-self.position[1],player.x-self.position[0])))
+                for i in range(2):
+                    self.addBullet("basic", [-20,50+i*300], 5, 20+i*5+random.randint(0,15))
+                for i in range(2):
+                    self.addBullet("basic", [1020,100+i*300], 5, 160-i*5-random.randint(0,15))
         elif self.level == 2:
             if special == 0:
                 for i in range(5):
