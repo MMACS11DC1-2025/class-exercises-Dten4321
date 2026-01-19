@@ -2,8 +2,12 @@
 
 
 ## Changelog
+### 01/19/2026
+### V 0.3.1
+- added backdrop for stage 3
+
 ### 01/18/2026
-### V 0.2.5
+### V 0.3.0
 - Added Debug Mode
 - Finished stage 1, stage 2
 - finished boss behavior for stage 1 and stage 2

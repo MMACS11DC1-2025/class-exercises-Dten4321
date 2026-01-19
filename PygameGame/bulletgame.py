@@ -43,8 +43,8 @@ bombing = 0
 
 stage = 1
 stageCount = 0
-if DEBUG:
-    stageCount = 3300
+#if DEBUG:
+#    stageCount = 3300
 
 bossbulletCooldownTimer = 0
 bosscdthreshold = 20
@@ -105,10 +105,14 @@ particleSprite = ezload('particle.png')
 bambooBushSprite = ezload('Bambooleaves.png')
 pygame.Surface.set_alpha(bambooBushSprite, 150)
 bambooBushSpriteRight = pygame.transform.flip(bambooBushSprite, True, False)
+bamboodarkBushSprite = ezload('Bambooleavesdark.png')
+pygame.Surface.set_alpha(bamboodarkBushSprite, 150)
+bamboodarkBushSpriteRight = pygame.transform.flip(bamboodarkBushSprite, True, False)
 
 #============OTHER============
 stage1backdrop = ezload('backgroundStage1.png')
 stage2backdrop = ezload('backgroundStage2.png')
+stage3backdrop = ezload('backgroundStage3.png')
 
 #Portraits
 PORTRAITS = {
@@ -130,7 +134,7 @@ PORTRAITS = {
     "Haruki" : {
         "neutral" : portraitload("harukiNeutral.png"),
         "angry" : portraitload("harukiAngry.png"),
-        "angier" : portraitload("harukiAngrier.png"),
+        "angrier" : portraitload("harukiAngrier.png"),
         "confused" : portraitload("harukiConfused.png"),
         "smug" : portraitload("harukiSmug.png"),
         "sweat" : portraitload("harukiSweat.png")
@@ -194,9 +198,9 @@ DIALOGUEBOSS3END = (
     ("Qi", "sweat","Goodness, I cannot sleep with this fight here!"),
     ("Qi", "neutral","Hey! The device I was missing!"),
     ("Haruki", "sweat","Sorry..."),
-    ("Qi", "neutral","I overheard the conversation a bit, you like to study stuff as well?"),
+    ("Qi", "neutral","So, you like to study stuff?"),
     ("Haruki", "confused","Yes?"),
-    ("Qi", "neutral","Well, I didn't make this, I found it near the river by the border."),
+    ("Qi", "neutral","Well, I didn't make this, 'found it by the border."),
     ("Qi", "neutral","I think it's not from here!"),
     ("Haruki", "confused","Not from here!?"),
     ("Qi", "neutral","I invite you to help me in figuring out how this thing works."),
@@ -283,6 +287,8 @@ def updateGraphics():
         backgroundIMG = stage1backdrop
     elif stage == 2:
         backgroundIMG = stage2backdrop
+    elif stage == 3:
+        backgroundIMG = stage3backdrop
     else:
         backgroundIMG = stage1backdrop
 
@@ -345,7 +351,7 @@ def updateGraphics():
             elif item.itemType == "points":
                 particles.append(Particle("points",item.position[:],10,math.degrees(math.atan2(player.y-item.position[1],player.x-item.position[0])),len(particles)))
                 points += 100
-        elif item.position[1] < despawnRange[1]:
+        elif item.position[1] > despawnRange[0]:
             itemDestroyed = item.destroy()
             removed = True
         if removed:
@@ -429,7 +435,7 @@ def updateGraphics():
             pygame.draw.rect(DISPLAYSURF, (0,0,255) , particle.rect)
         particle.render()
         removed = False
-        if particle.position[1] < despawnRange[1] or particle.life < 0:
+        if particle.position[1] > despawnRange[0] or particle.life < 0:
             particleDestroyed = particle.destroy()
             removed = True
         if removed:
@@ -455,9 +461,15 @@ class Particle(pygame.sprite.Sprite):
         self.diameter = 30
         self.life = 5
         if self.particleType == "bushLeft":
-            self.img = bambooBushSprite
+            if stage > 2:
+                self.img = bamboodarkBushSprite
+            else:
+                self.img = bambooBushSprite
         elif self.particleType == "bushRight":
-            self.img = bambooBushSpriteRight
+            if stage > 2:
+                self.img = bamboodarkBushSpriteRight
+            else:
+                self.img = bambooBushSpriteRight
         elif self.particleType == "bomb":
             self.img = bombSprite
         elif self.particleType == "points":
@@ -1136,15 +1148,28 @@ while True:
             
             if DEBUG:
                 textDisplay = text.render(f"BossReady: {boss.bossReady}", False, (255,255,255))
-                DISPLAYSURF.blit(textDisplay, (50,100))
+                DISPLAYSURF.blit(textDisplay, (20,100))
                 textDisplay = text.render(f"StageCount: {stageCount}", False, (255,255,255))
-                DISPLAYSURF.blit(textDisplay, (50,130))
+                DISPLAYSURF.blit(textDisplay, (20,130))
                 textDisplay = text.render(f"BossAttacks: {numBossattacks}", False, (255,255,255))
-                DISPLAYSURF.blit(textDisplay, (50,160))
+                DISPLAYSURF.blit(textDisplay, (20,160))
                 textDisplay = text.render(f"InitBoss: {initBoss}", False, (255,255,255))
-                DISPLAYSURF.blit(textDisplay, (50,190))
+                DISPLAYSURF.blit(textDisplay, (20,190))
                 textDisplay = text.render(f"Dialogue: {dialogue}", False, (255,255,255))
-                DISPLAYSURF.blit(textDisplay, (50,220))
+                DISPLAYSURF.blit(textDisplay, (20,220))
+                textDisplay = text.render(f"Num of entities: {len(items)+len(enemies)+len(enemyBullets)+len(player.playerBullets)+len(particles)}", False, (255,255,255))
+                DISPLAYSURF.blit(textDisplay, (20,250))
+                textDisplay = text.render(f"Num of Items: {len(items)}", False, (255,255,255))
+                DISPLAYSURF.blit(textDisplay, (700,100))
+                textDisplay = text.render(f"Num of Enemies: {len(enemies)}", False, (255,255,255))
+                DISPLAYSURF.blit(textDisplay, (700,130))
+                textDisplay = text.render(f"Num of EBullets: {len(enemyBullets)}", False, (255,255,255))
+                DISPLAYSURF.blit(textDisplay, (700,160))
+                textDisplay = text.render(f"Num of PBullets: {len(player.playerBullets)}", False, (255,255,255))
+                DISPLAYSURF.blit(textDisplay, (700,190))
+                textDisplay = text.render(f"Num of Particles: {len(particles)}", False, (255,255,255))
+                DISPLAYSURF.blit(textDisplay, (700,220))
+
             
     for event in pygame.event.get():
         if event.type == QUIT:
