@@ -41,7 +41,7 @@ if DEBUG:
 points = 0
 bombing = 0
 
-stage = 1
+stage = 3
 stageCount = 0
 #if DEBUG:
 #    stageCount = 3300
@@ -209,9 +209,9 @@ DIALOGUEBOSS3END = (
 )
 
 level_1_data = (
-    [(1 + random.random(), "EMbox", [random.randint(50,950), -40], 5, 90) for i in range(5)] +
-    [(2 + random.random(), "EMbox", [random.randint(50,950), -40], 5, 90) for i in range(5)] +
-    [(3 + random.random(), "EMbox", [random.randint(50,950), -40], 5, 90) for i in range(5)] +
+    [(1 + random.random(), "EMbox", [random.randint(250,750), -40], 5, 90) for i in range(5)] +
+    [(2 + random.random(), "EMbox", [random.randint(250,750), -40], 5, 90) for i in range(5)] +
+    [(3 + random.random(), "EMbox", [random.randint(250,750), -40], 5, 90) for i in range(5)] +
     [(4 + random.random(), "yinyangright", [1200, 100 + random.randint(-10,600)], 10 + random.randint(-2,2), 190) for i in range(7)] +
     [(5 + random.random(), "yinyangright", [1200, 100 + random.randint(-10,600)], 10 + random.randint(-2,2), 190) for i in range(7)] +
     [(6 + random.random(), "yinyangright", [1200, 100 + random.randint(-200,600)], 10 + random.randint(-2,2), 190) for i in range(10)] +
@@ -219,11 +219,11 @@ level_1_data = (
     [(8 + random.random(), "yinyangleft", [-200, 100 + random.randint(-200,600)], 10 + random.randint(-2,2), 350) for i in range(10)] +
     [(9 + random.random(), "yinyangleft", [-200, 100 + random.randint(-200,600)], 10 + random.randint(-2,2), 350) for i in range(10)] +
     [(10 + random.random(), "yinyang", [random.randint(100,1500), -40], 7 + random.randint(-2,2), 110) for i in range(35)] +
-    [(random.randint(11,14) + random.random(), "EMbox", [random.randint(50,950), -40], 5, 90) for i in range(10)] +
+    [(random.randint(11,14) + random.random(), "EMbox", [random.randint(250,750), -40], 5, 90) for i in range(10)] +
     [(14 + random.random(), "yinyang", [random.randint(100,1500), -40], 10 + random.randint(-2,2), 110) for i in range(30)] +
-    [(random.randint(16,18) + random.random(), "EMbox", [random.randint(50,950), -40], 5, 90) for i in range(10)] +
-    [(random.randint(16,18), "yinyang", [1050, random.randint(50,950)], 6 + random.randint(-2,2), 170) for i in range(5)] +
-    [(random.randint(16,18), "yinyang", [-50, random.randint(50,950)], 6 + random.randint(-2,2), 10) for i in range(5)] +
+    [(random.randint(16,18) + random.random(), "EMbox", [random.randint(250,750), -40], 5, 90) for i in range(10)] +
+    [(random.randint(16,18), "yinyang", [1050, random.randint(250,750)], 6 + random.randint(-2,2), 170) for i in range(5)] +
+    [(random.randint(16,18), "yinyang", [-50, random.randint(250,750)], 6 + random.randint(-2,2), 10) for i in range(5)] +
     [(19 + i/3, "EMyinyangevil", [1200, 50], 7, 160) for i in range(10)] +
     [(20 + i/2, "yinyang", [1200, 100+i*100], 4, 180) for i in range(10)] +
     [(20 + i/2, "yinyang", [-200, 100+i*100], 4, 0) for i in range(10)] +
@@ -247,13 +247,42 @@ level_2_data = (
     [(22 + i/3, "EMyinyangevil", [500, -40], 6, 90) for i in range(8)] +
     [(22 + i/3, "EMyinyangevilLeft", [500, -40], 6, 90) for i in range(8)] +
     [(25 + random.random(), "EMbox", [random.randint(50,950), -40], 5, 90) for i in range(5)] +
-    [(28 + i/8, "yellowAccelerateFollow", [50+i*50, -40], 4, 90) for i in range(20)] +
-    [(28 + i/8, "yellowAccelerateFollow", [950-i*50, -40], 4, 90) for i in range(20)] +
+    [(28 + i/8, "yellowAccelerateFollow", [50+i*50, -40], 4, 90) for i in range(23)] +
+    [(28 + i/8, "yellowAccelerateFollow", [950-i*50, -40], 4, 90) for i in range(23)] +
     [(34, "boss", 2)] #34
     
 )
 level_3_data = (
-    [(0, "boss", 3)]
+    [(1 + random.random(), "EMbox", [random.randint(50,950), -40], 5, 90) for i in range(5)] +
+    [(3 + i/8, "big", [100+i*250, -200], 5, 90) for i in range(4)] +
+    [(4 + i/8, "big", [650-i*250, -200], 8, 90) for i in range(3)] +
+    [(5 + i/15, "yinyangright", [1200, 100+i*130], 8, 200) for i in range(8)] +
+    [(5.5  + i/10, "yinyangright", [1200, 900-i*150], 9, 220) for i in range(8)] +
+    [(6.5  + i/20, "yinyangright", [1200, 100+i*180], 10, 200) for i in range(8)] +
+    [(7.5, "big", [50+i*250, -200], 10, 90) for i in range(5)] +
+    [(7.5, "big", [900-i*250, -200], 7, 90) for i in range(4)] +
+    [(8.3, "big", [50+i*250, -200], 10, 90) for i in range(5)] +
+    [(9.5 + random.random(), "yinyang", [random.randint(50,950), -40], 7 + random.randint(-2,2), 90) for i in range(40)] +
+    [(10.3 + i/6, "big", [random.randint(-100,1000), -200], 7 + random.randint(-3,3), 90) for i in range(7)] +
+    [(10.8 + i/6, "big", [random.randint(-100,1000), -200], 7 + random.randint(-3,3), 90) for i in range(7)] +
+    [(12 + i/3, "EMyinyangevil", [1200, 50], 6, 160) for i in range(8)] +
+    [(12.5 + i/3, "EMyinyangevilLeft", [-200, 50], 6, 20) for i in range(8)] +
+    [(16 + i/10, "yellowAccelerate", [50+i*90, -40], 4, 100) for i in range(20)] +
+    [(16 + i/10, "yellowAccelerate", [950-i*90, -40], 4, 80) for i in range(20)] +
+    [(18, "bigAccelerate", [100+i*250, -200], 8, 90) for i in range(4)] +
+    [(18.5, "bigAccelerate", [50+i*250, -200], 10, 90) for i in range(5)] +
+    [(19, "bigAccelerate", [100+i*250, -200], 13, 90) for i in range(4)] +
+    [(19.5, "bigAccelerate", [50+i*250, -200], 15, 90) for i in range(5)] +
+    [(20 + i/2, "EMyinyangevil", [1200, 50], 5, 160) for i in range(8)] +
+    [(20 + random.random(), "EMbox", [random.randint(50,950), -40], 5, 90) for i in range(7)] +
+    [(21 + i/3, "EMyinyangevilLeft", [-200, 50], 6, 20) for i in range(8)] +
+    [(25.5, "bigAccelerate", [-200, 100+i*300], 8, 0) for i in range(4)] +
+    [(26, "bigAccelerate", [1200, 0+i*300], 10, 180) for i in range(5)] +
+    [(28 + i/3, "EMyinyangevil", [400, -40], 6, 90) for i in range(10)] +
+    [(28 + i/3, "EMyinyangevilLeft", [600, -40], 6, 90) for i in range(10)] +
+    [(28 + i/3, "EMyinyangevil", [1200, 50], 5, 160) for i in range(8)] +
+    [(28.5 + i/3, "EMyinyangevilLeft", [-200, 50], 6, 20) for i in range(8)] +
+    [(34, "boss", 3)]
 )
 
 #===========================================================================================================
@@ -294,9 +323,9 @@ def updateGraphics():
 
     DISPLAYSURF.blit(backgroundIMG, (0, backgroundY))
     DISPLAYSURF.blit(backgroundIMG, (0, backgroundY-950))
-    if stageCount % 30 == 0:
-        particles.append(Particle("bushLeft",[100,-100],7,90,len(particles)))
-        particles.append(Particle("bushRight",[900,-100],7,90,len(particles)))
+    if stageCount % 60 == 0:
+        particles.append(Particle("bushLeft",[100,-600],7,90,len(particles)))
+        particles.append(Particle("bushRight",[900,-600],7,90,len(particles)))
 
     # Boss ==========================
     boss.render()
@@ -304,7 +333,7 @@ def updateGraphics():
         pygame.draw.rect(DISPLAYSURF, (0,255,0) , boss.rect)
     #enemies collide
     for enemy in enemies:
-        if enemy.hitcooldown < 3:
+        if enemy.hitcooldown < 2:
             enemy.hitcooldown += 1
         if enemy.typeBullet[:13] == "EMyinyangevil":
             if enemy.cooldown == 30:
@@ -314,7 +343,7 @@ def updateGraphics():
                 enemy.cooldown += 1
 
         removedBullet = False
-        if pygame.sprite.spritecollide(enemy,player.playerBullets,False,pygame.sprite.collide_rect_ratio(1)) and enemy.hitcooldown == 3 or bombing > 0:
+        if pygame.sprite.spritecollide(enemy,player.playerBullets,False,pygame.sprite.collide_rect_ratio(1)) and enemy.hitcooldown == 2 or bombing > 0:
             enemy.hp -= 1
             enemy.hitcooldown = 0
             if enemy.hp <= 0:
@@ -581,6 +610,8 @@ class EnemyBullet(pygame.sprite.Sprite):
             self.sprite = bambooSprite
         elif self.typeBullet == "EMbox":
             self.sprite = boxSprite
+        elif self.typeBullet[:3] == "big":
+            self.sprite = bigBullet
         elif self.typeBullet[:7] == "yinyang" or self.typeBullet[:13] == "EMyinyangevil":
             self.sprite = evilyinyangSprite
             self.visableRotation = 0
@@ -598,7 +629,10 @@ class EnemyBullet(pygame.sprite.Sprite):
         elif self.typeBullet in ["basic","yellowbasic","yellowAccelerate", "yellowRotate", "yellowAccelerateFollow"]:
             self.diameter = 25
             self.rect = Rect(self.position[0]-self.diameter/2, self.position[1]-self.diameter/2, self.diameter, self.diameter)
-    
+        elif self.typeBullet[:3] == "big":
+            self.diameter = 128
+            self.rect = Rect(self.position[0]-self.diameter/2, self.position[1]-self.diameter/2, self.diameter, self.diameter)
+
     def move(self):
         self.position[0] += math.cos(math.radians(self.angle))*self.velocity
         self.position[1] += math.sin(math.radians(self.angle))*self.velocity
@@ -606,6 +640,8 @@ class EnemyBullet(pygame.sprite.Sprite):
         self.rect.update([self.position[0]-self.diameter/2, self.position[1]-self.diameter/2], [self.diameter,self.diameter])
         if self.typeBullet[:16] == "yellowAccelerate":
             self.velocity += 0.02
+        elif self.typeBullet == "bigAccelerate":
+            self.velocity += 0.1
         elif self.typeBullet == "yinyangright" or self.typeBullet ==  "yellowRotate":
             self.angle -= 0.5
         elif self.typeBullet == "yinyangleft":
@@ -1008,7 +1044,7 @@ while True:
             # Per Loop Updates
             #==========================
             if playerInvincability == 0:
-                if pygame.sprite.spritecollide(player,enemyBullets,False,pygame.sprite.collide_rect_ratio(1)) or pygame.sprite.spritecollide(player,enemies,False,pygame.sprite.collide_rect_ratio(1)):
+                if pygame.sprite.spritecollide(player,enemyBullets,False,pygame.sprite.collide_circle_ratio(1)) or pygame.sprite.spritecollide(player,enemies,False,pygame.sprite.collide_circle_ratio(1)):
                     #print(bombs)
                     if bombs > 3:
                         items.append(Item("bomb", [player.x,player.y-100], -3, len(items)))
@@ -1144,7 +1180,7 @@ while True:
                 backgroundY = 0
                 
             textDisplay = text.render(f"Points: {points}", False, (255,255,255))
-            DISPLAYSURF.blit(textDisplay, (850,50))
+            DISPLAYSURF.blit(textDisplay, (800,50))
             
             if DEBUG:
                 textDisplay = text.render(f"BossReady: {boss.bossReady}", False, (255,255,255))
