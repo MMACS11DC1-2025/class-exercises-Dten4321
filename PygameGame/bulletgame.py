@@ -11,7 +11,7 @@ pygame.init()
 
 FPS = 60 # frames per second setting
 fpsClock = pygame.time.Clock()
-DEBUG = False
+DEBUG = True
 
 text = pygame.font.SysFont('Times New Roman', 30)
 
@@ -24,22 +24,28 @@ pygame.display.set_caption('Mizhou Episode 0.5')
 ############################################################################################################
 ############################################################################################################
 gameState = 0
+backgroundY = 0
 
 enemyBullets = []
 enemies = []
 items = []
+particles = []
 bulletCooldownTimer = 4
 bombCooldownTimer = 4
 
 lives = 5
 bombs = 3
+if DEBUG:
+    lives = 99
+    bombs = 99
 points = 0
 bombing = 0
 
 stage = 1
 stageCount = 0
+if DEBUG:
+    stageCount = 3300
 
-bossReady = False
 bossbulletCooldownTimer = 0
 bosscdthreshold = 20
 numBossattacks = 0
@@ -49,7 +55,7 @@ menuSelect = 0
 inputCooldown = 10
 
 playerInvincability = 0
-dialogue = 0
+dialogue = [0, False]
 despawnRange = [1600,-600]
 
 
@@ -85,6 +91,7 @@ boxSprite = ezload('box.png')
 yinyangSprite = ezload('yinyang.png')
 evilyinyangSprite = ezload('bluespirit.png')
 eMyinyang = ezload('enemyyinyang.png')
+bigBullet = ezload('bigBullet.png')
 
 pygame.Surface.set_alpha(evilyinyangSprite, 180)
 pygame.Surface.set_alpha(eMyinyang, 230)
@@ -92,6 +99,16 @@ pygame.Surface.set_alpha(basicPlayerBullet, 185)
 
 #===========BOSSES============
 qiSprite = ezload('qiBoss.png')
+
+##============PARTICLES=======
+particleSprite = ezload('particle.png')
+bambooBushSprite = ezload('Bambooleaves.png')
+pygame.Surface.set_alpha(bambooBushSprite, 150)
+bambooBushSpriteRight = pygame.transform.flip(bambooBushSprite, True, False)
+
+#============OTHER============
+stage1backdrop = ezload('backgroundStage1.png')
+stage2backdrop = ezload('backgroundStage2.png')
 
 #Portraits
 PORTRAITS = {
@@ -109,6 +126,18 @@ PORTRAITS = {
         "angry" : portraitload("qiAngry.png"),
         "confused" : portraitload("qiConfused.png"),
         "sweat" : portraitload("qiSweat.png")
+    },
+    "Haruki" : {
+        "neutral" : portraitload("harukiNeutral.png"),
+        "angry" : portraitload("harukiAngry.png"),
+        "angier" : portraitload("harukiAngrier.png"),
+        "confused" : portraitload("harukiConfused.png"),
+        "smug" : portraitload("harukiSmug.png"),
+        "sweat" : portraitload("harukiSweat.png")
+    },
+    "Han" : {
+        "neutral" : portraitload("hanNeutral.png"),
+        "smug" : portraitload("hanSmug.png")
     }
 }
 
@@ -124,39 +153,104 @@ MUSIC.set_volume(0.5)
 ############################################################################################################
 ############################################################################################################
 
+DIALOGUEBOSS1 = (
+    ("Han", "neutral","Oh hello Jiang, what brings you to the town borders?"),
+    ("Jiang", "neutral","Apparently someone from out of town stole something"),
+    ("Jiang", "annoyed","...and I have to get it back."),
+    ("Han", "smug","Don't you think you need to test your skill just in case?"),
+    ("Jiang", "annoyed","Fine."),
+)
+DIALOGUEBOSS1END = (
+    ("Han", "smug","You should be ready!"),
+    ("Jiang", "angry","Let's not waste any more time..."),
+)
 DIALOGUEBOSS2 = (
     ("Jiang", "smug","Hmm, I think I've found the culprit..."),
     ("Qi", "neutral","Really?"),
     ("Jiang", "smug","Don't act suprised, culprit."),
     ("Qi", "confused","What!?"),
     ("Qi", "angry","I'm the one who is missing stuff!"),
-    ("Jiang", "smug","That's exactly what the culprit would say!"),
+    ("Jiang", "smug","That's exactly what the culprit would say!")
+)
+DIALOGUEBOSS2END = (
+    ("Jiang", "confused","So you're really not the culprit?"),
+    ("Qi", "angry","No..."),
+    ("Jiang", "sweat","Oh"),
+    ("Jiang", "sweat","Well I'm going to find them now..."),
+    ("Qi", "sweat","Good luck I guess?")
+)
+DIALOGUEBOSS3 = (
+    ("Haruki", "angrier","Who are you, and what are you doing here!"),
+    ("Jiang", "annoyed", "I'm here to find the suspect who stole a ..lamp?"),
+    ("Jiang", "confused","You wouldn't happen to know anything about it?"),
+    ("Haruki", "sweat","Uhhh.... No... Totally!"),
+    ("Jiang", "annoyed","Won't budge huh?"),
+)
+DIALOGUEBOSS3END = (
+    ("Haruki", "sweat","It was me, it was me!"),
+    ("Jiang", "annoyed","This is not allowed..."),
+    ("Haruki", "sweat","I promise I won't do it again! It was just too interesting!"),
+    ("Jiang", "confused","Interesting?"),
+    ("Qi", "sweat","Goodness, I cannot sleep with this fight here!"),
+    ("Qi", "neutral","Hey! The device I was missing!"),
+    ("Haruki", "sweat","Sorry..."),
+    ("Qi", "neutral","I overheard the conversation a bit, you like to study stuff as well?"),
+    ("Haruki", "confused","Yes?"),
+    ("Qi", "neutral","Well, I didn't make this, I found it near the river by the border."),
+    ("Qi", "neutral","I think it's not from here!"),
+    ("Haruki", "confused","Not from here!?"),
+    ("Qi", "neutral","I invite you to help me in figuring out how this thing works."),
+    ("Haruki", "smug","Of course!"),
+    ("Jiang", "confused","Uhhh... I gues my work is done?"),
 )
 
 level_1_data = (
-    #[(1 + random.random(), "EMbox", [random.randint(50,950), -40], 5, 90) for i in range(5)] +
-    #[(2 + random.random(), "EMbox", [random.randint(50,950), -40], 5, 90) for i in range(5)] +
-    #[(3 + random.random(), "EMbox", [random.randint(50,950), -40], 5, 90) for i in range(5)] +
-    #[(4 + random.random(), "yinyangright", [1200, 100 + random.randint(-10,600)], 10 + random.randint(-2,2), 190) for i in range(7)] +
-    #[(5 + random.random(), "yinyangright", [1200, 100 + random.randint(-10,600)], 10 + random.randint(-2,2), 190) for i in range(7)] +
-    #[(6 + random.random(), "yinyangright", [1200, 100 + random.randint(-200,600)], 10 + random.randint(-2,2), 190) for i in range(10)] +
-    #[(7.4 + random.random(), "yinyangleft", [-200, 100 + random.randint(-200,600)], 10 + random.randint(-2,2), 350) for i in range(10)] +
-    #[(8 + random.random(), "yinyangleft", [-200, 100 + random.randint(-200,600)], 10 + random.randint(-2,2), 350) for i in range(10)] +
-    #[(9 + random.random(), "yinyangleft", [-200, 100 + random.randint(-200,600)], 10 + random.randint(-2,2), 350) for i in range(10)] +
-    #[(10 + random.random(), "yinyang", [random.randint(100,1500), -40], 7 + random.randint(-2,2), 110) for i in range(35)] +
-    #[(random.randint(11,14) + random.random(), "EMbox", [random.randint(50,950), -40], 5, 90) for i in range(10)] +
-    #[(14 + random.random(), "yinyang", [random.randint(100,1500), -40], 10 + random.randint(-2,2), 110) for i in range(30)] +
-    #[(random.randint(16,18) + random.random(), "EMbox", [random.randint(50,950), -40], 5, 90) for i in range(10)] +
-    #[(random.randint(16,18), "yinyang", [1050, random.randint(50,950)], 6 + random.randint(-2,2), 170) for i in range(5)] +
-    #[(random.randint(16,18), "yinyang", [-50, random.randint(50,950)], 6 + random.randint(-2,2), 10) for i in range(5)] +
-    #[(19 + i/3, "EMyinyangevil", [1200, 50], 7, 160) for i in range(10)] +
-    #[(20 + i/2, "yinyang", [1200, 100+i*100], 4, 180) for i in range(10)] +
-    #[(20 + i/2, "yinyang", [-200, 100+i*100], 4, 0) for i in range(10)] +
-    #[(24 + i/3, "EMyinyangevil", [1200, 50], 5, 160) for i in range(8)] +
-    #[(28 + random.random(), "yinyangright", [1200, 100 + random.randint(-10,600)], 10 + random.randint(-2,2), 190) for i in range(10)] +
-    #[(31 + random.random(), "yinyang", [random.randint(100,1500), -40], 7 + random.randint(-2,2), 110) for i in range(35)] +
-    [(0, "boss", 2)] #34
-)    
+    [(1 + random.random(), "EMbox", [random.randint(50,950), -40], 5, 90) for i in range(5)] +
+    [(2 + random.random(), "EMbox", [random.randint(50,950), -40], 5, 90) for i in range(5)] +
+    [(3 + random.random(), "EMbox", [random.randint(50,950), -40], 5, 90) for i in range(5)] +
+    [(4 + random.random(), "yinyangright", [1200, 100 + random.randint(-10,600)], 10 + random.randint(-2,2), 190) for i in range(7)] +
+    [(5 + random.random(), "yinyangright", [1200, 100 + random.randint(-10,600)], 10 + random.randint(-2,2), 190) for i in range(7)] +
+    [(6 + random.random(), "yinyangright", [1200, 100 + random.randint(-200,600)], 10 + random.randint(-2,2), 190) for i in range(10)] +
+    [(7.4 + random.random(), "yinyangleft", [-200, 100 + random.randint(-200,600)], 10 + random.randint(-2,2), 350) for i in range(10)] +
+    [(8 + random.random(), "yinyangleft", [-200, 100 + random.randint(-200,600)], 10 + random.randint(-2,2), 350) for i in range(10)] +
+    [(9 + random.random(), "yinyangleft", [-200, 100 + random.randint(-200,600)], 10 + random.randint(-2,2), 350) for i in range(10)] +
+    [(10 + random.random(), "yinyang", [random.randint(100,1500), -40], 7 + random.randint(-2,2), 110) for i in range(35)] +
+    [(random.randint(11,14) + random.random(), "EMbox", [random.randint(50,950), -40], 5, 90) for i in range(10)] +
+    [(14 + random.random(), "yinyang", [random.randint(100,1500), -40], 10 + random.randint(-2,2), 110) for i in range(30)] +
+    [(random.randint(16,18) + random.random(), "EMbox", [random.randint(50,950), -40], 5, 90) for i in range(10)] +
+    [(random.randint(16,18), "yinyang", [1050, random.randint(50,950)], 6 + random.randint(-2,2), 170) for i in range(5)] +
+    [(random.randint(16,18), "yinyang", [-50, random.randint(50,950)], 6 + random.randint(-2,2), 10) for i in range(5)] +
+    [(19 + i/3, "EMyinyangevil", [1200, 50], 7, 160) for i in range(10)] +
+    [(20 + i/2, "yinyang", [1200, 100+i*100], 4, 180) for i in range(10)] +
+    [(20 + i/2, "yinyang", [-200, 100+i*100], 4, 0) for i in range(10)] +
+    [(24 + i/3, "EMyinyangevil", [1200, 50], 5, 160) for i in range(8)] +
+    [(28 + random.random(), "yinyangright", [1200, 100 + random.randint(-10,600)], 10 + random.randint(-2,2), 190) for i in range(10)] +
+    [(31 + random.random(), "yinyang", [random.randint(100,1500), -40], 7 + random.randint(-2,2), 110) for i in range(35)] +
+    [(34, "boss", 1)] #34
+)
+level_2_data = (
+    [(1 + random.random(), "EMbox", [random.randint(50,950), -40], 5, 90) for i in range(5)] +
+    [(random.randint(3,6), "yinyang", [random.randint(50,900), -40], 7 + random.randint(-2,2), 90) for i in range(50)] +
+    [(7 + i/8, "yellowAccelerate", [50+i*50, -40], 4, 90) for i in range(20)] +
+    [(9 + i/8, "yellowAccelerate", [950-i*50, -40], 4, 90) for i in range(20)] +
+    [(11 + random.random(), "yinyangleft", [-200, 100 + random.randint(-200,600)], 10 + random.randint(-2,2), 350) for i in range(15)] +
+    [(13+ i/18, "yellowRotate", [1100, 500], 8, 270-i*20) for i in range(18)] +
+    [(15, "yellowRotate", [1100, 500], 8, 270-i*20) for i in range(9)] +
+    [(13+ i/18, "yellowRotate", [-100, 500], 8, 270+i*20) for i in range(18)] +
+    [(14, "yellowRotate", [-100, 500], 8, 270+i*20) for i in range(9)] +
+    [(16 + i/3, "EMyinyangevil", [1200, 50], 6, 160) for i in range(8)] +
+    [(18 + i/3, "EMyinyangevilLeft", [-100, 50], 6, 20) for i in range(8)] +
+    [(22 + i/3, "EMyinyangevil", [500, -40], 6, 90) for i in range(8)] +
+    [(22 + i/3, "EMyinyangevilLeft", [500, -40], 6, 90) for i in range(8)] +
+    [(25 + random.random(), "EMbox", [random.randint(50,950), -40], 5, 90) for i in range(5)] +
+    [(28 + i/8, "yellowAccelerateFollow", [50+i*50, -40], 4, 90) for i in range(20)] +
+    [(28 + i/8, "yellowAccelerateFollow", [950-i*50, -40], 4, 90) for i in range(20)] +
+    [(34, "boss", 2)] #34
+    
+)
+level_3_data = (
+    [(0, "boss", 3)]
+)
 
 #===========================================================================================================
 # PLAYER CODE & setup
@@ -185,6 +279,19 @@ def displayIMGPlayer(img):
     DISPLAYSURF.blit(img, (player.x - img.get_width()/2, player.y - img.get_height()/2))
 
 def updateGraphics():
+    if stage == 1:
+        backgroundIMG = stage1backdrop
+    elif stage == 2:
+        backgroundIMG = stage2backdrop
+    else:
+        backgroundIMG = stage1backdrop
+
+    DISPLAYSURF.blit(backgroundIMG, (0, backgroundY))
+    DISPLAYSURF.blit(backgroundIMG, (0, backgroundY-950))
+    if stageCount % 30 == 0:
+        particles.append(Particle("bushLeft",[100,-100],7,90,len(particles)))
+        particles.append(Particle("bushRight",[900,-100],7,90,len(particles)))
+
     # Boss ==========================
     boss.render()
     if DEBUG and boss.level > 0:
@@ -193,7 +300,7 @@ def updateGraphics():
     for enemy in enemies:
         if enemy.hitcooldown < 3:
             enemy.hitcooldown += 1
-        if enemy.typeBullet == "EMyinyangevil":
+        if enemy.typeBullet[:13] == "EMyinyangevil":
             if enemy.cooldown == 30:
                 enemy.cooldown = 0
                 enemy.attack()
@@ -221,19 +328,22 @@ def updateGraphics():
         global points
         item.move()
         if DEBUG:
-            pygame.draw.rect(DISPLAYSURF, (0,0,255) , bullet.rect)
+            pygame.draw.rect(DISPLAYSURF, (0,0,255) , item.rect)
         item.render()
         removed = False
         if pygame.sprite.collide_circle_ratio(3)(item,player):
             itemDestroyed = item.destroy()
             removed = True
             if item.itemType == "life":
+                particles.append(Particle("life",item.position[:],10,math.degrees(math.atan2(player.y-item.position[1],player.x-item.position[0])),len(particles)))
                 if lives < 8:
                     lives += 1
             elif item.itemType == "bomb":
+                particles.append(Particle("bomb",item.position[:],10,math.degrees(math.atan2(player.y-item.position[1],player.x-item.position[0])),len(particles)))
                 if bombs < 8:
                     bombs += 1
             elif item.itemType == "points":
+                particles.append(Particle("points",item.position[:],10,math.degrees(math.atan2(player.y-item.position[1],player.x-item.position[0])),len(particles)))
                 points += 100
         elif item.position[1] < despawnRange[1]:
             itemDestroyed = item.destroy()
@@ -253,21 +363,28 @@ def updateGraphics():
         
         removedBullet = False
         if pygame.sprite.spritecollide(bullet,enemies,False,pygame.sprite.collide_rect_ratio(1)):
+            for i in range(3):
+                particles.append(Particle("shread",bullet.position[:],7,random.randint(0,180),len(particles)))
             bulletDestroyed = bullet.destroy()
             removedBullet = True
             #print(f"removedBullet = {removedBullet}, bulletDestroyed = {bulletDestroyed}")
         elif boss.level > 0:
             if pygame.sprite.collide_rect(bullet,boss):
+                for i in range(3):
+                    particles.append(Particle("shread",bullet.position[:],7,random.randint(0,180),len(particles)))
                 boss.health -= 1
                 bulletDestroyed = bullet.destroy()
                 removedBullet = True
+                if boss.health < 1:
+                    boss.bossReady = False
         elif bullet.position[1] < despawnRange[1]:
             bulletDestroyed = bullet.destroy()
             removedBullet = True
-        
+            
         if removedBullet:
             for bulletNewID in player.playerBullets[bulletDestroyed:]:
                 bulletNewID.index = bulletNewID.index-1
+        
     if focus == True:
         displayIMGPlayer(pygame.transform.rotate(focusBagua, player.focusBaguaRotation))
         displayIMGPlayer(pygame.transform.rotate(focusSpear, 0-player.focusBaguaRotation))
@@ -281,6 +398,7 @@ def updateGraphics():
         displayIMGPlayer(player.playerSprite)
     if DEBUG:
         pygame.draw.rect(DISPLAYSURF, (255,0,255) , player.rect)
+    
     #==========================
     # Enemies
     #==========================
@@ -305,15 +423,68 @@ def updateGraphics():
         if DEBUG:
             pygame.draw.rect(DISPLAYSURF, (255,255,0) , enemy.rect)
         
-            
+    for particle in particles:
+        particle.move()
+        if DEBUG:
+            pygame.draw.rect(DISPLAYSURF, (0,0,255) , particle.rect)
+        particle.render()
+        removed = False
+        if particle.position[1] < despawnRange[1] or particle.life < 0:
+            particleDestroyed = particle.destroy()
+            removed = True
+        if removed:
+            for newID in particles[particleDestroyed:]:
+                newID.index = newID.index-1       
+     
     if focus == True:
         displayIMGPlayer(playerHitbox)
+    
 
 ############################################################################################################
 ############################################################################################################
 # CLASSES & EXTRA FUNCTIONS
 ############################################################################################################
 ############################################################################################################
+class Particle(pygame.sprite.Sprite):
+    def __init__(self, particleType, pos, velocity, angle, index):
+        self.particleType = particleType
+        self.position = pos
+        self.velocity = velocity
+        self.index = index
+        self.angle = angle
+        self.diameter = 30
+        self.life = 5
+        if self.particleType == "bushLeft":
+            self.img = bambooBushSprite
+        elif self.particleType == "bushRight":
+            self.img = bambooBushSpriteRight
+        elif self.particleType == "bomb":
+            self.img = bombSprite
+        elif self.particleType == "points":
+            self.img = pointsSprite
+        elif self.particleType == "life":
+            self.img = liveSprite
+        else:
+            self.img = particleSprite
+        
+        self.rect = Rect(self.position[0]-self.diameter/2, self.position[1]-self.diameter/2, self.diameter, self.diameter)
+
+    def move(self):
+        self.position[0] += math.cos(math.radians(self.angle))*self.velocity
+        self.position[1] += math.sin(math.radians(self.angle))*self.velocity
+        self.rect.update([self.position[0]-self.diameter/2, self.position[1]-self.diameter/2], [self.diameter,self.diameter])
+        if self.particleType in ["shread", "bomb", "points", "life"]:
+            self.life -= 1
+        #if self.particleType in ["bomb", "points", "life"]:
+        #    self.angle = math.degrees(math.atan2(self.position[0]-player.y,self.position[1]-player.x))
+    
+    def render(self):
+        self.selfDraw(self.img)
+    def selfDraw(self, img):
+        DISPLAYSURF.blit(img, (self.position[0] - img.get_width()/2, self.position[1] - img.get_height()/2))
+    def destroy(self):
+        particles.pop(self.index)
+        return self.index
 
 class PlayerBullet(pygame.sprite.Sprite):
     def __init__(self, typeBullet, playerPos, velocity, angle, index):
@@ -379,16 +550,18 @@ class EnemyBullet(pygame.sprite.Sprite):
         self.velocity = velocity
         self.index = index
         self.angle = angle
+        if self.typeBullet == "yellowAccelerateFollow":
+            self.angle = math.degrees(math.atan2(player.y-self.position[1],player.x-self.position[0]))
         if self.typeBullet[:2] == "EM":
             self.hitcooldown = 0
             if self.typeBullet[2:] == "box":
                 self.hp = 1
-            elif self.typeBullet[2:] == "yinyangevil":
+            elif self.typeBullet in ["EMyinyangevil", "EMyinyangevilLeft"]:
                 self.hp = 5
                 self.cooldown = 0
         if self.typeBullet == "basic":
             self.sprite = basicBullet
-        elif self.typeBullet in ["yellowbasic", "yellowAccelerate", "yellowRotate"]:
+        elif self.typeBullet in ["yellowbasic", "yellowAccelerate", "yellowRotate", "yellowAccelerateFollow"]:
             self.sprite = yellowbullet
         elif self.typeBullet == "yellowbeam":
             self.sprite = yellowbeam
@@ -396,10 +569,10 @@ class EnemyBullet(pygame.sprite.Sprite):
             self.sprite = bambooSprite
         elif self.typeBullet == "EMbox":
             self.sprite = boxSprite
-        elif self.typeBullet[:7] == "yinyang" or self.typeBullet == "EMyinyangevil":
+        elif self.typeBullet[:7] == "yinyang" or self.typeBullet[:13] == "EMyinyangevil":
             self.sprite = evilyinyangSprite
             self.visableRotation = 0
-            if self.typeBullet == "EMyinyangevil":
+            if self.typeBullet[:13] == "EMyinyangevil":
                 self.sprite = eMyinyang
         else:
             self.sprite = basicBullet
@@ -407,10 +580,10 @@ class EnemyBullet(pygame.sprite.Sprite):
         if self.typeBullet == "bamboo":
             self.diameter = 28
             self.rect = Rect(self.position[0]-self.diameter/2, self.position[1]-self.diameter/2, self.diameter, self.diameter)
-        elif self.typeBullet[:7] == "yinyang" or self.typeBullet in ["EMyinyangevil", "EMbox"]:
+        elif self.typeBullet[:7] == "yinyang" or self.typeBullet in ["EMyinyangevil", "EMbox", "EMyinyangevilLeft"]:
             self.diameter = 40
             self.rect = Rect(self.position[0]-self.diameter/2, self.position[1]-self.diameter/2, self.diameter, self.diameter)
-        elif self.typeBullet in ["basic","yellowbasic","yellowAccelerate", "yellowRotate"]:
+        elif self.typeBullet in ["basic","yellowbasic","yellowAccelerate", "yellowRotate", "yellowAccelerateFollow"]:
             self.diameter = 25
             self.rect = Rect(self.position[0]-self.diameter/2, self.position[1]-self.diameter/2, self.diameter, self.diameter)
     
@@ -419,7 +592,7 @@ class EnemyBullet(pygame.sprite.Sprite):
         self.position[1] += math.sin(math.radians(self.angle))*self.velocity
         #if self.typeBullet in ["basic","yellowbasic","yellowAccelerate", "yellowturn"]:
         self.rect.update([self.position[0]-self.diameter/2, self.position[1]-self.diameter/2], [self.diameter,self.diameter])
-        if self.typeBullet == "yellowAccelerate":
+        if self.typeBullet[:16] == "yellowAccelerate":
             self.velocity += 0.02
         elif self.typeBullet == "yinyangright" or self.typeBullet ==  "yellowRotate":
             self.angle -= 0.5
@@ -427,14 +600,16 @@ class EnemyBullet(pygame.sprite.Sprite):
             self.angle += 0.5
         elif self.typeBullet == "EMyinyangevil":
             self.angle += 0.2
+        elif self.typeBullet == "EMyinyangevilLeft":
+            self.angle -= 0.2
         if self.typeBullet[:7] == "yinyang":
             self.visableRotation += 10
-        elif self.typeBullet == "EMyinyangevil":
+        elif self.typeBullet[:13] == "EMyinyangevil":
             self.visableRotation += 5
 
     
     def render(self):
-        if self.typeBullet[:7] == "yinyang" or self.typeBullet == "EMyinyangevil":
+        if self.typeBullet[:7] == "yinyang" or self.typeBullet[:13] == "EMyinyangevil":
             self.selfDraw(pygame.transform.rotate(self.sprite, self.visableRotation))
         else:
             self.selfDraw(self.sprite)
@@ -447,6 +622,8 @@ class EnemyBullet(pygame.sprite.Sprite):
             DISPLAYSURF.blit(img, (self.position[0] - img.get_width()/2, self.position[1] - img.get_height()/2))
 
     def destroy(self):
+        for i in range(5):
+            particles.append(Particle("shread",self.position[:],7,(0 + i*72)+random.randint(-5,5),len(particles)))
         if self.typeBullet[:2] == "EM":
             if self.typeBullet == "EMbox":
                 getPoints = random.randint(0,6)
@@ -456,7 +633,7 @@ class EnemyBullet(pygame.sprite.Sprite):
                     pointsAmount = random.randint(3,8)
                     for i in range(pointsAmount):
                         items.append(Item(random.choice(["points"]), [self.position[0]+ random.randint(-50,50),self.position[1]+ random.randint(-20,50)], -3, len(items)))
-            elif self.typeBullet == "EMyinyangevil":
+            elif self.typeBullet[:13] == "EMyinyangevil":
                 getPoints = random.randint(0,3)
                 if getPoints == 0:
                     items.append(Item(random.choice(["bomb", "bomb", "bomb","bomb","life"]), self.position[:], -3, len(items)))
@@ -470,7 +647,7 @@ class EnemyBullet(pygame.sprite.Sprite):
         return self.index
 
     def attack(self):
-        if self.typeBullet == "EMyinyangevil":
+        if self.typeBullet[:13] == "EMyinyangevil":
             self.addBullet("basic", self.position[:], 8, math.degrees(math.atan2(player.y-200,player.x-500)))
     
     def addBullet(self, btype, pos, vel, angle):
@@ -483,6 +660,8 @@ class EnemyBullet(pygame.sprite.Sprite):
 class Boss(pygame.sprite.Sprite):
     def __init__(self, level):
         self.level = level
+        self.bossReady = False
+        self.health = 999
         if level > 0:
             self.position = [500, -60]
             self.velocity = 0
@@ -490,28 +669,14 @@ class Boss(pygame.sprite.Sprite):
             self.maxV = [10,10]
             self.diameter = 70
             self.maxSpeed = 5
-            print("made!!")
             self.rect = Rect(self.position[0],self.position[1], 70, 70)
             self.rect.update([self.position[0]-self.diameter/2, self.position[1]-self.diameter/2], [self.diameter,self.diameter])
-            if self.level == 2:
-                self.health = 1000
-    
-    def gotoPos(self, target, pos, ogPos):
-        angleTowards = math.atan2(ogPos[1]-target[1],ogPos[0]-target[0])
-        ogDist = math.sqrt((ogPos[0] - target[0])**2 + (ogPos[1] - target[1])**2) #pythagoras to find hypotenuse
-        currDist = math.sqrt((pos[0] - target[0])**2 + (pos[1] - target[1])**2) #pythagoras to find hypotenuse
-        #print(f"ogdist = {ogDist}, currdist = {currDist}, vel = {self.velocity}")
-        if currDist >= 10:
-            self.velocity = 10
-            self.position[0] -= math.cos(angleTowards)*self.velocity
-            self.position[1] -= math.sin(angleTowards)*self.velocity
-            return True
-        return False
-    
-    def makeogPos(self, NumBssAtks, currNumBssAtk, currOgPos):
-        if currNumBssAtk == NumBssAtks:
-            return boss.position
-        return currOgPos
+            if self.level == 1:
+                self.health = 800 
+            elif self.level == 2:
+                self.health = 1500 
+            elif self.level == 3:
+                self.health = 2000  
     
     def fancyGotoPos(self, target, ogPos, NumBssAtks, startEndTime): 
         angleTowards = math.atan2(ogPos[1]-target[1],ogPos[0]-target[0])
@@ -550,13 +715,16 @@ class Boss(pygame.sprite.Sprite):
             else:
                 self.velocity = 0
         if NumBssAtks == startEndTime[0]:
-            print("done")
             return boss.position[:]
         else:
             return ogPos
     
     def render(self):
-        if self.level == 2:
+        if self.level == 4:
+            self.selfDraw(qiSprite)
+        elif self.level == 2:
+            self.selfDraw(qiSprite)
+        elif self.level == 3:
             self.selfDraw(qiSprite)
         
     def selfDraw(self, img):
@@ -565,20 +733,32 @@ class Boss(pygame.sprite.Sprite):
     #==========================
     # Boss Special Attacks
     #==========================
-    def bossAttack(self, boss, special):
-        if boss == 2:
+    def bossAttack(self, special):
+        if self.level == 1:
             if special == 0:
-                for i in range(7):
-                    self.addBullet("yellowbasic", self.position[:], 8, math.degrees(math.atan2(player.y-200,player.x-500))-45+i*15)
+                for i in range(3):
+                    self.addBullet("basic", self.position[:], 8, math.degrees(math.atan2(player.y-self.position[1],player.x-self.position[0]))-30+i*30)
+            elif special == 1:
+                for i in range(6):
+                    self.addBullet("basic", [random.randint(10,990),-30], 5, math.degrees(math.atan2(player.y-self.position[1],player.x-self.position[0])))
+            elif special == 2:
+                for i in range(6):
+                    self.addBullet("basic", [-30,100+i*80], 5, math.degrees(math.atan2(player.y-self.position[1],player.x-self.position[0])))
+                for i in range(6):
+                    self.addBullet("basic", [1030,150+i*80], 5, math.degrees(math.atan2(player.y-self.position[1],player.x-self.position[0])))
+        elif self.level == 2:
+            if special == 0:
+                for i in range(5):
+                    self.addBullet("yellowbasic", self.position[:], 5, math.degrees(math.atan2(player.y-self.position[1],player.x-self.position[0]))-30+i*30)
                 
-            if special == 1:
+            elif special == 1:
                 self.addBullet("yellowAccelerate", [700, -15], 1, random.randint(60,120))
                 self.addBullet("yellowAccelerate", [500, -15], 1, random.randint(60,120))
                 self.addBullet("yellowAccelerate", [300, -15], 1, random.randint(60,120))
                 
-            if special == 2:
-                for i in range(12):
-                    self.addBullet("yellowRotate", self.position[:], 8, math.degrees(math.atan2(player.y-200,player.x-500))+i*30)
+            elif special == 2:
+                for i in range(18):
+                    self.addBullet("yellowRotate", self.position[:], 8, math.degrees(math.atan2(player.y-self.position[1],player.x-self.position[0]))+i*20)
 
     
     def addBullet(self, btype,pos,vel,angle):
@@ -611,12 +791,32 @@ def runStage(stageData, stageCount):
 #== STAGE 1 =======================================
 def getStageData(stage):
     if stage == 1:
-    	return level_1_data #Format for each item (time, bullet type,position,velocity,angle/direction)...
+        return level_1_data #Format for each item (time, bullet type,position,velocity,angle/direction)...
+    if stage == 2:
+        return level_2_data
+    if stage == 3:
+        return level_3_data
+    else:
+        return []
 
 
 ############################################################################################################
 # EXTRA FUNCTIONS
 ############################################################################################################
+
+def dialogueHandler(dialogueTree, dialogueTreeName, dialogue):
+    if dialogue-1 < len(dialogueTree):
+        dialogue = doDialogue(dialogueTreeName, dialogue-1, dialogueTree)
+        for event in pygame.event.get():
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    pygame.quit()
+                    sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_z:
+                    dialogue +=1
+        return (dialogue, True)
+    return (dialogue, False)
 
 def menuGetColour(id):
     if menuSelect == id:
@@ -633,17 +833,19 @@ def setState(state):
     if state == 0:
         setMusic("LandOfTheLostFog")
     elif state == 1:
-        setMusic("Stage1Theme")
+        if stage == 1:
+            setMusic("Stage1Theme")
+        elif stage == 2:
+            setMusic("Stage2Theme")
     return state
 
-def doDialouge(level, textID):
-    currDia = DIALOGUEBOSS2[textID]
-    textpos = [300,700]
-    if level == "boss2":
-        if textID < len(DIALOGUEBOSS2):
-            textDisplay = text.render(currDia[2], False, (255,255,255))
-            DISPLAYSURF.blit(PORTRAITS[currDia[0]][currDia[1]],(textpos[0]-250,textpos[1]-50))
-            DISPLAYSURF.blit(textDisplay, (textpos[0],textpos[1]))
+def doDialogue(level, textID, dialogueTree):
+    currDia = dialogueTree[textID]
+    textpos = [220,700]
+    if textID < len(dialogueTree):
+        textDisplay = text.render(currDia[2], False, (255,255,255))
+        DISPLAYSURF.blit(PORTRAITS[currDia[0]][currDia[1]],(textpos[0]-200,textpos[1]-50))
+        DISPLAYSURF.blit(textDisplay, (textpos[0],textpos[1]))
     return textID+1
     
 ############################################################################################################
@@ -733,40 +935,59 @@ while True:
             # Boss Loop
             #==========================
             initBoss = runStage(getStageData(stage), stageCount)
-            if bossReady:
+            if boss.bossReady:
+                if bombing > 0:
+                    boss.health -= 10
+                    if boss.health < 1:
+                        boss.bossReady = False
                 if bossbulletCooldownTimer == bosscdthreshold:
-                    #Shooting===============
-                    if numBossattacks % 40 < 15 and 100 < numBossattacks < 350:
-                        boss.bossAttack(2,0)
-                        bossbulletCooldownTimer = 0
+                    #Attacks===============
+                    if boss.level == 1:
+                        if numBossattacks % 40 < 15 and 100 < numBossattacks < 150:
+                            boss.bossAttack(0)
+                            bossbulletCooldownTimer = 0
+                        elif numBossattacks and 200 < numBossattacks < 220:
+                            boss.bossAttack(1)
+                            bossbulletCooldownTimer = 0 
+                        elif numBossattacks % 40 < 5 and 220 < numBossattacks < 230:
+                            boss.bossAttack(0)
+                            bossbulletCooldownTimer = 0 
+                        elif numBossattacks % 40 < 5 and 230 < numBossattacks < 250:
+                            boss.bossAttack(2)
+                            bossbulletCooldownTimer = 0     
+                        elif numBossattacks > 250:
+                            bosscdthreshold = 20
+                            numBossattacks = 1
+                    elif boss.level == 2:
+                        if numBossattacks % 40 < 15 and 100 < numBossattacks < 350:
+                            boss.bossAttack(0)
+                            bossbulletCooldownTimer = 0
 
-                    elif numBossattacks and 350 < numBossattacks < 400:
-                        bosscdthreshold = 20
-                        boss.bossAttack(2,1)
-                        bossbulletCooldownTimer = 0 
-                    elif numBossattacks % 40 < 5 and 400 < numBossattacks < 450:
-                        boss.bossAttack(2,0)
-                        bossbulletCooldownTimer = 0 
-                    elif numBossattacks % 40 < 5 and 450 < numBossattacks < 600:
-                        bosscdthreshold = 15
-                        boss.bossAttack(2,2)
-                        bossbulletCooldownTimer = 0     
-                    elif numBossattacks > 600:
-                        bosscdthreshold = 20
-                        numBossattacks = 0
+                        elif numBossattacks and 350 < numBossattacks < 400:
+                            boss.bossAttack(1)
+                            bossbulletCooldownTimer = 0 
+                        elif numBossattacks % 40 < 5 and 400 < numBossattacks < 450:
+                            boss.bossAttack(0)
+                            bossbulletCooldownTimer = 0 
+                        elif numBossattacks % 40 < 5 and 450 < numBossattacks < 650:
+                            boss.bossAttack(2)
+                            bossbulletCooldownTimer = 0     
+                        elif numBossattacks > 650:
+                            bosscdthreshold = 20
+                            numBossattacks = 1
                     
                     numBossattacks +=1
-                    print(numBossattacks)
                 if bossbulletCooldownTimer < bosscdthreshold:
                     bossbulletCooldownTimer += 1
                 #Moving=================
-                ogPos = boss.fancyGotoPos([boss.position[0], 120], ogPos, numBossattacks, [0, 100])
-                ogPos = boss.fancyGotoPos([200, boss.position[1]], ogPos, numBossattacks, [100, 200])
-                ogPos = boss.fancyGotoPos([800, boss.position[1]], ogPos, numBossattacks, [200, 320])
-                ogPos = boss.fancyGotoPos([500, boss.position[1]], ogPos, numBossattacks, [320, 420])
+                if boss.level == 1:
+                    ogPos = boss.fancyGotoPos([boss.position[0], 120], ogPos, numBossattacks, [0, 100])
+                elif boss.level == 2:
+                    ogPos = boss.fancyGotoPos([boss.position[0], 120], ogPos, numBossattacks, [0, 100])
+                    ogPos = boss.fancyGotoPos([200, boss.position[1]], ogPos, numBossattacks, [100, 200])
+                    ogPos = boss.fancyGotoPos([800, boss.position[1]], ogPos, numBossattacks, [200, 320])
+                    ogPos = boss.fancyGotoPos([500, boss.position[1]], ogPos, numBossattacks, [320, 420])
                 
-                textDisplay = text.render(f"Boss Health: {boss.health}", False, (255,255,255))
-                DISPLAYSURF.blit(textDisplay, (50,50))
                     #print(ogPos)
                 if pygame.sprite.collide_rect(player, boss):
                     gameState = setState(0)
@@ -776,10 +997,16 @@ while True:
             #==========================
             if playerInvincability == 0:
                 if pygame.sprite.spritecollide(player,enemyBullets,False,pygame.sprite.collide_rect_ratio(1)) or pygame.sprite.spritecollide(player,enemies,False,pygame.sprite.collide_rect_ratio(1)):
-                    lives -= 1
+                    #print(bombs)
+                    if bombs > 3:
+                        items.append(Item("bomb", [player.x,player.y-100], -3, len(items)))
                     player.x = 500
                     player.y = 500
+                    lives -= 1
                     playerInvincability = 120
+                    
+                    for i in range(5):
+                        particles.append(Particle("shread",[player.x,player.y],7,(0 + i*72)+random.randint(-5,5),len(particles)))
                     if lives == 0:
                         gameState = setState(0)
                     bombs = 3
@@ -794,26 +1021,103 @@ while True:
                    
             updateGraphics()
             
-            if not bossReady:
-                if initBoss == "BossInit":
-                    if stage == 1:
+            if boss.bossReady:
+                textDisplay = text.render(f"Boss Health: {boss.health}", False, (255,255,255))
+                DISPLAYSURF.blit(textDisplay, (50,50))
+            
+            if not boss.bossReady:
+                if stage == 1:
+                    if initBoss == "BossInit":
+                        numBossattacks = 0
+                        setMusic("HanTheme")
+                        dialogue = [1, True]
+                        dialogueDone = doDialogue("DIALOGUEBOSS1", 0, DIALOGUEBOSS1)
+                        playerInvincability = 1
+                    
+                    if boss.health > 0 and dialogue[0] > 0: # Begin Stage 1 boss
+                        dialogue = dialogueHandler(DIALOGUEBOSS1, "DIALOGUEBOSS1",dialogue[0])
+                        playerInvincability = 1
+                        if not dialogue[1]:
+                            boss = Boss(1)
+                            boss.bossReady = True
+                            dialogue = [0, True]
+                    elif boss.health < 1 and dialogue[0] == 0: #End Stage 1 boss
+                        dialogue = [1, True]
+                        dialogueDone = doDialogue("DIALOGUEBOSS1END", 0, DIALOGUEBOSS1END)
+                        playerInvincability = 1
+                        
+                    if boss.health < 1 and dialogue[0] > 0:
+                        dialogue = dialogueHandler(DIALOGUEBOSS1END, "DIALOGUEBOSS1END",dialogue[0])    
+                        playerInvincability = 1  
+                        bombing = 1                  
+                        if not dialogue[1]:
+                            dialogue = [0, False]
+                            stage = 2
+                            stageCount = 0       
+                            boss = Boss(0)
+                            setMusic("Stage2Theme")
+                elif stage == 2:
+                    if initBoss == "BossInit":
+                        numBossattacks = 0
                         setMusic("QiTheme")
-                        dialogue = 1
-                        dialogueDone = doDialouge("boss2", 0)
-                if dialogue > 0 and stage == 1:
-                    if dialogue-1 < len(DIALOGUEBOSS2):
-                        dialogue = doDialouge("boss2", dialogue-1)
-                        for event in pygame.event.get():
-                            for event in pygame.event.get():
-                                if event.type == QUIT:
-                                    pygame.quit()
-                                    sys.exit()
-                            if event.type == pygame.KEYDOWN:
-                                if event.key == pygame.K_z:
-                                    dialogue +=1
-                    else:
-                        boss = Boss(2)
-                        bossReady = True
+                        dialogue = [1, True]
+                        dialogueDone = doDialogue("DIALOGUEBOSS2", 0, DIALOGUEBOSS2)
+                        playerInvincability = 1
+                    
+                    if boss.health > 0 and dialogue[0] > 0: # Begin Stage 1 boss
+                        dialogue = dialogueHandler(DIALOGUEBOSS2, "DIALOGUEBOSS2",dialogue[0])
+                        playerInvincability = 1
+                        if not dialogue[1]:
+                            boss = Boss(2)
+                            boss.bossReady = True
+                            dialogue = [0, True]
+                    elif boss.health < 1 and dialogue[0] == 0: #End Stage 1 boss
+                        dialogue = [1, True]
+                        dialogueDone = doDialogue("DIALOGUEBOSS2END", 0, DIALOGUEBOSS2END)
+                        bombing = 1
+                        playerInvincability = 1
+                        boss.bossReady = False
+                        
+                    if boss.health < 1 and dialogue[0] > 0:
+                        dialogue = dialogueHandler(DIALOGUEBOSS2END, "DIALOGUEBOSS2END",dialogue[0])    
+                        playerInvincability = 1                    
+                        if not dialogue[1]:
+                            dialogue = [0, False]
+                            stage = 3
+                            stageCount = 0       
+                            boss = Boss(0)
+                            setMusic("Stage3Theme")
+                elif stage == 3:
+                    if initBoss == "BossInit":
+                        numBossattacks = 0
+                        setMusic("HarukiTheme")
+                        dialogue = [1, True]
+                        dialogueDone = doDialogue("DIALOGUEBOSS3", 0, DIALOGUEBOSS3)
+                        playerInvincability = 1
+                    
+                    if boss.health > 0 and dialogue[0] > 0: # Begin Stage 1 boss
+                        dialogue = dialogueHandler(DIALOGUEBOSS3, "DIALOGUEBOSS3",dialogue[0])
+                        playerInvincability = 1
+                        if not dialogue[1]:
+                            boss = Boss(3)
+                            boss.bossReady = True
+                            dialogue = [0, True]
+                    elif boss.health < 1 and dialogue[0] == 0: #End Stage 1 boss
+                        dialogue = [1, True]
+                        dialogueDone = doDialogue("DIALOGUEBOSS3END", 0, DIALOGUEBOSS3END)
+                        bombing = 1
+                        playerInvincability = 1
+                        boss.bossReady = False
+                        
+                    if boss.health < 1 and dialogue[0] > 0:
+                        dialogue = dialogueHandler(DIALOGUEBOSS3END, "DIALOGUEBOSS3END",dialogue[0])    
+                        playerInvincability = 1                    
+                        if not dialogue[1]:
+                            dialogue = [0, False]
+                            stage = 3
+                            stageCount = 0       
+                            boss = Boss(0)
+                            setMusic("Stage3Theme")
             
             for i in range(lives):
                 DISPLAYSURF.blit(liveSprite, (20 + i* 50, 880))
@@ -821,9 +1125,26 @@ while True:
                 DISPLAYSURF.blit(bombSprite, (940 - i*50, 880))
             if bombing > 0:
                 bombing -=1
+            
+            if backgroundY < 950:
+                backgroundY +=3
+            else:
+                backgroundY = 0
                 
             textDisplay = text.render(f"Points: {points}", False, (255,255,255))
             DISPLAYSURF.blit(textDisplay, (850,50))
+            
+            if DEBUG:
+                textDisplay = text.render(f"BossReady: {boss.bossReady}", False, (255,255,255))
+                DISPLAYSURF.blit(textDisplay, (50,100))
+                textDisplay = text.render(f"StageCount: {stageCount}", False, (255,255,255))
+                DISPLAYSURF.blit(textDisplay, (50,130))
+                textDisplay = text.render(f"BossAttacks: {numBossattacks}", False, (255,255,255))
+                DISPLAYSURF.blit(textDisplay, (50,160))
+                textDisplay = text.render(f"InitBoss: {initBoss}", False, (255,255,255))
+                DISPLAYSURF.blit(textDisplay, (50,190))
+                textDisplay = text.render(f"Dialogue: {dialogue}", False, (255,255,255))
+                DISPLAYSURF.blit(textDisplay, (50,220))
             
     for event in pygame.event.get():
         if event.type == QUIT:

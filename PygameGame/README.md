@@ -4,6 +4,15 @@
 ## Changelog
 ### 01/18/2026
 ### V 0.2.5
+- Added Debug Mode
+- Finished stage 1, stage 2
+- finished boss behavior for stage 1 and stage 2
+- added particles
+- added background + paralax
+- added theme for all stages
+- added all dialogue "trees"
+### 01/17/2026
+### V 0.2.5
 - Added Dialogue
 - added more attacks and enlongated stage 1
 - added lives and "bombs"
