@@ -5,6 +5,7 @@
 ### 01/19/2026
 ### V 0.3.1
 - added backdrop for stage 3
+- added title and game over screens
 
 ### 01/18/2026
 ### V 0.3.0
