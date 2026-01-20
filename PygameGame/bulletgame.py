@@ -13,7 +13,8 @@ FPS = 60 # frames per second setting
 fpsClock = pygame.time.Clock()
 DEBUG = False
 
-text = pygame.font.SysFont('Times New Roman', 30)
+text = pygame.font.SysFont('Lucida Fax', 30)
+bigText = pygame.font.SysFont('Lucida Fax', 80)
 
 DISPLAYSURF = pygame.display.set_mode((1000, 950))
 pygame.display.set_caption('Mizhou Episode 0.5')
@@ -41,10 +42,10 @@ if DEBUG:
 points = 0
 bombing = 0
 
-stage = 3
+stage = 1
 stageCount = 0
-#if DEBUG:
-#    stageCount = 3300
+if DEBUG:
+    stageCount = 0
 
 bossbulletCooldownTimer = 0
 bosscdthreshold = 20
@@ -56,7 +57,7 @@ inputCooldown = 10
 
 playerInvincability = 0
 dialogue = [0, False]
-despawnRange = [1600,-600]
+DESPWANRANGE = [1600,-600]
 
 
 ############################################################################################################
@@ -98,7 +99,9 @@ pygame.Surface.set_alpha(eMyinyang, 230)
 pygame.Surface.set_alpha(basicPlayerBullet, 185)
 
 #===========BOSSES============
+hanSprite = ezload('hanBoss.png')
 qiSprite = ezload('qiBoss.png')
+harukiSprite = ezload('harukiBoss.png')
 
 ##============PARTICLES=======
 particleSprite = ezload('particle.png')
@@ -110,9 +113,16 @@ pygame.Surface.set_alpha(bamboodarkBushSprite, 150)
 bamboodarkBushSpriteRight = pygame.transform.flip(bamboodarkBushSprite, True, False)
 
 #============OTHER============
+titleBackdrop = ezload('titleimage.png')
+titleWords = ezload('titletext.png')
+titleBox = ezload('titlebox.png')
 stage1backdrop = ezload('backgroundStage1.png')
 stage2backdrop = ezload('backgroundStage2.png')
 stage3backdrop = ezload('backgroundStage3.png')
+gameoverscreen = ezload('gameOverScreen.png')
+transitionSprite = ezload('transition.png')
+
+pygame.Surface.set_alpha(titleBox, 200)
 
 #Portraits
 PORTRAITS = {
@@ -230,30 +240,30 @@ level_1_data = (
     [(24 + i/3, "EMyinyangevil", [1200, 50], 5, 160) for i in range(8)] +
     [(28 + random.random(), "yinyangright", [1200, 100 + random.randint(-10,600)], 10 + random.randint(-2,2), 190) for i in range(10)] +
     [(31 + random.random(), "yinyang", [random.randint(100,1500), -40], 7 + random.randint(-2,2), 110) for i in range(35)] +
-    [(34, "boss", 1)] #34
+    [(33, "boss", 1)]
 )
 level_2_data = (
-    [(1 + random.random(), "EMbox", [random.randint(50,950), -40], 5, 90) for i in range(5)] +
-    [(random.randint(3,6), "yinyang", [random.randint(50,900), -40], 7 + random.randint(-2,2), 90) for i in range(50)] +
-    [(7 + i/8, "yellowAccelerate", [50+i*50, -40], 4, 90) for i in range(20)] +
-    [(9 + i/8, "yellowAccelerate", [950-i*50, -40], 4, 90) for i in range(20)] +
-    [(11 + random.random(), "yinyangleft", [-200, 100 + random.randint(-200,600)], 10 + random.randint(-2,2), 350) for i in range(15)] +
-    [(13+ i/18, "yellowRotate", [1100, 500], 8, 270-i*20) for i in range(18)] +
-    [(15, "yellowRotate", [1100, 500], 8, 270-i*20) for i in range(9)] +
-    [(13+ i/18, "yellowRotate", [-100, 500], 8, 270+i*20) for i in range(18)] +
-    [(14, "yellowRotate", [-100, 500], 8, 270+i*20) for i in range(9)] +
-    [(16 + i/3, "EMyinyangevil", [1200, 50], 6, 160) for i in range(8)] +
-    [(18 + i/3, "EMyinyangevilLeft", [-100, 50], 6, 20) for i in range(8)] +
-    [(22 + i/3, "EMyinyangevil", [500, -40], 6, 90) for i in range(8)] +
-    [(22 + i/3, "EMyinyangevilLeft", [500, -40], 6, 90) for i in range(8)] +
-    [(25 + random.random(), "EMbox", [random.randint(50,950), -40], 5, 90) for i in range(5)] +
-    [(28 + i/8, "yellowAccelerateFollow", [50+i*50, -40], 4, 90) for i in range(23)] +
-    [(28 + i/8, "yellowAccelerateFollow", [950-i*50, -40], 4, 90) for i in range(23)] +
-    [(34, "boss", 2)] #34
+    [(2 + random.random(), "EMbox", [random.randint(50,950), -40], 5, 90) for i in range(5)] +
+    [(random.randint(4,7), "yinyang", [random.randint(50,900), -40], 7 + random.randint(-2,2), 90) for i in range(50)] +
+    [(8 + i/8, "yellowAccelerate", [50+i*50, -40], 4, 90) for i in range(20)] +
+    [(10 + i/8, "yellowAccelerate", [950-i*50, -40], 4, 90) for i in range(20)] +
+    [(12 + random.random(), "yinyangleft", [-200, 100 + random.randint(-200,600)], 10 + random.randint(-2,2), 350) for i in range(15)] +
+    [(14+ i/18, "yellowRotate", [1100, 500], 8, 270-i*20) for i in range(18)] +
+    [(16, "yellowRotate", [1100, 500], 8, 270-i*20) for i in range(9)] +
+    [(14+ i/18, "yellowRotate", [-100, 500], 8, 270+i*20) for i in range(18)] +
+    [(15, "yellowRotate", [-100, 500], 8, 270+i*20) for i in range(9)] +
+    [(17 + i/3, "EMyinyangevil", [1200, 50], 6, 160) for i in range(8)] +
+    [(19 + i/3, "EMyinyangevilLeft", [-100, 50], 6, 20) for i in range(8)] +
+    [(23 + i/3, "EMyinyangevil", [500, -40], 6, 90) for i in range(8)] +
+    [(23 + i/3, "EMyinyangevilLeft", [500, -40], 6, 90) for i in range(8)] +
+    [(26 + random.random(), "EMbox", [random.randint(50,950), -40], 5, 90) for i in range(5)] +
+    [(29 + i/8, "yellowAccelerateFollow", [50+i*50, -40], 4, 90) for i in range(23)] +
+    [(29 + i/8, "yellowAccelerateFollow", [950-i*50, -40], 4, 90) for i in range(23)] +
+    [(33.5, "boss", 2)]
     
 )
 level_3_data = (
-    [(1 + random.random(), "EMbox", [random.randint(50,950), -40], 5, 90) for i in range(5)] +
+    [(2 + random.random(), "EMbox", [random.randint(50,950), -40], 5, 90) for i in range(5)] +
     [(3 + i/8, "big", [100+i*250, -200], 5, 90) for i in range(4)] +
     [(4 + i/8, "big", [650-i*250, -200], 8, 90) for i in range(3)] +
     [(5 + i/15, "yinyangright", [1200, 100+i*130], 8, 200) for i in range(8)] +
@@ -294,7 +304,7 @@ class Player(pygame.sprite.Sprite):
         self.bombs = 3
         self.playerSprite = jiangSprite
         self.x = 500
-        self.y = 500
+        self.y = 800
         self.diameter = 5
         self.playerSpeed = 5
         self.focusBaguaRotation = 0
@@ -314,10 +324,12 @@ def displayIMGPlayer(img):
 def updateGraphics():
     if stage == 1:
         backgroundIMG = stage1backdrop
-    elif stage == 2:
+    elif stage == 2 and stageCount > 70:
         backgroundIMG = stage2backdrop
-    elif stage == 3:
+    elif stage == 3 and stageCount > 70:
         backgroundIMG = stage3backdrop
+    elif stage == 3:
+        backgroundIMG = stage2backdrop
     else:
         backgroundIMG = stage1backdrop
 
@@ -350,7 +362,7 @@ def updateGraphics():
                 enemyDestroyed = enemy.destroy()
                 removedBullet = True
                 #print(f"removedBullet = {removedBullet}, bulletDestroyed = {enemyDestroyed}")
-        elif enemy.position[1] > despawnRange[0] or enemy.position[1] < despawnRange[1] or enemy.position[0] > despawnRange[0] or enemy.position[0] < despawnRange[1]:
+        elif enemy.position[1] > DESPWANRANGE[0] or enemy.position[1] < DESPWANRANGE[1] or enemy.position[0] > DESPWANRANGE[0] or enemy.position[0] < DESPWANRANGE[1]:
             enemyDestroyed = enemy.destroy()
             removedBullet = True
         if removedBullet:
@@ -380,7 +392,7 @@ def updateGraphics():
             elif item.itemType == "points":
                 particles.append(Particle("points",item.position[:],10,math.degrees(math.atan2(player.y-item.position[1],player.x-item.position[0])),len(particles)))
                 points += 100
-        elif item.position[1] > despawnRange[0]:
+        elif item.position[1] > DESPWANRANGE[0]:
             itemDestroyed = item.destroy()
             removed = True
         if removed:
@@ -412,7 +424,7 @@ def updateGraphics():
                 removedBullet = True
                 if boss.health < 1:
                     boss.bossReady = False
-        elif bullet.position[1] < despawnRange[1]:
+        elif bullet.position[1] < DESPWANRANGE[1]:
             bulletDestroyed = bullet.destroy()
             removedBullet = True
             
@@ -442,7 +454,7 @@ def updateGraphics():
         bullet.move()
         bullet.render()
         removedBullet = False
-        if bullet.position[1] > despawnRange[0] or bullet.position[1] < despawnRange[1] or bullet.position[0] > despawnRange[0] or bullet.position[0] < despawnRange[1] or bombing > 0:
+        if bullet.position[1] > DESPWANRANGE[0] or bullet.position[1] < DESPWANRANGE[1] or bullet.position[0] > DESPWANRANGE[0] or bullet.position[0] < DESPWANRANGE[1] or bombing > 0:
             bulletDestroyed = bullet.destroy()
             removedBullet = True
         if DEBUG:
@@ -464,7 +476,7 @@ def updateGraphics():
             pygame.draw.rect(DISPLAYSURF, (0,0,255) , particle.rect)
         particle.render()
         removed = False
-        if particle.position[1] > despawnRange[0] or particle.life < 0:
+        if particle.position[1] > DESPWANRANGE[0] or particle.life < 0:
             particleDestroyed = particle.destroy()
             removed = True
         if removed:
@@ -473,6 +485,17 @@ def updateGraphics():
      
     if focus == True:
         displayIMGPlayer(playerHitbox)
+    if stageCount == 0 and stage > 1:
+        particles.append(Particle("transition",[-2000,475],30,0,len(particles)))
+    if stageCount <= 100:
+        textDisplay = bigText.render(f"Stage {stage}", False, (255,255,255))
+        DISPLAYSURF.blit(textDisplay, (stageCount-50,50))
+    elif 100 < stageCount <= 150:
+        textDisplay = bigText.render(f"Stage {stage}", False, (255,255,255))
+        DISPLAYSURF.blit(textDisplay, (50,50))
+    elif 150 < stageCount < 250:
+        textDisplay = bigText.render(f"Stage {stage}", False, (255,255,255))
+        DISPLAYSURF.blit(textDisplay, (50-((stageCount-150)*4),50))
     
 
 ############################################################################################################
@@ -505,6 +528,9 @@ class Particle(pygame.sprite.Sprite):
             self.img = pointsSprite
         elif self.particleType == "life":
             self.img = liveSprite
+        elif self.particleType == "transition":
+            self.img = transitionSprite
+            self.life = 600
         else:
             self.img = particleSprite
         
@@ -516,6 +542,8 @@ class Particle(pygame.sprite.Sprite):
         self.rect.update([self.position[0]-self.diameter/2, self.position[1]-self.diameter/2], [self.diameter,self.diameter])
         if self.particleType in ["shread", "bomb", "points", "life"]:
             self.life -= 1
+        if self.particleType == "transition" and self.position[0] > 1100+self.img.get_width():
+            self.life = -1
         #if self.particleType in ["bomb", "points", "life"]:
         #    self.angle = math.degrees(math.atan2(self.position[0]-player.y,self.position[1]-player.x))
     
@@ -710,6 +738,7 @@ class Boss(pygame.sprite.Sprite):
         self.level = level
         self.bossReady = False
         self.health = 999
+        self.rect = Rect(-1000,-1000, 0, 0)
         if level > 0:
             self.position = [500, -60]
             self.velocity = 0
@@ -769,11 +798,11 @@ class Boss(pygame.sprite.Sprite):
     
     def render(self):
         if self.level == 1:
-            self.selfDraw(qiSprite)
+            self.selfDraw(hanSprite)
         elif self.level == 2:
             self.selfDraw(qiSprite)
         elif self.level == 3:
-            self.selfDraw(qiSprite)
+            self.selfDraw(harukiSprite)
         
     def selfDraw(self, img):
         DISPLAYSURF.blit(img, (self.position[0] - img.get_width()/2, self.position[1] - img.get_height()/2))
@@ -807,8 +836,20 @@ class Boss(pygame.sprite.Sprite):
             elif special == 2:
                 for i in range(18):
                     self.addBullet("yellowRotate", self.position[:], 8, math.degrees(math.atan2(player.y-self.position[1],player.x-self.position[0]))+i*20)
-
-    
+        elif self.level == 3:
+            if special == 0:
+                for i in range(5):
+                    self.addBullet("big", self.position[:], 5, math.degrees(math.atan2(player.y-self.position[1],player.x-self.position[0]))-30+i*30)
+            elif special == 1:
+                for i in range(5):
+                    self.addBullet("big", self.position[:], 5, math.degrees(math.atan2(player.y-self.position[1],player.x-self.position[0]))+i*72)
+                enemies.append(EnemyBullet("EMyinyangevil", [1200,50],12, 170, len(enemies)))
+            elif special == 2:
+                for i in range(5):
+                    self.addBullet("big", [0+i*300,-200], random.randint(3,5), 90)
+                enemies.append(EnemyBullet("EMyinyangevilLeft", [-200,50],12, 10, len(enemies)))
+                    
+                    
     def addBullet(self, btype,pos,vel,angle):
         enemyBullets.append(EnemyBullet(btype, pos, vel, angle,len(enemyBullets)))
         
@@ -856,10 +897,9 @@ def dialogueHandler(dialogueTree, dialogueTreeName, dialogue):
     if dialogue-1 < len(dialogueTree):
         dialogue = doDialogue(dialogueTreeName, dialogue-1, dialogueTree)
         for event in pygame.event.get():
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    pygame.quit()
-                    sys.exit()
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_z:
                     dialogue +=1
@@ -877,14 +917,16 @@ def setMusic(song):
     MUSIC.play()
     MUSIC.set_volume(0.5)
 
-def setState(state):
-    if state == 0:
+def setState(state, currstate):
+    if state in [0,2] and currstate not in [0,2] :
         setMusic("LandOfTheLostFog")
     elif state == 1:
         if stage == 1:
             setMusic("Stage1Theme")
         elif stage == 2:
             setMusic("Stage2Theme")
+        elif stage == 3:
+            setMusic("Stage3Theme")
     return state
 
 def doDialogue(level, textID, dialogueTree):
@@ -910,6 +952,10 @@ while True:
         ############################################################################################################
         case 0: 
             DISPLAYSURF.fill((0,0,0))
+            DISPLAYSURF.blit(titleBackdrop, (0, 0))
+            #pygame.draw.rect(titleBackdrop, (0,0,0,0), (100,40,320,860), 0, 30)
+            DISPLAYSURF.blit(titleBox, (65, 20))
+            DISPLAYSURF.blit(titleWords, (120, 50))
             if inputCooldown == 10:
                 if keys[K_UP]:
                     if menuSelect > 0:
@@ -923,11 +969,49 @@ while True:
                     else:
                         menuSelect = 0
                     inputCooldown = 0
-                if keys[K_z]:
-                    if menuSelect == 0:
-                        gameState = setState(1)
-                    if menuSelect == 3:
-                        pygame.event.post(pygame.event.Event(pygame.QUIT))
+                for event in pygame.event.get():
+                    if event.type == QUIT:
+                        pygame.quit()
+                        sys.exit()
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_z:
+                            if menuSelect == 0:
+                                #reset variables
+                                backgroundY = 0
+
+                                enemyBullets = []
+                                enemies = []
+                                items = []
+                                particles = []
+                                bulletCooldownTimer = 4
+                                bombCooldownTimer = 4
+
+                                lives = 5
+                                bombs = 3
+                                if DEBUG:
+                                    lives = 99
+                                    bombs = 99
+                                points = 0
+                                bombing = 0
+
+                                stage = 1
+                                stageCount = 0
+                                if DEBUG:
+                                    stageCount == 3300
+
+                                bossbulletCooldownTimer = 0
+                                bosscdthreshold = 20
+                                numBossattacks = 0
+                                ogPos = [0,0]
+
+                                menuSelect = 0
+                                inputCooldown = 10
+
+                                playerInvincability = 0
+                                dialogue = [0, False]
+                                gameState = setState(1, gameState)
+                            if menuSelect == 3:
+                                pygame.event.post(pygame.event.Event(pygame.QUIT))
             
             menutext = ["Story", "Options", "Music Room", "Exit"]
             for textNum in range(len(menutext)):
@@ -941,8 +1025,7 @@ while True:
         # MAIN GAMEPLAY
         ############################################################################################################
         case 1:
-            DISPLAYSURF.fill((0,0,0))
-            
+            DISPLAYSURF.fill((0,0,0))            
             if keys[K_LEFT]:
                 if player.x > 0:
                     player.x -= playerSpeed
@@ -1023,6 +1106,24 @@ while True:
                         elif numBossattacks > 650:
                             bosscdthreshold = 20
                             numBossattacks = 1
+                    elif boss.level == 3:
+                        if numBossattacks % 40 < 15 and 100 < numBossattacks < 200:
+                            bosscdthreshold = 60
+                            boss.bossAttack(0)
+                            bossbulletCooldownTimer = 0
+
+                        elif numBossattacks and 200 < numBossattacks < 300:
+                            boss.bossAttack(1)
+                            bossbulletCooldownTimer = 0 
+                        elif numBossattacks % 40 < 5 and 300 < numBossattacks < 400:
+                            boss.bossAttack(0)
+                            bossbulletCooldownTimer = 0 
+                        elif numBossattacks % 40 < 5 and 500 < numBossattacks < 600:
+                            boss.bossAttack(2)
+                            bossbulletCooldownTimer = 0     
+                        elif numBossattacks > 600:
+                            bosscdthreshold = 20
+                            numBossattacks = 1
                     
                     numBossattacks +=1
                 if bossbulletCooldownTimer < bosscdthreshold:
@@ -1031,32 +1132,45 @@ while True:
                 if boss.level == 1:
                     ogPos = boss.fancyGotoPos([boss.position[0], 120], ogPos, numBossattacks, [0, 100])
                 elif boss.level == 2:
-                    ogPos = boss.fancyGotoPos([boss.position[0], 120], ogPos, numBossattacks, [0, 100])
+                    ogPos = boss.fancyGotoPos([500, 120], ogPos, numBossattacks, [0, 100])
                     ogPos = boss.fancyGotoPos([200, boss.position[1]], ogPos, numBossattacks, [100, 200])
                     ogPos = boss.fancyGotoPos([800, boss.position[1]], ogPos, numBossattacks, [200, 320])
                     ogPos = boss.fancyGotoPos([500, boss.position[1]], ogPos, numBossattacks, [320, 420])
+                elif boss.level == 3:
+                    ogPos = boss.fancyGotoPos([500, 120], ogPos, numBossattacks, [0, 100])
+                    ogPos = boss.fancyGotoPos([200, boss.position[1]], ogPos, numBossattacks, [100, 150])
+                    ogPos = boss.fancyGotoPos([800, boss.position[1]], ogPos, numBossattacks, [150, 200])
+                    ogPos = boss.fancyGotoPos([500, boss.position[1]], ogPos, numBossattacks, [250, 300])
+                    ogPos = boss.fancyGotoPos([200, boss.position[1]], ogPos, numBossattacks, [350, 400])
+                    ogPos = boss.fancyGotoPos([800, boss.position[1]], ogPos, numBossattacks, [400, 450])
+                    ogPos = boss.fancyGotoPos([800, 600], ogPos, numBossattacks, [450, 480])
+                    ogPos = boss.fancyGotoPos([200, 100], ogPos, numBossattacks, [480, 510])
+                    ogPos = boss.fancyGotoPos([500, 500], ogPos, numBossattacks, [510, 600])
                 
                     #print(ogPos)
-                if pygame.sprite.collide_rect(player, boss):
-                    gameState = setState(0)
                 
             #==========================
             # Per Loop Updates
             #==========================
             if playerInvincability == 0:
-                if pygame.sprite.spritecollide(player,enemyBullets,False,pygame.sprite.collide_circle_ratio(1)) or pygame.sprite.spritecollide(player,enemies,False,pygame.sprite.collide_circle_ratio(1)):
+                if (pygame.sprite.spritecollide(player,enemyBullets,False,pygame.sprite.collide_circle_ratio(1)) or 
+                        pygame.sprite.spritecollide(player,enemies,False,pygame.sprite.collide_circle_ratio(1)) or 
+                        pygame.sprite.collide_rect(player, boss)):
                     #print(bombs)
+                    for i in range(5):
+                        particles.append(Particle("shread",[player.x,player.y],7,(0 + i*72)+random.randint(-5,5),len(particles)))
                     if bombs > 3:
                         items.append(Item("bomb", [player.x,player.y-100], -3, len(items)))
                     player.x = 500
-                    player.y = 500
+                    player.y = 800
                     lives -= 1
                     playerInvincability = 120
                     
                     for i in range(5):
                         particles.append(Particle("shread",[player.x,player.y],7,(0 + i*72)+random.randint(-5,5),len(particles)))
                     if lives == 0:
-                        gameState = setState(0)
+                        menuSelect = 0
+                        gameState = setState(2, gameState)
                     bombs = 3
             elif playerInvincability > 0:
                 playerInvincability -=1
@@ -1064,10 +1178,9 @@ while True:
             bulletCooldownTimer += 1
             bombCooldownTimer += 1
             
-        
-            stageCount +=1
-                   
             updateGraphics()
+            stageCount +=1  
+            
             
             if boss.bossReady:
                 textDisplay = text.render(f"Boss Health: {boss.health}", False, (255,255,255))
@@ -1195,6 +1308,8 @@ while True:
                 DISPLAYSURF.blit(textDisplay, (20,220))
                 textDisplay = text.render(f"Num of entities: {len(items)+len(enemies)+len(enemyBullets)+len(player.playerBullets)+len(particles)}", False, (255,255,255))
                 DISPLAYSURF.blit(textDisplay, (20,250))
+                textDisplay = text.render(f"Game State: {gameState}", False, (255,255,255))
+                DISPLAYSURF.blit(textDisplay, (20,280))
                 textDisplay = text.render(f"Num of Items: {len(items)}", False, (255,255,255))
                 DISPLAYSURF.blit(textDisplay, (700,100))
                 textDisplay = text.render(f"Num of Enemies: {len(enemies)}", False, (255,255,255))
@@ -1205,7 +1320,41 @@ while True:
                 DISPLAYSURF.blit(textDisplay, (700,190))
                 textDisplay = text.render(f"Num of Particles: {len(particles)}", False, (255,255,255))
                 DISPLAYSURF.blit(textDisplay, (700,220))
-
+        case 2:
+            updateGraphics()
+            DISPLAYSURF.blit(gameoverscreen, (0,0))
+            if inputCooldown == 10:
+                if keys[K_UP]:
+                    if menuSelect > 0:
+                        menuSelect -= 1
+                    else:
+                        menuSelect = 1
+                    inputCooldown = 0
+                elif keys[K_DOWN]:    
+                    if menuSelect < 1:
+                        menuSelect += 1
+                    else:
+                        menuSelect = 0
+                    inputCooldown = 0
+                for event in pygame.event.get():
+                    if event.type == QUIT:
+                        pygame.quit()
+                        sys.exit()
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_z:
+                            if menuSelect == 0:
+                                gameState = setState(0, gameState)
+                            if menuSelect == 1:
+                                pygame.event.post(pygame.event.Event(pygame.QUIT))
+            
+            menutext = ["Title", "Exit"]
+            for textNum in range(len(menutext)):
+                textDisplay = text.render(menutext[textNum], False, menuGetColour(textNum))
+                DISPLAYSURF.blit(textDisplay, (700,300+textNum*100))
+            
+            if inputCooldown < 10:
+                inputCooldown += 1
+            stageCount +=1
             
     for event in pygame.event.get():
         if event.type == QUIT:
