@@ -2,10 +2,16 @@
 
 
 ## Changelog
+### 01/20/2026
+### V 0.3.1
+- added end screen
+- game over screen properly restarts
+
 ### 01/19/2026
 ### V 0.3.1
 - added backdrop for stage 3
 - added title and game over screens
+- new fonts
 
 ### 01/18/2026
 ### V 0.3.0

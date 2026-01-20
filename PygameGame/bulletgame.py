@@ -14,6 +14,7 @@ fpsClock = pygame.time.Clock()
 DEBUG = False
 
 text = pygame.font.SysFont('Lucida Fax', 30)
+dialogueText = pygame.font.SysFont('Lucida Fax', 20)
 bigText = pygame.font.SysFont('Lucida Fax', 80)
 
 DISPLAYSURF = pygame.display.set_mode((1000, 950))
@@ -26,6 +27,7 @@ pygame.display.set_caption('Mizhou Episode 0.5')
 ############################################################################################################
 gameState = 0
 backgroundY = 0
+pause = False
 
 enemyBullets = []
 enemies = []
@@ -36,16 +38,11 @@ bombCooldownTimer = 4
 
 lives = 5
 bombs = 3
-if DEBUG:
-    lives = 99
-    bombs = 99
 points = 0
 bombing = 0
 
 stage = 1
 stageCount = 0
-if DEBUG:
-    stageCount = 0
 
 bossbulletCooldownTimer = 0
 bosscdthreshold = 20
@@ -120,6 +117,7 @@ stage1backdrop = ezload('backgroundStage1.png')
 stage2backdrop = ezload('backgroundStage2.png')
 stage3backdrop = ezload('backgroundStage3.png')
 gameoverscreen = ezload('gameOverScreen.png')
+victoryScreen = ezload('victoryScreen.png')
 transitionSprite = ezload('transition.png')
 
 pygame.Surface.set_alpha(titleBox, 200)
@@ -330,14 +328,18 @@ def updateGraphics():
         backgroundIMG = stage3backdrop
     elif stage == 3:
         backgroundIMG = stage2backdrop
+    elif stage == 4 and stageCount < 80:
+        backgroundIMG = stage3backdrop
     else:
         backgroundIMG = stage1backdrop
 
-    DISPLAYSURF.blit(backgroundIMG, (0, backgroundY))
-    DISPLAYSURF.blit(backgroundIMG, (0, backgroundY-950))
-    if stageCount % 60 == 0:
-        particles.append(Particle("bushLeft",[100,-600],7,90,len(particles)))
-        particles.append(Particle("bushRight",[900,-600],7,90,len(particles)))
+    if not (stage == 4 and stageCount >= 80):
+        DISPLAYSURF.blit(backgroundIMG, (0, backgroundY))
+        DISPLAYSURF.blit(backgroundIMG, (0, backgroundY-950))
+    if stage != 4:
+        if stageCount % 60 == 0:
+            particles.append(Particle("bushLeft",[100,-600],7,90,len(particles)))
+            particles.append(Particle("bushRight",[900,-600],7,90,len(particles)))
 
     # Boss ==========================
     boss.render()
@@ -487,15 +489,16 @@ def updateGraphics():
         displayIMGPlayer(playerHitbox)
     if stageCount == 0 and stage > 1:
         particles.append(Particle("transition",[-2000,475],30,0,len(particles)))
-    if stageCount <= 100:
-        textDisplay = bigText.render(f"Stage {stage}", False, (255,255,255))
-        DISPLAYSURF.blit(textDisplay, (stageCount-50,50))
-    elif 100 < stageCount <= 150:
-        textDisplay = bigText.render(f"Stage {stage}", False, (255,255,255))
-        DISPLAYSURF.blit(textDisplay, (50,50))
-    elif 150 < stageCount < 250:
-        textDisplay = bigText.render(f"Stage {stage}", False, (255,255,255))
-        DISPLAYSURF.blit(textDisplay, (50-((stageCount-150)*4),50))
+    if stage < 4:
+        if stageCount <= 100:
+            textDisplay = bigText.render(f"Stage {stage}", False, (255,255,255))
+            DISPLAYSURF.blit(textDisplay, (stageCount-50,50))
+        elif 100 < stageCount <= 150:
+            textDisplay = bigText.render(f"Stage {stage}", False, (255,255,255))
+            DISPLAYSURF.blit(textDisplay, (50,50))
+        elif 150 < stageCount < 250:
+            textDisplay = bigText.render(f"Stage {stage}", False, (255,255,255))
+            DISPLAYSURF.blit(textDisplay, (50-((stageCount-150)*4),50))
     
 
 ############################################################################################################
@@ -506,7 +509,7 @@ def updateGraphics():
 class Particle(pygame.sprite.Sprite):
     def __init__(self, particleType, pos, velocity, angle, index):
         self.particleType = particleType
-        self.position = pos
+        self.position = pos[:]
         self.velocity = velocity
         self.index = index
         self.angle = angle
@@ -558,7 +561,7 @@ class Particle(pygame.sprite.Sprite):
 class PlayerBullet(pygame.sprite.Sprite):
     def __init__(self, typeBullet, playerPos, velocity, angle, index):
         self.typeBullet = typeBullet
-        self.position = playerPos
+        self.position = playerPos[:]
         self.velocity = velocity
         self.index = index
         self.angle = angle
@@ -584,7 +587,7 @@ class PlayerBullet(pygame.sprite.Sprite):
 class Item(pygame.sprite.Sprite):
     def __init__(self, itemType, pos, velocity, index):
         self.itemType = itemType
-        self.position = pos
+        self.position = pos[:]
         self.velocity = velocity
         self.index = index
         self.diameter = 30
@@ -615,7 +618,7 @@ class Item(pygame.sprite.Sprite):
 class EnemyBullet(pygame.sprite.Sprite):
     def __init__(self, typeBullet, startPos, velocity, angle, index):
         self.typeBullet = typeBullet
-        self.position = startPos
+        self.position = startPos[:]
         self.velocity = velocity
         self.index = index
         self.angle = angle
@@ -872,6 +875,7 @@ def runStage(stageData, stageCount):
                 spawnBoss(item[2])
                 return "BossInit"
         elif int(item[0]*100) == stageCount:
+            #print(f"typeBullet= {item[1]}, startPos= {item[2]}, velocity= {item[3]}, angle= {item[4]}")
             if item[1][:2] == "EM":
                 enemies.append(EnemyBullet(item[1], item[2], item[3], item[4],len(enemies)))
             else:
@@ -880,11 +884,11 @@ def runStage(stageData, stageCount):
 #== STAGE 1 =======================================
 def getStageData(stage):
     if stage == 1:
-        return level_1_data #Format for each item (time, bullet type,position,velocity,angle/direction)...
+        return level_1_data.copy() #Format for each item (time, bullet type,position,velocity,angle/direction)...
     if stage == 2:
-        return level_2_data
+        return level_2_data.copy()
     if stage == 3:
-        return level_3_data
+        return level_3_data.copy()
     else:
         return []
 
@@ -918,7 +922,7 @@ def setMusic(song):
     MUSIC.set_volume(0.5)
 
 def setState(state, currstate):
-    if state in [0,2] and currstate not in [0,2] :
+    if state in [0,2] and currstate not in [0,2] and stage <4:
         setMusic("LandOfTheLostFog")
     elif state == 1:
         if stage == 1:
@@ -927,13 +931,15 @@ def setState(state, currstate):
             setMusic("Stage2Theme")
         elif stage == 3:
             setMusic("Stage3Theme")
+    elif state == 2 and stage == 4:
+        setMusic("endCredits")
     return state
 
 def doDialogue(level, textID, dialogueTree):
     currDia = dialogueTree[textID]
     textpos = [220,700]
     if textID < len(dialogueTree):
-        textDisplay = text.render(currDia[2], False, (255,255,255))
+        textDisplay = dialogueText.render(currDia[2], False, (255,255,255))
         DISPLAYSURF.blit(PORTRAITS[currDia[0]][currDia[1]],(textpos[0]-200,textpos[1]-50))
         DISPLAYSURF.blit(textDisplay, (textpos[0],textpos[1]))
     return textID+1
@@ -951,9 +957,8 @@ while True:
         # MAIN MENU
         ############################################################################################################
         case 0: 
-            DISPLAYSURF.fill((0,0,0))
+            #DISPLAYSURF.fill((0,0,0))
             DISPLAYSURF.blit(titleBackdrop, (0, 0))
-            #pygame.draw.rect(titleBackdrop, (0,0,0,0), (100,40,320,860), 0, 30)
             DISPLAYSURF.blit(titleBox, (65, 20))
             DISPLAYSURF.blit(titleWords, (120, 50))
             if inputCooldown == 10:
@@ -978,10 +983,11 @@ while True:
                             if menuSelect == 0:
                                 #reset variables
                                 backgroundY = 0
+                                pause = False
 
                                 enemyBullets = []
-                                enemies = []
-                                items = []
+                                enemies.clear()
+                                items.clear()
                                 particles = []
                                 bulletCooldownTimer = 4
                                 bombCooldownTimer = 4
@@ -996,8 +1002,6 @@ while True:
 
                                 stage = 1
                                 stageCount = 0
-                                if DEBUG:
-                                    stageCount == 3300
 
                                 bossbulletCooldownTimer = 0
                                 bosscdthreshold = 20
@@ -1020,309 +1024,325 @@ while True:
             
             if inputCooldown < 10:
                 inputCooldown += 1
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    pygame.quit()
+                    sys.exit()
         
         ############################################################################################################
         # MAIN GAMEPLAY
         ############################################################################################################
         case 1:
-            DISPLAYSURF.fill((0,0,0))            
-            if keys[K_LEFT]:
-                if player.x > 0:
-                    player.x -= playerSpeed
-            elif keys[K_RIGHT]:
-                if player.x < 1000:
-                    player.x += playerSpeed
-            if keys[K_UP]:
-                if player.y > 0:
-                    player.y -= playerSpeed
-            elif keys[K_DOWN]:
-                if player.y < 950:
-                    player.y += playerSpeed
-            if keys[K_LSHIFT] or keys[K_LCTRL]:
-                focus = True
-                playerSpeed = 3
-                if player.focusBaguaRotation <= 360:
-                    player.focusBaguaRotation += 1
-                else: 
-                    player.focusBaguaRotation = 0
-            else:
-                focus = False
-                playerSpeed = 6
-            player.rect.update(player.x-player.diameter/2, player.y-player.diameter/2,7,7)
+            #DISPLAYSURF.fill((0,0,0))
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_w:
+                        pause = not pause
+                        print(pause)
+            if not pause:
+                if keys[K_LEFT]:
+                    if player.x > 0:
+                        player.x -= playerSpeed
+                elif keys[K_RIGHT]:
+                    if player.x < 1000:
+                        player.x += playerSpeed
+                if keys[K_UP]:
+                    if player.y > 0:
+                        player.y -= playerSpeed
+                elif keys[K_DOWN]:
+                    if player.y < 950:
+                        player.y += playerSpeed
+                if keys[K_LSHIFT] or keys[K_LCTRL]:
+                    focus = True
+                    playerSpeed = 3
+                    if player.focusBaguaRotation <= 360:
+                        player.focusBaguaRotation += 1
+                    else: 
+                        player.focusBaguaRotation = 0
+                else:
+                    focus = False
+                    playerSpeed = 6
+                player.rect.update(player.x-player.diameter/2, player.y-player.diameter/2,7,7)
 
-            if keys[K_z]:
-                if bulletCooldownTimer >= player.bulletCooldown:
-                    player.playerBullets.append(PlayerBullet("basic", [player.x+15, player.y], 25, 270,len(player.playerBullets)))
-                    player.playerBullets.append(PlayerBullet("basic", [player.x-15, player.y], 25, 270,len(player.playerBullets)))
-                    bulletCooldownTimer = 0
-            if keys[K_x]:
-                if bombCooldownTimer >= 40 and bombs > 0:
-                    bombs -= 1
-                    bombing = 30
-                    playerInvincability = 30
-                    bombCooldownTimer = 0    
-            
-            #==========================
-            # Boss Loop
-            #==========================
-            initBoss = runStage(getStageData(stage), stageCount)
-            if boss.bossReady:
-                if bombing > 0:
-                    boss.health -= 10
-                    if boss.health < 1:
-                        boss.bossReady = False
-                if bossbulletCooldownTimer == bosscdthreshold:
-                    #Attacks===============
+                if keys[K_z]:
+                    if bulletCooldownTimer >= player.bulletCooldown:
+                        player.playerBullets.append(PlayerBullet("basic", [player.x+15, player.y], 25, 270,len(player.playerBullets)))
+                        player.playerBullets.append(PlayerBullet("basic", [player.x-15, player.y], 25, 270,len(player.playerBullets)))
+                        bulletCooldownTimer = 0
+                if keys[K_x]:
+                    if bombCooldownTimer >= 40 and bombs > 0:
+                        bombs -= 1
+                        bombing = 30
+                        playerInvincability = 30
+                        bombCooldownTimer = 0    
+
+                #==========================
+                # Boss Loop
+                #==========================
+                initBoss = runStage(getStageData(stage), stageCount)
+                if boss.bossReady:
+                    if bombing > 0:
+                        boss.health -= 10
+                        if boss.health < 1:
+                            boss.bossReady = False
+                    if bossbulletCooldownTimer == bosscdthreshold:
+                        #Attacks===============
+                        if boss.level == 1:
+                            if numBossattacks % 40 < 15 and 100 < numBossattacks < 150:
+                                boss.bossAttack(0)
+                                bossbulletCooldownTimer = 0
+                            elif numBossattacks and 200 < numBossattacks < 220:
+                                boss.bossAttack(1)
+                                bossbulletCooldownTimer = 0 
+                            elif numBossattacks % 40 < 5 and 220 < numBossattacks < 230:
+                                boss.bossAttack(0)
+                                bossbulletCooldownTimer = 0 
+                            elif numBossattacks % 40 < 5 and 230 < numBossattacks < 250:
+                                boss.bossAttack(2)
+                                bossbulletCooldownTimer = 0     
+                            elif numBossattacks > 250:
+                                bosscdthreshold = 20
+                                numBossattacks = 1
+                        elif boss.level == 2:
+                            if numBossattacks % 40 < 15 and 100 < numBossattacks < 350:
+                                boss.bossAttack(0)
+                                bossbulletCooldownTimer = 0
+
+                            elif numBossattacks and 350 < numBossattacks < 400:
+                                boss.bossAttack(1)
+                                bossbulletCooldownTimer = 0 
+                            elif numBossattacks % 40 < 5 and 400 < numBossattacks < 450:
+                                boss.bossAttack(0)
+                                bossbulletCooldownTimer = 0 
+                            elif numBossattacks % 40 < 5 and 450 < numBossattacks < 650:
+                                boss.bossAttack(2)
+                                bossbulletCooldownTimer = 0     
+                            elif numBossattacks > 650:
+                                bosscdthreshold = 20
+                                numBossattacks = 1
+                        elif boss.level == 3:
+                            if numBossattacks % 40 < 15 and 100 < numBossattacks < 200:
+                                bosscdthreshold = 60
+                                boss.bossAttack(0)
+                                bossbulletCooldownTimer = 0
+
+                            elif numBossattacks and 200 < numBossattacks < 300:
+                                boss.bossAttack(1)
+                                bossbulletCooldownTimer = 0 
+                            elif numBossattacks % 40 < 5 and 300 < numBossattacks < 400:
+                                boss.bossAttack(0)
+                                bossbulletCooldownTimer = 0 
+                            elif numBossattacks % 40 < 5 and 500 < numBossattacks < 600:
+                                boss.bossAttack(2)
+                                bossbulletCooldownTimer = 0     
+                            elif numBossattacks > 600:
+                                bosscdthreshold = 20
+                                numBossattacks = 1
+
+                        numBossattacks +=1
+                    if bossbulletCooldownTimer < bosscdthreshold:
+                        bossbulletCooldownTimer += 1
+                    #Moving=================
                     if boss.level == 1:
-                        if numBossattacks % 40 < 15 and 100 < numBossattacks < 150:
-                            boss.bossAttack(0)
-                            bossbulletCooldownTimer = 0
-                        elif numBossattacks and 200 < numBossattacks < 220:
-                            boss.bossAttack(1)
-                            bossbulletCooldownTimer = 0 
-                        elif numBossattacks % 40 < 5 and 220 < numBossattacks < 230:
-                            boss.bossAttack(0)
-                            bossbulletCooldownTimer = 0 
-                        elif numBossattacks % 40 < 5 and 230 < numBossattacks < 250:
-                            boss.bossAttack(2)
-                            bossbulletCooldownTimer = 0     
-                        elif numBossattacks > 250:
-                            bosscdthreshold = 20
-                            numBossattacks = 1
+                        ogPos = boss.fancyGotoPos([boss.position[0], 120], ogPos, numBossattacks, [0, 100])
                     elif boss.level == 2:
-                        if numBossattacks % 40 < 15 and 100 < numBossattacks < 350:
-                            boss.bossAttack(0)
-                            bossbulletCooldownTimer = 0
-
-                        elif numBossattacks and 350 < numBossattacks < 400:
-                            boss.bossAttack(1)
-                            bossbulletCooldownTimer = 0 
-                        elif numBossattacks % 40 < 5 and 400 < numBossattacks < 450:
-                            boss.bossAttack(0)
-                            bossbulletCooldownTimer = 0 
-                        elif numBossattacks % 40 < 5 and 450 < numBossattacks < 650:
-                            boss.bossAttack(2)
-                            bossbulletCooldownTimer = 0     
-                        elif numBossattacks > 650:
-                            bosscdthreshold = 20
-                            numBossattacks = 1
+                        ogPos = boss.fancyGotoPos([500, 120], ogPos, numBossattacks, [0, 100])
+                        ogPos = boss.fancyGotoPos([200, boss.position[1]], ogPos, numBossattacks, [100, 200])
+                        ogPos = boss.fancyGotoPos([800, boss.position[1]], ogPos, numBossattacks, [200, 320])
+                        ogPos = boss.fancyGotoPos([500, boss.position[1]], ogPos, numBossattacks, [320, 420])
                     elif boss.level == 3:
-                        if numBossattacks % 40 < 15 and 100 < numBossattacks < 200:
-                            bosscdthreshold = 60
-                            boss.bossAttack(0)
-                            bossbulletCooldownTimer = 0
+                        ogPos = boss.fancyGotoPos([500, 120], ogPos, numBossattacks, [0, 100])
+                        ogPos = boss.fancyGotoPos([200, boss.position[1]], ogPos, numBossattacks, [100, 150])
+                        ogPos = boss.fancyGotoPos([800, boss.position[1]], ogPos, numBossattacks, [150, 200])
+                        ogPos = boss.fancyGotoPos([500, boss.position[1]], ogPos, numBossattacks, [250, 300])
+                        ogPos = boss.fancyGotoPos([200, boss.position[1]], ogPos, numBossattacks, [350, 400])
+                        ogPos = boss.fancyGotoPos([800, boss.position[1]], ogPos, numBossattacks, [400, 450])
+                        ogPos = boss.fancyGotoPos([800, 600], ogPos, numBossattacks, [450, 480])
+                        ogPos = boss.fancyGotoPos([200, 100], ogPos, numBossattacks, [480, 510])
+                        ogPos = boss.fancyGotoPos([500, 500], ogPos, numBossattacks, [510, 600])
 
-                        elif numBossattacks and 200 < numBossattacks < 300:
-                            boss.bossAttack(1)
-                            bossbulletCooldownTimer = 0 
-                        elif numBossattacks % 40 < 5 and 300 < numBossattacks < 400:
-                            boss.bossAttack(0)
-                            bossbulletCooldownTimer = 0 
-                        elif numBossattacks % 40 < 5 and 500 < numBossattacks < 600:
-                            boss.bossAttack(2)
-                            bossbulletCooldownTimer = 0     
-                        elif numBossattacks > 600:
-                            bosscdthreshold = 20
-                            numBossattacks = 1
-                    
-                    numBossattacks +=1
-                if bossbulletCooldownTimer < bosscdthreshold:
-                    bossbulletCooldownTimer += 1
-                #Moving=================
-                if boss.level == 1:
-                    ogPos = boss.fancyGotoPos([boss.position[0], 120], ogPos, numBossattacks, [0, 100])
-                elif boss.level == 2:
-                    ogPos = boss.fancyGotoPos([500, 120], ogPos, numBossattacks, [0, 100])
-                    ogPos = boss.fancyGotoPos([200, boss.position[1]], ogPos, numBossattacks, [100, 200])
-                    ogPos = boss.fancyGotoPos([800, boss.position[1]], ogPos, numBossattacks, [200, 320])
-                    ogPos = boss.fancyGotoPos([500, boss.position[1]], ogPos, numBossattacks, [320, 420])
-                elif boss.level == 3:
-                    ogPos = boss.fancyGotoPos([500, 120], ogPos, numBossattacks, [0, 100])
-                    ogPos = boss.fancyGotoPos([200, boss.position[1]], ogPos, numBossattacks, [100, 150])
-                    ogPos = boss.fancyGotoPos([800, boss.position[1]], ogPos, numBossattacks, [150, 200])
-                    ogPos = boss.fancyGotoPos([500, boss.position[1]], ogPos, numBossattacks, [250, 300])
-                    ogPos = boss.fancyGotoPos([200, boss.position[1]], ogPos, numBossattacks, [350, 400])
-                    ogPos = boss.fancyGotoPos([800, boss.position[1]], ogPos, numBossattacks, [400, 450])
-                    ogPos = boss.fancyGotoPos([800, 600], ogPos, numBossattacks, [450, 480])
-                    ogPos = boss.fancyGotoPos([200, 100], ogPos, numBossattacks, [480, 510])
-                    ogPos = boss.fancyGotoPos([500, 500], ogPos, numBossattacks, [510, 600])
-                
-                    #print(ogPos)
-                
-            #==========================
-            # Per Loop Updates
-            #==========================
-            if playerInvincability == 0:
-                if (pygame.sprite.spritecollide(player,enemyBullets,False,pygame.sprite.collide_circle_ratio(1)) or 
-                        pygame.sprite.spritecollide(player,enemies,False,pygame.sprite.collide_circle_ratio(1)) or 
-                        pygame.sprite.collide_rect(player, boss)):
-                    #print(bombs)
-                    for i in range(5):
-                        particles.append(Particle("shread",[player.x,player.y],7,(0 + i*72)+random.randint(-5,5),len(particles)))
-                    if bombs > 3:
-                        items.append(Item("bomb", [player.x,player.y-100], -3, len(items)))
-                    player.x = 500
-                    player.y = 800
-                    lives -= 1
-                    playerInvincability = 120
-                    
-                    for i in range(5):
-                        particles.append(Particle("shread",[player.x,player.y],7,(0 + i*72)+random.randint(-5,5),len(particles)))
-                    if lives == 0:
-                        menuSelect = 0
-                        gameState = setState(2, gameState)
-                    bombs = 3
-            elif playerInvincability > 0:
-                playerInvincability -=1
-            
-            bulletCooldownTimer += 1
-            bombCooldownTimer += 1
-            
-            updateGraphics()
-            stageCount +=1  
-            
-            
-            if boss.bossReady:
-                textDisplay = text.render(f"Boss Health: {boss.health}", False, (255,255,255))
-                DISPLAYSURF.blit(textDisplay, (50,50))
-            
-            if not boss.bossReady:
-                if stage == 1:
-                    if initBoss == "BossInit":
-                        numBossattacks = 0
-                        setMusic("HanTheme")
-                        dialogue = [1, True]
-                        dialogueDone = doDialogue("DIALOGUEBOSS1", 0, DIALOGUEBOSS1)
-                        playerInvincability = 1
-                    
-                    if boss.health > 0 and dialogue[0] > 0: # Begin Stage 1 boss
-                        dialogue = dialogueHandler(DIALOGUEBOSS1, "DIALOGUEBOSS1",dialogue[0])
-                        playerInvincability = 1
-                        if not dialogue[1]:
-                            boss = Boss(1)
-                            boss.bossReady = True
-                            dialogue = [0, True]
-                    elif boss.health < 1 and dialogue[0] == 0: #End Stage 1 boss
-                        dialogue = [1, True]
-                        dialogueDone = doDialogue("DIALOGUEBOSS1END", 0, DIALOGUEBOSS1END)
-                        playerInvincability = 1
-                        
-                    if boss.health < 1 and dialogue[0] > 0:
-                        dialogue = dialogueHandler(DIALOGUEBOSS1END, "DIALOGUEBOSS1END",dialogue[0])    
-                        playerInvincability = 1  
-                        bombing = 1                  
-                        if not dialogue[1]:
-                            dialogue = [0, False]
-                            stage = 2
-                            stageCount = 0       
-                            boss = Boss(0)
-                            setMusic("Stage2Theme")
-                elif stage == 2:
-                    if initBoss == "BossInit":
-                        numBossattacks = 0
-                        setMusic("QiTheme")
-                        dialogue = [1, True]
-                        dialogueDone = doDialogue("DIALOGUEBOSS2", 0, DIALOGUEBOSS2)
-                        playerInvincability = 1
-                    
-                    if boss.health > 0 and dialogue[0] > 0: # Begin Stage 1 boss
-                        dialogue = dialogueHandler(DIALOGUEBOSS2, "DIALOGUEBOSS2",dialogue[0])
-                        playerInvincability = 1
-                        if not dialogue[1]:
-                            boss = Boss(2)
-                            boss.bossReady = True
-                            dialogue = [0, True]
-                    elif boss.health < 1 and dialogue[0] == 0: #End Stage 1 boss
-                        dialogue = [1, True]
-                        dialogueDone = doDialogue("DIALOGUEBOSS2END", 0, DIALOGUEBOSS2END)
-                        bombing = 1
-                        playerInvincability = 1
-                        boss.bossReady = False
-                        
-                    if boss.health < 1 and dialogue[0] > 0:
-                        dialogue = dialogueHandler(DIALOGUEBOSS2END, "DIALOGUEBOSS2END",dialogue[0])    
-                        playerInvincability = 1                    
-                        if not dialogue[1]:
-                            dialogue = [0, False]
-                            stage = 3
-                            stageCount = 0       
-                            boss = Boss(0)
-                            setMusic("Stage3Theme")
-                elif stage == 3:
-                    if initBoss == "BossInit":
-                        numBossattacks = 0
-                        setMusic("HarukiTheme")
-                        dialogue = [1, True]
-                        dialogueDone = doDialogue("DIALOGUEBOSS3", 0, DIALOGUEBOSS3)
-                        playerInvincability = 1
-                    
-                    if boss.health > 0 and dialogue[0] > 0: # Begin Stage 1 boss
-                        dialogue = dialogueHandler(DIALOGUEBOSS3, "DIALOGUEBOSS3",dialogue[0])
-                        playerInvincability = 1
-                        if not dialogue[1]:
-                            boss = Boss(3)
-                            boss.bossReady = True
-                            dialogue = [0, True]
-                    elif boss.health < 1 and dialogue[0] == 0: #End Stage 1 boss
-                        dialogue = [1, True]
-                        dialogueDone = doDialogue("DIALOGUEBOSS3END", 0, DIALOGUEBOSS3END)
-                        bombing = 1
-                        playerInvincability = 1
-                        boss.bossReady = False
-                        
-                    if boss.health < 1 and dialogue[0] > 0:
-                        dialogue = dialogueHandler(DIALOGUEBOSS3END, "DIALOGUEBOSS3END",dialogue[0])    
-                        playerInvincability = 1                    
-                        if not dialogue[1]:
-                            dialogue = [0, False]
-                            stage = 3
-                            stageCount = 0       
-                            boss = Boss(0)
-                            setMusic("Stage3Theme")
-            
-            for i in range(lives):
-                DISPLAYSURF.blit(liveSprite, (20 + i* 50, 880))
-            for i in range(bombs):
-                DISPLAYSURF.blit(bombSprite, (940 - i*50, 880))
-            if bombing > 0:
-                bombing -=1
-            
-            if backgroundY < 950:
-                backgroundY +=3
-            else:
-                backgroundY = 0
-                
-            textDisplay = text.render(f"Points: {points}", False, (255,255,255))
-            DISPLAYSURF.blit(textDisplay, (800,50))
-            
-            if DEBUG:
-                textDisplay = text.render(f"BossReady: {boss.bossReady}", False, (255,255,255))
-                DISPLAYSURF.blit(textDisplay, (20,100))
-                textDisplay = text.render(f"StageCount: {stageCount}", False, (255,255,255))
-                DISPLAYSURF.blit(textDisplay, (20,130))
-                textDisplay = text.render(f"BossAttacks: {numBossattacks}", False, (255,255,255))
-                DISPLAYSURF.blit(textDisplay, (20,160))
-                textDisplay = text.render(f"InitBoss: {initBoss}", False, (255,255,255))
-                DISPLAYSURF.blit(textDisplay, (20,190))
-                textDisplay = text.render(f"Dialogue: {dialogue}", False, (255,255,255))
-                DISPLAYSURF.blit(textDisplay, (20,220))
-                textDisplay = text.render(f"Num of entities: {len(items)+len(enemies)+len(enemyBullets)+len(player.playerBullets)+len(particles)}", False, (255,255,255))
-                DISPLAYSURF.blit(textDisplay, (20,250))
-                textDisplay = text.render(f"Game State: {gameState}", False, (255,255,255))
-                DISPLAYSURF.blit(textDisplay, (20,280))
-                textDisplay = text.render(f"Num of Items: {len(items)}", False, (255,255,255))
-                DISPLAYSURF.blit(textDisplay, (700,100))
-                textDisplay = text.render(f"Num of Enemies: {len(enemies)}", False, (255,255,255))
-                DISPLAYSURF.blit(textDisplay, (700,130))
-                textDisplay = text.render(f"Num of EBullets: {len(enemyBullets)}", False, (255,255,255))
-                DISPLAYSURF.blit(textDisplay, (700,160))
-                textDisplay = text.render(f"Num of PBullets: {len(player.playerBullets)}", False, (255,255,255))
-                DISPLAYSURF.blit(textDisplay, (700,190))
-                textDisplay = text.render(f"Num of Particles: {len(particles)}", False, (255,255,255))
-                DISPLAYSURF.blit(textDisplay, (700,220))
+                        #print(ogPos)
+
+                #==========================
+                # Per Loop Updates
+                #==========================
+                if playerInvincability == 0:
+                    if (pygame.sprite.spritecollide(player,enemyBullets,False,pygame.sprite.collide_circle_ratio(1)) or 
+                            pygame.sprite.spritecollide(player,enemies,False,pygame.sprite.collide_circle_ratio(1)) or 
+                            pygame.sprite.collide_rect(player, boss)):
+                        #print(bombs)
+                        for i in range(5):
+                            particles.append(Particle("shread",[player.x,player.y],7,(0 + i*72)+random.randint(-5,5),len(particles)))
+                        if bombs > 3:
+                            items.append(Item("bomb", [player.x,player.y-100], -3, len(items)))
+                        player.x = 500
+                        player.y = 800
+                        lives -= 1
+                        playerInvincability = 120
+
+                        for i in range(5):
+                            particles.append(Particle("shread",[player.x,player.y],7,(0 + i*72)+random.randint(-5,5),len(particles)))
+                        if lives == 0:
+                            menuSelect = 0
+                            gameState = setState(2, gameState)
+                        bombs = 3
+                elif playerInvincability > 0:
+                    playerInvincability -=1
+
+                bulletCooldownTimer += 1
+                bombCooldownTimer += 1
+
+                updateGraphics()
+                stageCount +=1  
+
+
+                if boss.bossReady:
+                    textDisplay = text.render(f"Boss Health: {boss.health}", False, (255,255,255))
+                    DISPLAYSURF.blit(textDisplay, (50,50))
+
+                if not boss.bossReady:
+                    if stage == 1:
+                        if initBoss == "BossInit":
+                            numBossattacks = 0
+                            setMusic("HanTheme")
+                            dialogue = [1, True]
+                            dialogueDone = doDialogue("DIALOGUEBOSS1", 0, DIALOGUEBOSS1)
+                            playerInvincability = 1
+
+                        if boss.health > 0 and dialogue[0] > 0: # Begin Stage 1 boss
+                            dialogue = dialogueHandler(DIALOGUEBOSS1, "DIALOGUEBOSS1",dialogue[0])
+                            playerInvincability = 1
+                            if not dialogue[1]:
+                                boss = Boss(1)
+                                boss.bossReady = True
+                                dialogue = [0, True]
+                        elif boss.health < 1 and dialogue[0] == 0: #End Stage 1 boss
+                            dialogue = [1, True]
+                            dialogueDone = doDialogue("DIALOGUEBOSS1END", 0, DIALOGUEBOSS1END)
+                            playerInvincability = 1
+
+                        if boss.health < 1 and dialogue[0] > 0:
+                            dialogue = dialogueHandler(DIALOGUEBOSS1END, "DIALOGUEBOSS1END",dialogue[0])    
+                            playerInvincability = 1  
+                            bombing = 1                  
+                            if not dialogue[1]:
+                                dialogue = [0, False]
+                                stage = 2
+                                stageCount = 0       
+                                boss = Boss(0)
+                                setMusic("Stage2Theme")
+                    elif stage == 2:
+                        if initBoss == "BossInit":
+                            numBossattacks = 0
+                            setMusic("QiTheme")
+                            dialogue = [1, True]
+                            dialogueDone = doDialogue("DIALOGUEBOSS2", 0, DIALOGUEBOSS2)
+                            playerInvincability = 1
+
+                        if boss.health > 0 and dialogue[0] > 0: # Begin Stage 2 boss
+                            dialogue = dialogueHandler(DIALOGUEBOSS2, "DIALOGUEBOSS2",dialogue[0])
+                            playerInvincability = 1
+                            if not dialogue[1]:
+                                boss = Boss(2)
+                                boss.bossReady = True
+                                dialogue = [0, True]
+                        elif boss.health < 1 and dialogue[0] == 0: #End Stage 2 boss
+                            dialogue = [1, True]
+                            dialogueDone = doDialogue("DIALOGUEBOSS2END", 0, DIALOGUEBOSS2END)
+                            bombing = 1
+                            playerInvincability = 1
+                            boss.bossReady = False
+
+                        if boss.health < 1 and dialogue[0] > 0:
+                            dialogue = dialogueHandler(DIALOGUEBOSS2END, "DIALOGUEBOSS2END",dialogue[0])    
+                            playerInvincability = 1                    
+                            if not dialogue[1]:
+                                dialogue = [0, False]
+                                stage = 3
+                                stageCount = 0       
+                                boss = Boss(0)
+                                setMusic("Stage3Theme")
+                    elif stage == 3:
+                        if initBoss == "BossInit":
+                            numBossattacks = 0
+                            setMusic("HarukiTheme")
+                            dialogue = [1, True]
+                            dialogueDone = doDialogue("DIALOGUEBOSS3", 0, DIALOGUEBOSS3)
+                            playerInvincability = 1
+
+                        if boss.health > 0 and dialogue[0] > 0: # Begin Stage 3 boss
+                            dialogue = dialogueHandler(DIALOGUEBOSS3, "DIALOGUEBOSS3",dialogue[0])
+                            playerInvincability = 1
+                            if not dialogue[1]:
+                                boss = Boss(3)
+                                boss.bossReady = True
+                                dialogue = [0, True]
+                        elif boss.health < 1 and dialogue[0] == 0: #End Stage 3 boss
+                            dialogue = [1, True]
+                            dialogueDone = doDialogue("DIALOGUEBOSS3END", 0, DIALOGUEBOSS3END)
+                            bombing = 1
+                            playerInvincability = 1
+                            boss.bossReady = False
+
+                        if boss.health < 1 and dialogue[0] > 0:
+                            dialogue = dialogueHandler(DIALOGUEBOSS3END, "DIALOGUEBOSS3END",dialogue[0])    
+                            playerInvincability = 1                    
+                            if not dialogue[1]:
+                                dialogue = [0, False]
+                                stage = 4
+                                stageCount = 0
+                                boss = Boss(0)
+                                menuSelect = 0
+                                gameState = setState(2, gameState)
+
+                for i in range(lives):
+                    DISPLAYSURF.blit(liveSprite, (20 + i* 50, 880))
+                for i in range(bombs):
+                    DISPLAYSURF.blit(bombSprite, (940 - i*50, 880))
+                if bombing > 0:
+                    bombing -=1
+
+                if backgroundY < 950:
+                    backgroundY +=3
+                else:
+                    backgroundY = 0
+
+                textDisplay = text.render(f"Points: {points}", False, (255,255,255))
+                DISPLAYSURF.blit(textDisplay, (750,50))
+
+                if DEBUG:
+                    textDisplay = text.render(f"BossReady: {boss.bossReady}", False, (255,255,255))
+                    DISPLAYSURF.blit(textDisplay, (20,100))
+                    textDisplay = text.render(f"StageCount: {stageCount}", False, (255,255,255))
+                    DISPLAYSURF.blit(textDisplay, (20,130))
+                    textDisplay = text.render(f"BossAttacks: {numBossattacks}", False, (255,255,255))
+                    DISPLAYSURF.blit(textDisplay, (20,160))
+                    textDisplay = text.render(f"InitBoss: {initBoss}", False, (255,255,255))
+                    DISPLAYSURF.blit(textDisplay, (20,190))
+                    textDisplay = text.render(f"Dialogue: {dialogue}", False, (255,255,255))
+                    DISPLAYSURF.blit(textDisplay, (20,220))
+                    textDisplay = text.render(f"Num of entities: {len(items)+len(enemies)+len(enemyBullets)+len(player.playerBullets)+len(particles)}", False, (255,255,255))
+                    DISPLAYSURF.blit(textDisplay, (20,250))
+                    textDisplay = text.render(f"Game State: {gameState}", False, (255,255,255))
+                    DISPLAYSURF.blit(textDisplay, (20,280))
+                    textDisplay = text.render(f"Num of Items: {len(items)}", False, (255,255,255))
+                    DISPLAYSURF.blit(textDisplay, (700,100))
+                    textDisplay = text.render(f"Num of Enemies: {len(enemies)}", False, (255,255,255))
+                    DISPLAYSURF.blit(textDisplay, (700,130))
+                    textDisplay = text.render(f"Num of EBullets: {len(enemyBullets)}", False, (255,255,255))
+                    DISPLAYSURF.blit(textDisplay, (700,160))
+                    textDisplay = text.render(f"Num of PBullets: {len(player.playerBullets)}", False, (255,255,255))
+                    DISPLAYSURF.blit(textDisplay, (700,190))
+                    textDisplay = text.render(f"Num of Particles: {len(particles)}", False, (255,255,255))
+                    DISPLAYSURF.blit(textDisplay, (700,220))
         case 2:
-            updateGraphics()
-            DISPLAYSURF.blit(gameoverscreen, (0,0))
+            if stage == 4:
+                DISPLAYSURF.blit(victoryScreen, (0,0))
+            else:
+                DISPLAYSURF.blit(gameoverscreen, (0,0))
             if inputCooldown == 10:
                 if keys[K_UP]:
                     if menuSelect > 0:
@@ -1351,14 +1371,15 @@ while True:
             for textNum in range(len(menutext)):
                 textDisplay = text.render(menutext[textNum], False, menuGetColour(textNum))
                 DISPLAYSURF.blit(textDisplay, (700,300+textNum*100))
+            textDisplay = text.render(f"Points: {points}", False, (255,255,255))
+            DISPLAYSURF.blit(textDisplay, (100,800))
             
             if inputCooldown < 10:
                 inputCooldown += 1
-            stageCount +=1
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    pygame.quit()
+                    sys.exit()
             
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            pygame.quit()
-            sys.exit()
     pygame.display.update()
     fpsClock.tick(FPS)
