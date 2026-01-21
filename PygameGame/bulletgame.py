@@ -961,63 +961,54 @@ while True:
             DISPLAYSURF.blit(titleBackdrop, (0, 0))
             DISPLAYSURF.blit(titleBox, (65, 20))
             DISPLAYSURF.blit(titleWords, (120, 50))
-            if inputCooldown == 10:
-                if keys[K_UP]:
-                    if menuSelect > 0:
-                        menuSelect -= 1
-                    else:
-                        menuSelect = 3
-                    inputCooldown = 0
-                elif keys[K_DOWN]:    
-                    if menuSelect < 3:
-                        menuSelect += 1
-                    else:
-                        menuSelect = 0
-                    inputCooldown = 0
-                for event in pygame.event.get():
-                    if event.type == QUIT:
-                        pygame.quit()
-                        sys.exit()
-                    if event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_z:
-                            if menuSelect == 0:
-                                #reset variables
-                                backgroundY = 0
-                                pause = False
-
-                                enemyBullets = []
-                                enemies.clear()
-                                items.clear()
-                                particles = []
-                                bulletCooldownTimer = 4
-                                bombCooldownTimer = 4
-
-                                lives = 5
-                                bombs = 3
-                                if DEBUG:
-                                    lives = 99
-                                    bombs = 99
-                                points = 0
-                                bombing = 0
-
-                                stage = 1
-                                stageCount = 0
-
-                                bossbulletCooldownTimer = 0
-                                bosscdthreshold = 20
-                                numBossattacks = 0
-                                ogPos = [0,0]
-
-                                menuSelect = 0
-                                inputCooldown = 10
-
-                                playerInvincability = 0
-                                dialogue = [0, False]
-                                gameState = setState(1, gameState)
-                            if menuSelect == 3:
-                                pygame.event.post(pygame.event.Event(pygame.QUIT))
-            
-            menutext = ["Story", "Options", "Music Room", "Exit"]
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_UP:
+                        if menuSelect > 0:
+                            menuSelect -=1
+                        else:
+                            menuSelect = 1
+                    if event.key == pygame.K_DOWN:
+                        if menuSelect < 1:
+                            menuSelect +=1
+                        else:
+                            menuSelect = 0
+                    if event.key == pygame.K_z:
+                        if menuSelect == 0:
+                            #reset variables
+                            backgroundY = 0
+                            pause = False
+                            enemyBullets = []
+                            enemies.clear()
+                            items.clear()
+                            particles = []
+                            bulletCooldownTimer = 4
+                            bombCooldownTimer = 4
+                            lives = 5
+                            bombs = 3
+                            if DEBUG:
+                                lives = 99
+                                bombs = 99
+                            points = 0
+                            bombing = 0
+                            stage = 1
+                            stageCount = 0
+                            bossbulletCooldownTimer = 0
+                            bosscdthreshold = 20
+                            numBossattacks = 0
+                            ogPos = [0,0]
+                            menuSelect = 0
+                            inputCooldown = 10
+                            playerInvincability = 0
+                            dialogue = [0, False]
+                            gameState = setState(1, gameState)
+                        if menuSelect == 1:
+                            pygame.event.post(pygame.event.Event(pygame.QUIT))
+        
+            menutext = ["Story", "Exit"]
             for textNum in range(len(menutext)):
                 textDisplay = text.render(menutext[textNum], False, menuGetColour(textNum))
                 DISPLAYSURF.blit(textDisplay, (700,300+textNum*100))
@@ -1039,9 +1030,36 @@ while True:
                     pygame.quit()
                     sys.exit()
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_w:
+                    if event.key == pygame.K_ESCAPE:
                         pause = not pause
                         print(pause)
+                        menuSelect = 0
+                    if pause:
+                        if event.key == pygame.K_UP:
+                            if menuSelect > 0:
+                                menuSelect -=1
+                            else:
+                                menuSelect = 2
+                        if event.key == pygame.K_DOWN:
+                            if menuSelect < 2:
+                                menuSelect +=1
+                            else:
+                                menuSelect = 0
+                        if event.key == pygame.K_z:
+                            if menuSelect == 0:
+                                pause = not pause
+                            elif menuSelect == 1:
+                                gameState = setState(0, gameState)
+                            elif menuSelect == 2:
+                                pygame.quit()
+                                sys.exit()
+            if pause:
+                textDisplay = bigText.render("Paused", False, (255,255,255))
+                DISPLAYSURF.blit(textDisplay, (50,50))
+                menutext = ["Continue", "Main Menu", "Exit"]
+                for textNum in range(len(menutext)):
+                    textDisplay = text.render(menutext[textNum], False, menuGetColour(textNum))
+                    DISPLAYSURF.blit(textDisplay, (700,300+textNum*100))
             if not pause:
                 if keys[K_LEFT]:
                     if player.x > 0:

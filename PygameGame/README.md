@@ -2,6 +2,10 @@
 
 
 ## Changelog
+### 01/21/2026
+### V 0.4.0
+- added Pause Screen
+
 ### 01/20/2026
 ### V 0.3.1
 - added end screen
