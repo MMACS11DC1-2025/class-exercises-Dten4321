@@ -1,5 +1,22 @@
-# Mizhou Project
+# Final Pygame Video Game Prioject: ~*Little Happanenings of Mizhou: Episode 0.5*~
+## Description
+A report of a stolen "device" has been sent to the village office of which the new mayor, Jiang must resolve.
+## Instructions
+The following section will explain how to play the game. **Bolded** words will be explained in the ***Mechanics*** Section
+### Gameplay:
+- Arrow keys to move
+- Z key to confirm, advnace dialogue, or to **Shoot**
+- X key to **Bomb**
+- Shift to enter **Focus Mode**
+- Esc to pause game
 
+## Mechanics
+The following section will explain core mechanics of the Game
+
+### Resources
+The two main resources of this game are **Lives** and **Bombs**
+
+### Shooting
 
 ## Changelog
 ### 01/21/2026

@@ -363,7 +363,6 @@ def updateGraphics():
             if enemy.hp <= 0:
                 enemyDestroyed = enemy.destroy()
                 removedBullet = True
-                #print(f"removedBullet = {removedBullet}, bulletDestroyed = {enemyDestroyed}")
         elif enemy.position[1] > DESPWANRANGE[0] or enemy.position[1] < DESPWANRANGE[1] or enemy.position[0] > DESPWANRANGE[0] or enemy.position[0] < DESPWANRANGE[1]:
             enemyDestroyed = enemy.destroy()
             removedBullet = True
@@ -416,7 +415,6 @@ def updateGraphics():
                 particles.append(Particle("shread",bullet.position[:],7,random.randint(0,180),len(particles)))
             bulletDestroyed = bullet.destroy()
             removedBullet = True
-            #print(f"removedBullet = {removedBullet}, bulletDestroyed = {bulletDestroyed}")
         elif boss.level > 0:
             if pygame.sprite.collide_rect(bullet,boss):
                 for i in range(3):
@@ -547,8 +545,6 @@ class Particle(pygame.sprite.Sprite):
             self.life -= 1
         if self.particleType == "transition" and self.position[0] > 1100+self.img.get_width():
             self.life = -1
-        #if self.particleType in ["bomb", "points", "life"]:
-        #    self.angle = math.degrees(math.atan2(self.position[0]-player.y,self.position[1]-player.x))
     
     def render(self):
         self.selfDraw(self.img)
@@ -667,7 +663,6 @@ class EnemyBullet(pygame.sprite.Sprite):
     def move(self):
         self.position[0] += math.cos(math.radians(self.angle))*self.velocity
         self.position[1] += math.sin(math.radians(self.angle))*self.velocity
-        #if self.typeBullet in ["basic","yellowbasic","yellowAccelerate", "yellowturn"]:
         self.rect.update([self.position[0]-self.diameter/2, self.position[1]-self.diameter/2], [self.diameter,self.diameter])
         if self.typeBullet[:16] == "yellowAccelerate":
             self.velocity += 0.02
@@ -765,8 +760,6 @@ class Boss(pygame.sprite.Sprite):
         
         speedChangetime = ((self.maxSpeed+1)*self.maxSpeed)/2
         if NumBssAtks > startEndTime[0] and NumBssAtks < startEndTime[1]:
-            #print(math.degrees(angleTowards))
-            #print(f"ogdist = {ogDist}, currdist = {currDist}, vel = {self.velocity}, speedchangetime = {speedChangetime}")
             if currDist > 0:
                 if ogDist > speedChangetime*2:
                     if abs(self.velocity) < self.maxSpeed and currDist > ogDist-speedChangetime:
@@ -875,7 +868,6 @@ def runStage(stageData, stageCount):
                 spawnBoss(item[2])
                 return "BossInit"
         elif int(item[0]*100) == stageCount:
-            #print(f"typeBullet= {item[1]}, startPos= {item[2]}, velocity= {item[3]}, angle= {item[4]}")
             if item[1][:2] == "EM":
                 enemies.append(EnemyBullet(item[1], item[2], item[3], item[4],len(enemies)))
             else:
@@ -957,7 +949,6 @@ while True:
         # MAIN MENU
         ############################################################################################################
         case 0: 
-            #DISPLAYSURF.fill((0,0,0))
             DISPLAYSURF.blit(titleBackdrop, (0, 0))
             DISPLAYSURF.blit(titleBox, (65, 20))
             DISPLAYSURF.blit(titleWords, (120, 50))
@@ -1004,6 +995,7 @@ while True:
                             inputCooldown = 10
                             playerInvincability = 0
                             dialogue = [0, False]
+                            boss = Boss(0)
                             gameState = setState(1, gameState)
                         if menuSelect == 1:
                             pygame.event.post(pygame.event.Event(pygame.QUIT))
@@ -1024,7 +1016,6 @@ while True:
         # MAIN GAMEPLAY
         ############################################################################################################
         case 1:
-            #DISPLAYSURF.fill((0,0,0))
             for event in pygame.event.get():
                 if event.type == QUIT:
                     pygame.quit()
@@ -1032,7 +1023,6 @@ while True:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         pause = not pause
-                        print(pause)
                         menuSelect = 0
                     if pause:
                         if event.key == pygame.K_UP:
@@ -1182,8 +1172,6 @@ while True:
                         ogPos = boss.fancyGotoPos([200, 100], ogPos, numBossattacks, [480, 510])
                         ogPos = boss.fancyGotoPos([500, 500], ogPos, numBossattacks, [510, 600])
 
-                        #print(ogPos)
-
                 #==========================
                 # Per Loop Updates
                 #==========================
@@ -1191,7 +1179,6 @@ while True:
                     if (pygame.sprite.spritecollide(player,enemyBullets,False,pygame.sprite.collide_circle_ratio(1)) or 
                             pygame.sprite.spritecollide(player,enemies,False,pygame.sprite.collide_circle_ratio(1)) or 
                             pygame.sprite.collide_rect(player, boss)):
-                        #print(bombs)
                         for i in range(5):
                             particles.append(Particle("shread",[player.x,player.y],7,(0 + i*72)+random.randint(-5,5),len(particles)))
                         if bombs > 3:
@@ -1347,15 +1334,15 @@ while True:
                     textDisplay = text.render(f"Game State: {gameState}", False, (255,255,255))
                     DISPLAYSURF.blit(textDisplay, (20,280))
                     textDisplay = text.render(f"Num of Items: {len(items)}", False, (255,255,255))
-                    DISPLAYSURF.blit(textDisplay, (700,100))
+                    DISPLAYSURF.blit(textDisplay, (650,100))
                     textDisplay = text.render(f"Num of Enemies: {len(enemies)}", False, (255,255,255))
-                    DISPLAYSURF.blit(textDisplay, (700,130))
+                    DISPLAYSURF.blit(textDisplay, (650,130))
                     textDisplay = text.render(f"Num of EBullets: {len(enemyBullets)}", False, (255,255,255))
-                    DISPLAYSURF.blit(textDisplay, (700,160))
+                    DISPLAYSURF.blit(textDisplay, (650,160))
                     textDisplay = text.render(f"Num of PBullets: {len(player.playerBullets)}", False, (255,255,255))
-                    DISPLAYSURF.blit(textDisplay, (700,190))
+                    DISPLAYSURF.blit(textDisplay, (650,190))
                     textDisplay = text.render(f"Num of Particles: {len(particles)}", False, (255,255,255))
-                    DISPLAYSURF.blit(textDisplay, (700,220))
+                    DISPLAYSURF.blit(textDisplay, (650,220))
         case 2:
             if stage == 4:
                 DISPLAYSURF.blit(victoryScreen, (0,0))
