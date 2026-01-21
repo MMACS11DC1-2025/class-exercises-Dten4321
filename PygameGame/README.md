@@ -7,7 +7,7 @@
 - added Pause Screen
 
 ### 01/20/2026
-### V 0.3.1
+### V 0.3.2
 - added end screen
 - game over screen properly restarts
 
