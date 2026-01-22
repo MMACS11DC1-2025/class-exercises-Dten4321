@@ -1232,7 +1232,7 @@ while True:
                         if boss.health < 1 and dialogue[0] > 0:
                             dialogue = dialogueHandler(DIALOGUEBOSS1END, "DIALOGUEBOSS1END",dialogue[0])    
                             playerInvincability = 1  
-                            bombing = 1                  
+                            bombing = 2
                             if not dialogue[1]:
                                 dialogue = [0, False]
                                 stage = 2
@@ -1257,7 +1257,7 @@ while True:
                         elif boss.health < 1 and dialogue[0] == 0: #End Stage 2 boss
                             dialogue = [1, True]
                             dialogueDone = doDialogue("DIALOGUEBOSS2END", 0, DIALOGUEBOSS2END)
-                            bombing = 1
+                            bombing = 2
                             playerInvincability = 1
                             boss.bossReady = False
 
@@ -1288,7 +1288,7 @@ while True:
                         elif boss.health < 1 and dialogue[0] == 0: #End Stage 3 boss
                             dialogue = [1, True]
                             dialogueDone = doDialogue("DIALOGUEBOSS3END", 0, DIALOGUEBOSS3END)
-                            bombing = 1
+                            bombing = 2
                             playerInvincability = 1
                             boss.bossReady = False
 

@@ -13,12 +13,42 @@ The following section will explain how to play the game. **Bolded** words will b
 ## Mechanics
 The following section will explain core mechanics of the Game
 
+#### Example Screenshot
+![demoImage](imageDemo.png)
+1. The Player
+2. Numeber of **Lives**
+3. Number of **Bombs**
+4. The **Boss**
+5. Some enemy Bullets
+6. A **Bomb** item
+7. Player bullets
+8. Boss health
+9. Points
+
 ### Resources
 The two main resources of this game are **Lives** and **Bombs**
 
-### Shooting
+### Lives
+The number of **Lives** the player has are shown at the bottom left of the screen as red hats. It determines how many times the player can get hit. The player gets hit after contacting a bullet (of any colour), a crate which has not been, a yinyang orb, or the boss. After being hit, the player will respawn at the starting position. The player may gain more lives by picking it up as an itemwith the same look as the icon of lives. Lives may only be dropped by yinyang orbs.
 
+### Bombs
+The number of **Bombs** the player has are shown at the bottom right of the screen as three intersecting spears. To use a bomb, press the X key. doing this will clear the screen of all enemies, all crates, and deal 300 damage to the boss.
+
+### Shooting
+Pressing the Z key will produce bullets from the player. These bullets will deal damage to crates, yinyang orbs, and bosses.
+
+### Crates and Yinyang orbs
+These are the only non-boss enemies in the game which may take damage from bullets. After being "killed," they drop **Items**. Crates only drop **Points** and **Bombs**, while yinyang orbs may drop points, bombs and lives.
+
+### Bosses
+Bosses are special characters that must be defeated to advance the story. They will cycle between a few different attacks until they are defeated.
+
+# Development
 ## Changelog
+### 01/22/2026
+### V 0.4.1
+- fixed bug where enemies did not clear after defeating a boss
+
 ### 01/21/2026
 ### V 0.4.0
 - added Pause Screen
