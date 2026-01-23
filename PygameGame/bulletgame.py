@@ -156,7 +156,7 @@ PORTRAITS = {
 #===========MUSIC============
 MUSIC = pygame.mixer.music
 MUSIC.load('PygameGame/LandOfTheLostFog.mp3')
-MUSIC.play()
+MUSIC.play(-1)
 MUSIC.set_volume(0.5)
 
 ############################################################################################################
@@ -910,7 +910,7 @@ def menuGetColour(id):
 
 def setMusic(song):
     MUSIC.load(f'PygameGame/{song}.mp3')
-    MUSIC.play()
+    MUSIC.play(-1)
     MUSIC.set_volume(0.5)
 
 def setState(state, currstate):

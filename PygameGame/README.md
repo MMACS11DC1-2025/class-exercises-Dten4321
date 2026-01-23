@@ -44,13 +44,20 @@ These are the only non-boss enemies in the game which may take damage from bulle
 Bosses are special characters that must be defeated to advance the story. They will cycle between a few different attacks until they are defeated.
 
 # Development
+## Challanges
+There were several challanges faced by the development of *Little Happanenings of Mizhou: Episode 0.5*. First, collision was a consistant issue throughout the development. Since collisions are by default rectangles, I had made many solutions to creating good feeling collision. Eventually I discovered how to use circular collisions, however it did not seem to work. Only in later development, I had discovered how to use circlular collisions properly. Aside from this, the second most prominant bug would be unloading objects. As with how the system works, each object, enemy, bullet, etc... is stored in lists.
+
 ## Changelog
+### 01/23/2026
+### V 1.0.0
+- added music looping
+
 ### 01/22/2026
-### V 0.4.1
+### V 1.0.0
 - fixed bug where enemies did not clear after defeating a boss
 
 ### 01/21/2026
-### V 0.4.0
+### V 1.0.0
 - added Pause Screen
 
 ### 01/20/2026
