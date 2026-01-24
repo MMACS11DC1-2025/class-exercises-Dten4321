@@ -8,3 +8,31 @@ exercises to include calculations, if you wish.
 Remember to design your algorithm in English first, then translate it to Python 
 code. Test as you go!
 """
+#input first number
+#input operation
+#input second numebr
+
+firstNum = input("Please input the first number: ")
+operation = input("Please input the operation: ").strip()
+secondNum = input("Please input the second number: ")
+
+match operation:
+    case "+":
+        final = float(firstNum) + float(secondNum)
+    case "-":
+        final = float(firstNum) - float(secondNum)
+    case "*":
+        final = float(firstNum) * float(secondNum)
+    case "/":
+        if secondNum == 0:
+            final = "Undefined"
+        else:
+            final = float(firstNum) / float(secondNum)
+    case "^":
+        final = float(firstNum) ** float(secondNum)
+    case "%":
+        final = float(firstNum) % float(secondNum)   
+    case _:
+        final = "Invalid Operation"
+
+print(final)
