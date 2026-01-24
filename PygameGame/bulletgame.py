@@ -1343,7 +1343,7 @@ while True:
                     DISPLAYSURF.blit(textDisplay, (650,190))
                     textDisplay = text.render(f"Num of Particles: {len(particles)}", False, (255,255,255))
                     DISPLAYSURF.blit(textDisplay, (650,220))
-        case 2:
+        case 2: # Game over screen or Victory Screen
             if stage == 4:
                 DISPLAYSURF.blit(victoryScreen, (0,0))
             else:

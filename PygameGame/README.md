@@ -40,12 +40,15 @@ Pressing the Z key will produce bullets from the player. These bullets will deal
 ### Crates and Yinyang orbs
 These are the only non-boss enemies in the game which may take damage from bullets. After being "killed," they drop **Items**. Crates only drop **Points** and **Bombs**, while yinyang orbs may drop points, bombs and lives.
 
+### Focus Mode
+Pressing the shift key will activate the **Focus Mode** which slows down player speed, allowing for more precise movement, and showing the true hitbox size of the player.
+
 ### Bosses
 Bosses are special characters that must be defeated to advance the story. They will cycle between a few different attacks until they are defeated.
 
 # Development
 ## Challanges
-There were several challanges faced by the development of *Little Happanenings of Mizhou: Episode 0.5*. First, collision was a consistant issue throughout the development. Since collisions are by default rectangles, I had made many solutions to creating good feeling collision. Eventually I discovered how to use circular collisions, however it did not seem to work. Only in later development, I had discovered how to use circlular collisions properly. Aside from this, the second most prominant bug would be unloading objects. As with how the system works, each object, enemy, bullet, etc... is stored in lists.
+There were several challanges faced by the development of *Little Happanenings of Mizhou: Episode 0.5*. First, collision was a consistant issue throughout the development. Since collisions are by default rectangles, I had made many solutions to creating good feeling collision. Eventually I discovered how to use circular collisions, however it did not seem to work. Only in later development, I had discovered how to use circlular collisions properly. Aside from this, the second most prominant bug would be unloading objects. As with how the system works, each object, enemy, bullet, etc... is stored in lists. But, I wanted to keep the list as small and efficient as possible, therefore when a list item is deleted, all list items after it must shift one index down. This would make the lists smaller, but due to the many different lists that were used to keep track of different categories of objects, when they were mixed up, it would crash the game. There were also some issues regarding bad inputs, as sometimes it was difficult to navigate the menus or pause this game. This was fixed with implementing 6 different loops which checked for inputs. Though not the most elegant solution, it was good for what my time allowed.
 
 ## Changelog
 ### 01/23/2026
